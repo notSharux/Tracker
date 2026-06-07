@@ -724,6 +724,7 @@
   .day-goal.on .day-goal-name{color:var(--text2);}
   .day-empty{font-size:14px;color:var(--text3);padding:14px 8px;}
   .hm-hint{font-size:12px;color:var(--text3);margin-top:12px;letter-spacing:-.01em;display:flex;align-items:center;gap:6px;}
+  .set-sub{font-size:12px;color:var(--text2);font-weight:400;line-height:1.45;}
   @media(max-width:560px){.goal-edit{flex-wrap:wrap;}.goal-edit input{min-width:120px;}}
 
   @media(prefers-reduced-motion:reduce){
@@ -858,6 +859,9 @@
           <div class="section-h">Ziele verwalten</div>
           <div class="set-card" id="goalsEditor"></div>
 
+          <div class="section-h">Cloud-Sync</div>
+          <div class="set-card" id="syncCard"></div>
+
           <div class="section-h">Sicherung</div>
           <div class="set-card">
             <div class="set-row">
@@ -964,7 +968,98 @@
 <script>
 function ymd(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function load(k,fb){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb;}catch{return fb;}}
-function ssave(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_theme','gt_accent'];
+let syncToken=localStorage.getItem('gt_sync_token')||'';
+let syncGistId=localStorage.getItem('gt_sync_gist')||'';
+let syncStatus=syncToken?'idle':'off';
+let _syncTimer=null,_syncReady=false;
+function ssave(k,v){
+  try{localStorage.setItem(k,JSON.stringify(v));}catch{}
+  if(SYNC_DATA_KEYS.includes(k)){try{localStorage.setItem('gt_data_ts',new Date().toISOString());}catch{} pushSoon();}
+}
+
+// ===== Cloud-Sync (privater GitHub-Gist) =====
+function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_theme:themePref,gt_accent:accentPref};}
+function mergeHistory(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{out[d]=(a[d]&&b[d])?(bN?{...a[d],...b[d]}:{...b[d],...a[d]}):(a[d]||b[d]);});return out;}
+async function ghFetch(method,path,body){
+  const r=await fetch('https://api.github.com'+path,{method,headers:{'Authorization':'Bearer '+syncToken,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  if(r.status===401||r.status===403)throw new Error('auth');
+  if(!r.ok)throw new Error('http '+r.status);
+  return r.json();
+}
+async function ensureGist(){
+  if(syncGistId)return;
+  const gists=await ghFetch('GET','/gists?per_page=100');
+  const found=(gists||[]).find(g=>g.files&&g.files['tracker.json']&&/goal-tracker/i.test(g.description||''));
+  if(found){syncGistId=found.id;}
+  else{const ts=new Date().toISOString();const c=await ghFetch('POST','/gists',{description:'goal-tracker-data (Tracker Sync) — nicht löschen',public:false,files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:localData()})}}});syncGistId=c.id;localStorage.setItem('gt_data_ts',ts);}
+  localStorage.setItem('gt_sync_gist',syncGistId);
+}
+function applyRemote(rData,rTs,mergedHist){
+  const set=(k,v)=>{if(v!==undefined)localStorage.setItem(k,JSON.stringify(v));};
+  set('gt_goals3',rData.gt_goals3);set('gt_start3',rData.gt_start3);
+  localStorage.setItem('gt_history3',JSON.stringify(mergedHist));
+  set('gt_events3',rData.gt_events3);set('gt_notes3',rData.gt_notes3);
+  set('gt_theme',rData.gt_theme);set('gt_accent',rData.gt_accent);
+  localStorage.setItem('gt_data_ts',rTs);
+  location.reload();
+}
+async function doPush(){
+  if(!syncToken)return;
+  setSyncStatus('syncing');
+  try{await ensureGist();const ts=new Date().toISOString();
+    await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:localData()})}}});
+    localStorage.setItem('gt_data_ts',ts);setSyncStatus('ok');
+  }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
+}
+async function doPull(){
+  if(!syncToken)return;
+  setSyncStatus('syncing');
+  try{await ensureGist();
+    const gist=await ghFetch('GET','/gists/'+syncGistId);
+    const f=gist.files&&gist.files['tracker.json'];
+    if(!f){setSyncStatus('ok');return;}
+    const text=f.truncated?await (await fetch(f.raw_url)).text():f.content;
+    const remote=JSON.parse(text),rData=remote.data||{},rTs=remote.updatedAt||'';
+    const lTs=localStorage.getItem('gt_data_ts')||'';
+    const mergedHist=mergeHistory(history||{},rData.gt_history3||{},lTs,rTs);
+    if(rTs>lTs){applyRemote(rData,rTs,mergedHist);return;}
+    const changed=JSON.stringify(mergedHist)!==JSON.stringify(history||{});
+    if(changed){history=mergedHist;ssave('gt_history3',history);renderGoals();renderStats();if(currentView==='stats'){renderHeatmap();renderBars();}}
+    if(lTs>rTs||changed){await doPush();}else{setSyncStatus('ok');}
+  }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
+}
+function pushSoon(){if(!syncToken||!_syncReady)return;clearTimeout(_syncTimer);_syncTimer=setTimeout(doPush,1500);}
+async function connectSync(token){
+  token=(token||'').trim();if(!token){alert('Bitte Token einfügen.');return;}
+  syncToken=token;localStorage.setItem('gt_sync_token',syncToken);_syncReady=true;
+  setSyncStatus('syncing');renderSyncUI();
+  try{await ensureGist();await doPull();await doPush();setSyncStatus('ok');}
+  catch(e){setSyncStatus('error');}
+  renderSyncUI();
+}
+function connectSyncFromInput(){const i=document.getElementById('syncTokenInput');if(i)connectSync(i.value);}
+function disconnectSync(){if(!confirm('Sync auf diesem Gerät trennen? Der Token wird entfernt — deine Daten und die Gist bleiben erhalten.'))return;syncToken='';localStorage.removeItem('gt_sync_token');setSyncStatus('off');renderSyncUI();}
+function syncNow(){if(!syncToken)return;doPull().then(()=>doPush());}
+function syncStatusText(){
+  const map={ok:'✓ Synchronisiert',syncing:'⟳ Synchronisiere…',error:'⚠ Fehler — Token prüfen',offline:'⌁ Offline — wird nachgeholt',idle:'Verbunden',off:'Nicht verbunden'};
+  let s=map[syncStatus]||'';const ts=localStorage.getItem('gt_data_ts');
+  if(syncStatus==='ok'&&ts)s+=' · '+new Date(ts).toLocaleString('de-DE');
+  return s;
+}
+function setSyncStatus(s){syncStatus=s;const el=document.getElementById('syncStatusLine');if(el)el.textContent=syncStatusText();}
+function renderSyncUI(){
+  const c=document.getElementById('syncCard');if(!c)return;
+  if(!syncToken){
+    c.innerHTML='<div class="set-row" style="align-items:flex-start;flex-direction:column;gap:12px;">'
+      +'<div class="set-label">Geräte synchronisieren<br><span class="set-sub">Hält PC und Handy über eine private GitHub-Gist auf demselben Stand. Du brauchst einen GitHub-Token mit Berechtigung „gist".</span></div>'
+      +'<div style="display:flex;gap:8px;width:100%;flex-wrap:wrap;"><input type="password" id="syncTokenInput" class="set-input" placeholder="GitHub-Token (ghp_…)" autocomplete="off" style="flex:1;min-width:200px;"><button class="mb primary" onclick="connectSyncFromInput()"><i class="ti ti-cloud-cog"></i> Verbinden</button></div>'
+      +'<a href="https://github.com/settings/tokens/new?scopes=gist&description=Tracker+Sync" target="_blank" rel="noopener" class="set-sub" style="color:var(--blue);text-decoration:none;"><i class="ti ti-external-link"></i> Token erstellen (Scope „gist" ist vorausgewählt)</a></div>';
+  }else{
+    c.innerHTML='<div class="set-row"><div class="set-label">Status<br><span class="set-sub" id="syncStatusLine">'+syncStatusText()+'</span></div><button class="mb" onclick="syncNow()"><i class="ti ti-refresh"></i> Jetzt</button></div>'
+      +'<div class="set-row"><div class="set-label">Verbindung trennen<br><span class="set-sub">Entfernt den Token von diesem Gerät (Daten &amp; Gist bleiben erhalten).</span></div><button class="mb danger" onclick="disconnectSync()">Trennen</button></div>';
+  }
+}
 function gid(){return 'g'+Date.now()+Math.random().toString(36).slice(2,6);}
 
 function haptic(type='light'){
@@ -1071,7 +1166,7 @@ function doSwitchView(v){
   renderToolbar();
   if(v==='calendar')renderCalendar();
   if(v==='stats'){renderHeatmap();renderBars();}
-  if(v==='settings')renderGoalsEditor();
+  if(v==='settings'){renderGoalsEditor();renderSyncUI();}
   if(v==='notes')renderNotes();
   if(v==='goals'){renderGoals();renderStats();}
   document.querySelector('.content').scrollTop=0;
@@ -1851,10 +1946,16 @@ renderStats();
 renderToolbar();
 setInterval(()=>{if(currentView==='calendar'&&calMode==='week')renderCalendar();},60000);
 
+// Cloud-Sync: beim Start ziehen, danach Push erlauben; bei Rückkehr zur App erneut ziehen
+renderSyncUI();
+if(syncToken){doPull().finally(()=>{_syncReady=true;});}else{_syncReady=true;}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&syncToken&&_syncReady)doPull();});
+
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(!document.getElementById('unsavedOverlay').classList.contains('hidden')){unsavedCancel();return;}
     if(!document.getElementById('noteOverlay').classList.contains('hidden')){closeNoteModal();return;}
+    if(!document.getElementById('dayOverlay').classList.contains('hidden')){closeDayModal();return;}
     if(!document.getElementById('eventOverlay').classList.contains('hidden'))closeEventModal();
   }
 });
