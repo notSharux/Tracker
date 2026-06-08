@@ -1,6 +1,6 @@
 /* Tracker service worker — offline app shell + runtime cache for fonts/icons.
    Bump CACHE to force clients to refetch the shell after an update. */
-const CACHE = 'tracker-v1';
+const CACHE = 'tracker-v2';
 const PRECACHE = ['./manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -25,6 +25,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;                       // never touch sync POST/PATCH
   const url = new URL(req.url);
   if (url.hostname === 'api.github.com') return;          // sync calls always hit the network
+  if (req.cache === 'no-store' || req.cache === 'no-cache') return; // live data (Fitness-Dienst): nie aus dem Cache
 
   // The HTML document: network-first (so updates show), fall back to cache offline.
   if (req.mode === 'navigate') {
