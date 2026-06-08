@@ -829,6 +829,39 @@
   @media(prefers-reduced-motion:reduce){
     *{animation-duration:.001ms!important;animation-iteration-count:1!important;}
   }
+
+  /* ===== Übersicht ===== */
+  .ov-nav{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 4px;}
+  .ov-arrow{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:11px;border:1px solid var(--separator);background:var(--fill3);color:var(--text2);font-size:18px;cursor:pointer;transition:background .15s,color .15s,transform .1s;}
+  .ov-arrow:hover{background:var(--fill-strong);color:var(--text);}
+  .ov-arrow:active{transform:scale(.94);}
+  .ov-now{min-width:118px;height:38px;padding:0 18px;border-radius:11px;border:1px solid var(--separator);background:var(--fill3);color:var(--text);font-weight:600;font-size:14px;letter-spacing:-.01em;cursor:pointer;transition:background .15s;}
+  .ov-now:hover{background:var(--fill-strong);}
+  .ov-now.is-today{background:var(--accent-soft);border-color:transparent;color:var(--blue);}
+  .ov-daygoals{display:flex;flex-direction:column;}
+  .ov-events{display:flex;flex-direction:column;}
+  .ov-event{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--separator);}
+  .ov-event:last-child{border-bottom:none;}
+  .ov-ev-bar{width:4px;align-self:stretch;border-radius:3px;flex:none;min-height:30px;}
+  .ov-ev-main{flex:1;min-width:0;}
+  .ov-ev-title{font-size:14.5px;font-weight:600;color:var(--text);letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ov-ev-note{font-size:12.5px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ov-ev-time{font-size:13px;color:var(--text2);font-family:var(--font-num);font-variant-numeric:tabular-nums;flex:none;}
+  .ov-pins{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+  .ov-pin{cursor:pointer;}
+
+  /* ===== Schlaf ===== */
+  .sleep-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .sleep-dur{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.02em;font-family:var(--font-num);display:flex;align-items:center;gap:8px;}
+  .sleep-dur i{color:#9775fa;font-size:20px;}
+  .sleep-score{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1;}
+  .sleep-score .sv{font-size:20px;font-weight:700;color:var(--text);font-family:var(--font-num);}
+  .sleep-score .sl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;}
+  .sleep-bar{display:flex;width:100%;height:10px;border-radius:6px;overflow:hidden;background:var(--track);}
+  .sleep-bar span{display:block;height:100%;}
+  .sleep-leg{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:10px;}
+  .sleg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+  .sleg .sdot{width:9px;height:9px;border-radius:50%;display:inline-block;font-style:normal;}
 </style>
 </head>
 <body>
@@ -841,7 +874,8 @@
         <span class="brand-name">Tracker</span>
       </div>
       <nav class="topnav">
-        <button class="nav-item active" data-view="goals" onclick="switchView('goals')">Ziele <span class="nav-badge" id="navGoalsBadge">0/0</span></button>
+        <button class="nav-item active" data-view="overview" onclick="switchView('overview')">Übersicht</button>
+        <button class="nav-item" data-view="goals" onclick="switchView('goals')">Ziele <span class="nav-badge" id="navGoalsBadge">0/0</span></button>
         <button class="nav-item" data-view="calendar" onclick="switchView('calendar')">Kalender</button>
         <button class="nav-item" data-view="fitness" onclick="switchView('fitness')">Fitness</button>
         <button class="nav-item" data-view="notes" onclick="switchView('notes')">Notizen</button>
@@ -865,7 +899,11 @@
     <div class="content">
       <div class="content-inner">
 
-        <div class="view active" id="view-goals">
+        <div class="view active" id="view-overview">
+          <div id="overviewBody"></div>
+        </div>
+
+        <div class="view" id="view-goals">
           <div class="today-hero">
             <div class="hero-head">
               <div class="today-date" id="todayDate">—</div>
@@ -1002,7 +1040,8 @@
 
   <nav class="tabbar" aria-label="Hauptnavigation">
     <div class="tabbar-inner">
-      <button class="tab active" data-view="goals" onclick="switchView('goals')" aria-label="Ziele"><i class="ti ti-list-check"></i><span>Ziele</span><span class="tab-badge" id="tabGoalsBadge" style="display:none">0</span></button>
+      <button class="tab active" data-view="overview" onclick="switchView('overview')" aria-label="Übersicht"><i class="ti ti-layout-dashboard"></i><span>Übersicht</span></button>
+      <button class="tab" data-view="goals" onclick="switchView('goals')" aria-label="Ziele"><i class="ti ti-list-check"></i><span>Ziele</span><span class="tab-badge" id="tabGoalsBadge" style="display:none">0</span></button>
       <button class="tab" data-view="calendar" onclick="switchView('calendar')" aria-label="Kalender"><i class="ti ti-calendar"></i><span>Kalender</span></button>
       <button class="tab" data-view="fitness" onclick="switchView('fitness')" aria-label="Fitness"><i class="ti ti-activity-heartbeat"></i><span>Fitness</span></button>
       <button class="tab" data-view="notes" onclick="switchView('notes')" aria-label="Notizen"><i class="ti ti-notes"></i><span>Notizen</span></button>
@@ -1240,7 +1279,8 @@ if(_goalsMigrated)ssave('gt_goals3',goals);
 
 if(!history[todayKey]){history[todayKey]={};goals.forEach(g=>{history[todayKey][g.id]=false;});ssave('gt_history3',history);}
 
-let currentView='goals';
+let currentView='overview';
+let ovDate=todayKey;
 let currentRange=7;
 let calMode='week';
 let calCursor=new Date();calCursor.setHours(12,0,0,0);
@@ -1278,7 +1318,7 @@ function doSwitchView(v){
   document.querySelectorAll('.nav-item,.tab,.settings-gear').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const titles={goals:'Ziele',calendar:'Kalender',fitness:'Fitness',notes:'Notizen',stats:'Statistik',settings:'Einstellungen'};
+  const titles={overview:'Übersicht',goals:'Ziele',calendar:'Kalender',fitness:'Fitness',notes:'Notizen',stats:'Statistik',settings:'Einstellungen'};
   document.getElementById('tbTitle').textContent=titles[v];
   if(v==='settings')initSettingsDraft();
   renderToolbar();
@@ -1287,6 +1327,7 @@ function doSwitchView(v){
   if(v==='settings'){renderGoalsEditor();renderSyncUI();renderFitnessSettings();}
   if(v==='notes')renderNotes();
   if(v==='fitness')renderFitness();
+  if(v==='overview')renderOverview();
   if(v==='goals'){renderGoals();renderStats();}
   document.querySelector('.content').scrollTop=0;
 }
@@ -2016,17 +2057,31 @@ function addNewGoal(){
   inp.value='';renderGoalsEditor();
   const ni=document.getElementById('newGoalName');if(ni)ni.focus();
 }
-function resetGoalsOnly(){
+// Reset muss auch die Sync-Gist überschreiben — sonst holt der nächste doPull die
+// alten Tage per mergeHistory-Vereinigung zurück und der Reset wirkt wie rückgängig.
+async function wipeSyncedGist(keepCalendar){
+  if(!syncToken)return;
+  await ensureGist();
+  const ts=new Date().toISOString();
+  const cleared={gt_goals3:[],gt_start3:ymd(new Date()),gt_history3:{},
+    gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
+    gt_theme:themePref,gt_accent:accentPref};
+  await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:cleared})}}});
+  localStorage.setItem('gt_data_ts',ts);
+}
+async function resetGoalsOnly(){
   if(!confirm('Statistik wirklich zurücksetzen? Alle abgehakten Ziele und der Verlauf werden gelöscht. Der Kalender bleibt erhalten.'))return;
   settingsDirty=false;
   ['gt_goals3','gt_start3','gt_history3'].forEach(k=>localStorage.removeItem(k));
+  try{await wipeSyncedGist(true);}catch(e){}
   location.reload();
 }
-function resetAllData(){
+async function resetAllData(){
   if(!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.'))return;
   if(!confirm('Bist du dir sicher? Wirklich alles?'))return;
   settingsDirty=false;
   ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3'].forEach(k=>localStorage.removeItem(k));
+  try{await wipeSyncedGist(false);}catch(e){}
   location.reload();
 }
 
@@ -2066,6 +2121,8 @@ applyAccent();
 document.getElementById('startDateInput').value=startDate;
 renderGoals();
 renderStats();
+renderOverview();
+document.getElementById('tbTitle').textContent='Übersicht';
 renderToolbar();
 setInterval(()=>{if(currentView==='calendar'&&calMode==='week')renderCalendar();},60000);
 
@@ -2161,6 +2218,8 @@ async function loadGarmin(silent){
       sync.className='fit-sync'+(stale?' stale':'');
       sync.innerHTML=d.ts?`<i class="ti ti-${stale?'alert-triangle':'refresh'}"></i> Aktualisiert ${esc(fitRelTime(d.ts))}${stale?' · Uhr synchronisieren':''}`:'';
     }
+    const fsc=document.getElementById('fitSleepCard');
+    if(fsc)fsc.innerHTML=sleepCardHtml(d.sleep);
   }catch(e){
     grid.innerHTML='<div class="fit-err"><i class="ti ti-plug-connected-x"></i> '+esc(fitErrMsg(e))+'</div>';
     if(sync)sync.innerHTML='';
@@ -2206,11 +2265,114 @@ function renderFitness(){
   }
   body.innerHTML='<div class="section-h">Garmin · Live</div>'
     +'<div class="card"><div class="fit-grid" id="fitGarminGrid"></div><div class="fit-sync" id="fitGarminSync"></div></div>'
+    +'<div class="section-h">Schlaf · Letzte Nacht</div>'
+    +'<div class="card" id="fitSleepCard"></div>'
     +'<div class="section-h">Lyfta · Letztes Workout</div>'
     +'<div class="card" id="fitLyftaCard"></div>';
   loadGarmin(false);loadLyfta(false);
 }
 function refreshFitness(){haptic('light');loadGarmin(false);loadLyfta(false);}
+
+// ===== Schlaf (Fitness-Tab + Übersicht) =====
+function fitSleepDur(min){min=Math.round(Number(min)||0);const h=Math.floor(min/60),m=min%60;return h+' h'+(m?' '+String(m).padStart(2,'0'):'');}
+function sleepStagesBar(s){
+  const parts=[['deep','Tief','#3b5bdb'],['light','Leicht','#74c0fc'],['rem','REM','#9775fa'],['awake','Wach','#adb5bd']];
+  const used=parts.filter(([k])=>Number(s[k])>0);
+  const tot=used.reduce((a,p)=>a+Number(s[p[0]]),0);
+  if(!tot)return '';
+  const seg=used.map(([k,lab,c])=>`<span style="width:${(Number(s[k])/tot*100).toFixed(1)}%;background:${c}" title="${lab}: ${fitSleepDur(s[k])}"></span>`).join('');
+  const leg=used.map(([k,lab,c])=>`<span class="sleg"><i class="sdot" style="background:${c}"></i>${lab} ${fitSleepDur(s[k])}</span>`).join('');
+  return `<div class="sleep-bar">${seg}</div><div class="sleep-leg">${leg}</div>`;
+}
+function sleepCardHtml(s){
+  if(!s||s.durationMin==null)return '<div class="fit-empty" style="padding:16px;"><i class="ti ti-zzz"></i><div style="font-size:14px;color:var(--text2);margin-top:4px;">Keine Schlafdaten für letzte Nacht</div></div>';
+  const score=s.score!=null?`<div class="sleep-score"><span class="sv">${esc(String(s.score))}</span><span class="sl">Score</span></div>`:'';
+  return `<div class="sleep-head"><div class="sleep-dur"><i class="ti ti-moon-stars"></i> ${fitSleepDur(s.durationMin)}</div>${score}</div>${sleepStagesBar(s)}`;
+}
+
+// ===== Übersicht =====
+function ovRelLabel(dk){
+  if(dk===todayKey)return 'Heute';
+  const diff=Math.round((_atNoon(dk)-_atNoon(todayKey))/86400000);
+  if(diff===-1)return 'Gestern';
+  if(diff===1)return 'Morgen';
+  const dt=_atNoon(dk);const mn=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  return `${dt.getDate()}. ${mn[dt.getMonth()]}`;
+}
+function ovStep(delta){ovDate=ymd(new Date(_atNoon(ovDate).getTime()+delta*86400000));haptic('light');renderOverview();}
+function ovToday(){if(ovDate!==todayKey){ovDate=todayKey;haptic('light');renderOverview();}}
+function ovProgress(dk){
+  if(dk===todayKey){const t=goals.filter(g=>isAbst(g)||isScheduledToday(g));return {done:t.filter(g=>isDoneToday(g)).length,total:t.length};}
+  const h=history[dk]||{};const l=goals.filter(g=>!isAbst(g)&&isScheduledOn(g,dk));return {done:l.filter(g=>h[g.id]).length,total:l.length};
+}
+function renderOverview(){
+  const body=document.getElementById('overviewBody');if(!body)return;
+  const dk=ovDate,isToday=dk===todayKey;
+  const dt=_atNoon(dk);
+  const dn=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  const mn=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  const dateStr=`${dn[dt.getDay()]}, ${dt.getDate()}. ${mn[dt.getMonth()]}`;
+  let heading;
+  if(isToday){const hr=new Date().getHours();heading=hr<11?'Guten Morgen':hr<18?'Guten Tag':'Guten Abend';}
+  else heading=dn[dt.getDay()];
+  const p=ovProgress(dk),pct=p.total?Math.round(p.done/p.total*100):0;
+  let h=`<div class="today-hero"><div class="hero-head"><div class="today-date">${esc(dateStr)}</div><div class="today-h1">${esc(heading)}</div></div>`
+    +`<div class="ov-nav"><button class="ov-arrow" onclick="ovStep(-1)" aria-label="Vorheriger Tag"><i class="ti ti-chevron-left"></i></button>`
+    +`<button class="ov-now${isToday?' is-today':''}" onclick="ovToday()">${esc(ovRelLabel(dk))}</button>`
+    +`<button class="ov-arrow" onclick="ovStep(1)" aria-label="Nächster Tag"><i class="ti ti-chevron-right"></i></button></div>`
+    +`<div class="progress-row"><div class="progress-num"><strong>${p.done}</strong> von ${p.total} erledigt</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-pct">${pct}%</div></div></div>`;
+  if(!isToday){
+    const hist=history[dk]||{};
+    const list=goals.filter(g=>!isAbst(g)&&isScheduledOn(g,dk));
+    const future=_atNoon(dk)>_atNoon(todayKey);
+    h+=`<div class="section-h">${future?'Vortragen':'Nachtragen'}</div><div class="card"><div class="ov-daygoals">`;
+    if(!list.length)h+='<div class="day-empty">Keine Ziele für diesen Tag geplant.</div>';
+    else list.forEach(g=>{h+=`<div class="day-goal${hist[g.id]?' on':''}" onclick="toggleOvGoal('${g.id}')"><div class="day-goal-box"><i class="ti ti-check"></i></div><div class="day-goal-name">${esc(g.name)}</div></div>`;});
+    h+='</div></div>';
+  }
+  const evs=getEventsForDate(dk,dt.getDay()).slice().sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+  if(evs.length){
+    h+=`<div class="section-h">Termine</div><div class="card"><div class="ov-events">`;
+    evs.forEach(ev=>{const co=eventColor(ev.color);h+=`<div class="ov-event"><span class="ov-ev-bar" style="background:${co.val}"></span><div class="ov-ev-main"><div class="ov-ev-title">${esc(ev.title||'Termin')}</div>${ev.note?`<div class="ov-ev-note">${esc(ev.note)}</div>`:''}</div><div class="ov-ev-time">${esc(ev.start||'')}${ev.end?'–'+esc(ev.end):''}</div></div>`;});
+    h+='</div></div>';
+  }
+  if(isToday&&fitBase()){
+    h+=`<div class="section-h">Heute · Live</div><div class="card"><div class="fit-grid" id="ovFitGrid"></div></div>`;
+  }
+  const pinned=notes.filter(n=>n.pinned);
+  if(pinned.length){
+    h+=`<div class="section-h">Angeheftet</div><div class="ov-pins">`;
+    pinned.forEach(n=>{const co=eventColor(n.color),ti=(n.title||'').trim(),bo=(n.body||'').trim();
+      h+=`<div class="note-card ov-pin" style="border-left-color:${co.val}" onclick="switchView('notes');openNoteModal('${n.id}')"><span class="note-pin"><i class="ti ti-pin-filled"></i></span><div class="note-title${ti?'':' empty'}">${esc(ti||'Ohne Titel')}</div>${bo?`<div class="note-body">${esc(bo)}</div>`:''}</div>`;});
+    h+='</div>';
+  }
+  body.innerHTML=h;
+  if(isToday&&fitBase())loadOverviewFitness(false);
+}
+function toggleOvGoal(id){
+  const dk=ovDate;if(!history[dk])history[dk]={};
+  history[dk][id]=!history[dk][id];
+  ssave('gt_history3',history);haptic('light');
+  renderOverview();renderStats();
+  if(currentView==='stats'){renderHeatmap();renderBars();}
+  if(dk===todayKey)renderGoals();
+}
+async function loadOverviewFitness(silent){
+  const grid=document.getElementById('ovFitGrid');if(!grid)return;
+  if(!silent)grid.innerHTML=fitSkeletonCards(3);
+  try{
+    const d=await fitFetch('/api/garmin/live');
+    if(d&&d.ok===false)throw new Error(d.error||'Fehler');
+    const sleep=d.sleep&&d.sleep.durationMin!=null?fitSleepDur(d.sleep.durationMin):null;
+    grid.innerHTML=[
+      fitStat('hr','ti-heartbeat','Herzfrequenz',d.heartRate,'bpm',true),
+      fitStat('','ti-walk','Schritte',fitNum(d.steps),d.stepGoal?('/ '+fitNum(d.stepGoal)):''),
+      fitStat('','ti-moon-stars','Schlaf',sleep,'')
+    ].join('');
+  }catch(e){
+    grid.innerHTML='<div class="fit-err"><i class="ti ti-plug-connected-x"></i> '+esc(fitErrMsg(e))+'</div>';
+  }
+}
 
 // ===== Einstellungen: Fitness-Dienst =====
 function renderFitnessSettings(){
@@ -2238,8 +2400,8 @@ function clearFitnessSettings(){
 }
 
 // Live-Aktualisierung der Garmin-Werte, solange der Fitness-Tab sichtbar ist
-setInterval(()=>{if(currentView==='fitness'&&!document.hidden&&fitBase())loadGarmin(true);},30000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentView==='fitness'&&fitBase()){loadGarmin(true);loadLyfta(true);}});
+setInterval(()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness')loadGarmin(true);else if(currentView==='overview'&&ovDate===todayKey)loadOverviewFitness(true);},30000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness'){loadGarmin(true);loadLyfta(true);}else if(currentView==='overview'&&ovDate===todayKey)loadOverviewFitness(true);});
 </script>
 </body>
 </html>
