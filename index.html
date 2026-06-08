@@ -1165,7 +1165,8 @@ async function doPush(){
   if(!syncToken)return;
   setSyncStatus('syncing');
   try{await ensureGist();const ts=new Date().toISOString();
-    await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:localData()})}}});
+    const rAt=localStorage.getItem('gt_reset_at')||undefined;   // Reset-Marker mitschleppen, nie verlieren
+    await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:rAt,data:localData()})}}});
     localStorage.setItem('gt_data_ts',ts);setSyncStatus('ok');
   }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
 }
@@ -1178,11 +1179,17 @@ async function doPull(){
     if(!f){setSyncStatus('ok');return;}
     const text=f.truncated?await (await fetch(f.raw_url)).text():f.content;
     const remote=JSON.parse(text),rData=remote.data||{},rTs=remote.updatedAt||'';
+    const rReset=remote.resetAt||'',lReset=localStorage.getItem('gt_reset_at')||'';
+    if(rReset&&rReset>lReset){
+      // Ein Reset, den dieses Gerät noch nicht kennt → leeren Remote-Stand 1:1 übernehmen (KEINE mergeHistory-Vereinigung, sonst kämen alte Tage zurück)
+      localStorage.setItem('gt_reset_at',rReset);
+      applyRemote(rData,rTs||rReset,rData.gt_history3||{});return;
+    }
     const lTs=localStorage.getItem('gt_data_ts')||'';
     const mergedHist=mergeHistory(history||{},rData.gt_history3||{},lTs,rTs);
     if(rTs>lTs){applyRemote(rData,rTs,mergedHist);return;}
     const changed=JSON.stringify(mergedHist)!==JSON.stringify(history||{});
-    if(changed){history=mergedHist;ssave('gt_history3',history);renderGoals();renderStats();if(currentView==='stats'){renderHeatmap();renderBars();}}
+    if(changed){history=mergedHist;ssave('gt_history3',history);renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
     if(lTs>rTs||changed){await doPush();}else{setSyncStatus('ok');}
   }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
 }
@@ -2066,7 +2073,8 @@ async function wipeSyncedGist(keepCalendar){
   const cleared={gt_goals3:[],gt_start3:ymd(new Date()),gt_history3:{},
     gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
     gt_theme:themePref,gt_accent:accentPref};
-  await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:cleared})}}});
+  localStorage.setItem('gt_reset_at',ts);   // Reset-Marker: ältere Geräte übernehmen dadurch beim nächsten Pull den leeren Stand
+  await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:ts,data:cleared})}}});
   localStorage.setItem('gt_data_ts',ts);
 }
 async function resetGoalsOnly(){
