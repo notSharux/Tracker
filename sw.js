@@ -1,6 +1,6 @@
 /* Tracker service worker — offline app shell + runtime cache for fonts/icons.
    Bump CACHE to force clients to refetch the shell after an update. */
-const CACHE = 'tracker-v2';
+const CACHE = 'tracker-v3';
 const PRECACHE = ['./manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

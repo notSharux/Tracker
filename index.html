@@ -114,6 +114,22 @@
   }
   .theme-toggle:hover{color:var(--text);background:var(--fill-hover);}
   .theme-toggle:active{background:var(--fill-strong);}
+  .sync-pill{
+    width:34px;height:34px;border-radius:9px;flex-shrink:0;
+    border:1px solid var(--separator);background:transparent;color:var(--text3);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:16px;
+    transition:color .2s var(--ease-out),background .2s var(--ease-out),transform .2s var(--ease-out);
+  }
+  .sync-pill[hidden]{display:none;}
+  .sync-pill:hover{background:var(--fill-hover);color:var(--text2);}
+  .sync-pill:active{transform:scale(0.92);}
+  .sync-pill.syncing{color:var(--blue);}
+  .sync-pill.syncing i{animation:syncspin 1s linear infinite;}
+  .sync-pill.ok{color:var(--text3);}
+  .sync-pill.ok.flash{color:var(--green);transform:scale(1.1);}
+  .sync-pill.error{color:var(--red);}
+  .sync-pill.offline{color:var(--orange);}
+  @keyframes syncspin{to{transform:rotate(360deg);}}
   .topbar-right{display:flex;align-items:center;gap:14px;flex-shrink:0;margin-left:auto;}
   .topbar-date{font-family:var(--font-num);font-size:12px;color:var(--text3);letter-spacing:.02em;white-space:nowrap;}
 
@@ -801,6 +817,59 @@
   .prog-badge.same{color:var(--text2);background:var(--fill-strong);}
   .prog-badge.down{color:var(--orange);background:color-mix(in srgb,var(--orange) 13%,transparent);}
 
+  /* ===== Gewicht (Übersicht) ===== */
+  .w-ask{padding:2px 0 2px;}
+  .w-ask-q{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-.01em;margin-bottom:12px;}
+  .w-hint{color:var(--text3);font-weight:500;}
+  .w-input-row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+  .w-field{position:relative;flex:1 1 150px;min-width:130px;display:flex;align-items:center;}
+  .w-input{
+    width:100%;background:var(--fill3);border:0.5px solid var(--separator-opaque);
+    border-radius:11px;padding:0 40px 0 14px;height:44px;color:var(--text);
+    font-family:var(--font-num);font-size:20px;font-weight:700;letter-spacing:-.02em;
+    outline:none;transition:all .2s var(--ease-out);
+  }
+  .w-input::placeholder{color:var(--placeholder);font-weight:600;}
+  .w-input:focus{border-color:var(--blue);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-ring);}
+  .w-input.w-bad{border-color:var(--red);box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 22%,transparent);}
+  .w-unit{position:absolute;right:14px;font-size:13px;color:var(--text3);font-weight:600;pointer-events:none;}
+  .w-save{height:44px;}
+  .w-cancel{height:44px;}
+  .w-shown{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:2px 0;}
+  .w-shown-main{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;}
+  .w-val{font-family:var(--font-num);font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--text);}
+  .w-val small{font-size:15px;color:var(--text3);font-weight:600;margin-left:3px;letter-spacing:0;}
+  .w-delta{font-family:var(--font-num);font-size:14px;font-weight:600;color:var(--text2);letter-spacing:-.01em;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+  .w-delta i{font-size:15px;}
+  .w-delta.first{color:var(--text3);font-weight:500;}
+  .w-shown-side{display:flex;flex-direction:column;align-items:flex-end;gap:9px;}
+  .w-when{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+  .w-acts{display:flex;gap:6px;}
+  .w-act{width:32px;height:32px;border-radius:9px;border:0.5px solid var(--separator);background:var(--fill3);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s var(--ease-out);}
+  .w-act:hover{background:var(--fill-strong);color:var(--text);}
+  .w-act:active{transform:scale(0.92);}
+  .w-future{font-size:13px;color:var(--text3);padding:4px 0;display:flex;align-items:center;gap:7px;}
+  .wchart-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px 0 8px;}
+  .wchart-cap{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+  .wchart{width:100%;height:auto;display:block;overflow:visible;}
+  .wc-grid{stroke:var(--separator);stroke-width:1;vector-effect:non-scaling-stroke;}
+  .wc-area{fill:var(--accent-soft);stroke:none;}
+  .wc-line{fill:none;stroke:var(--blue);stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+  .wc-dot{fill:var(--blue);opacity:.5;}
+  .wc-dot-last{fill:var(--blue);stroke:var(--surface-glass);stroke-width:1.5;}
+  .wc-dot-sel{opacity:1;}
+  .wc-sel{stroke:var(--blue);stroke-width:1;stroke-dasharray:3 3;opacity:.45;vector-effect:non-scaling-stroke;}
+  .wc-axis{fill:var(--text3);font-family:var(--font-num);font-size:13px;font-weight:500;}
+  .wc-yl{text-anchor:end;dominant-baseline:middle;}
+  .w-empty{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;color:var(--text3);font-size:13px;padding:28px 16px;line-height:1.4;}
+  .w-empty i{font-size:30px;opacity:.5;}
+  .w-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--separator);border-radius:14px;overflow:hidden;margin-top:16px;background:var(--surface-glass);}
+  .w-stat{display:flex;flex-direction:column;gap:5px;padding:11px 14px;border-right:1px solid var(--separator);}
+  .w-stat:last-child{border-right:none;}
+  .w-stat .wl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+  .w-stat .wv{font-family:var(--font-num);font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.02em;}
+  .w-stat .wv small{font-size:11px;color:var(--text3);font-weight:500;margin-left:2px;}
+
   @media(min-width:761px){
     .tabbar{display:none!important;}
   }
@@ -884,6 +953,7 @@
       </nav>
       <div class="topbar-right">
         <span class="topbar-date" id="topbarDate"></span>
+        <button class="sync-pill" id="syncPill" onclick="syncNow()" aria-label="Sync-Status" title="Synchronisierung" hidden><i class="ti ti-cloud" id="syncPillIcon"></i></button>
         <button class="theme-toggle settings-gear" data-view="settings" onclick="switchView('settings')" aria-label="Einstellungen" title="Einstellungen"><i class="ti ti-settings"></i></button>
         <button class="theme-toggle" id="themeToggle" onclick="cycleTheme()" aria-label="Erscheinungsbild wechseln" title="Erscheinungsbild wechseln"><i class="ti ti-moon-stars" id="themeToggleIcon"></i></button>
       </div>
@@ -1125,21 +1195,22 @@
 <script>
 function ymd(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function load(k,fb){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb;}catch{return fb;}}
-const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_theme','gt_accent'];
+const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_theme','gt_accent'];
 let syncToken=localStorage.getItem('gt_sync_token')||'';
 let syncGistId=localStorage.getItem('gt_sync_gist')||'';
 let syncStatus=syncToken?'idle':'off';
-let _syncTimer=null,_syncReady=false;
+let _syncTimer=null,_syncReady=false,_pendingPush=false,_syncPillT=null;
 function ssave(k,v){
   try{localStorage.setItem(k,JSON.stringify(v));}catch{}
   if(SYNC_DATA_KEYS.includes(k)){try{localStorage.setItem('gt_data_ts',new Date().toISOString());}catch{} pushSoon();}
 }
 
 // ===== Cloud-Sync (privater GitHub-Gist) =====
-function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_theme:themePref,gt_accent:accentPref};}
+function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_theme:themePref,gt_accent:accentPref};}
 function mergeHistory(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{out[d]=(a[d]&&b[d])?(bN?{...a[d],...b[d]}:{...b[d],...a[d]}):(a[d]||b[d]);});return out;}
-async function ghFetch(method,path,body){
-  const r=await fetch('https://api.github.com'+path,{method,headers:{'Authorization':'Bearer '+syncToken,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+function mergeWeights(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{const av=a?a[d]:undefined,bv=b?b[d]:undefined;out[d]=(av!=null&&bv!=null)?(bN?bv:av):(av!=null?av:bv);});return out;}
+async function ghFetch(method,path,body,keepalive){
+  const r=await fetch('https://api.github.com'+path,{method,keepalive:!!keepalive,headers:{'Authorization':'Bearer '+syncToken,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
   if(r.status===401||r.status===403)throw new Error('auth');
   if(!r.ok)throw new Error('http '+r.status);
   return r.json();
@@ -1152,22 +1223,23 @@ async function ensureGist(){
   else{const ts=new Date().toISOString();const c=await ghFetch('POST','/gists',{description:'goal-tracker-data (Tracker Sync) — nicht löschen',public:false,files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:localData()})}}});syncGistId=c.id;localStorage.setItem('gt_data_ts',ts);}
   localStorage.setItem('gt_sync_gist',syncGistId);
 }
-function applyRemote(rData,rTs,mergedHist){
+function applyRemote(rData,rTs,mergedHist,mergedW){
   const set=(k,v)=>{if(v!==undefined)localStorage.setItem(k,JSON.stringify(v));};
   set('gt_goals3',rData.gt_goals3);set('gt_start3',rData.gt_start3);
   localStorage.setItem('gt_history3',JSON.stringify(mergedHist));
   set('gt_events3',rData.gt_events3);set('gt_notes3',rData.gt_notes3);
+  localStorage.setItem('gt_weight',JSON.stringify(mergedW||rData.gt_weight||{}));
   set('gt_theme',rData.gt_theme);set('gt_accent',rData.gt_accent);
   localStorage.setItem('gt_data_ts',rTs);
   location.reload();
 }
-async function doPush(){
+async function doPush(opts){
   if(!syncToken)return;
   setSyncStatus('syncing');
   try{await ensureGist();const ts=new Date().toISOString();
     const rAt=localStorage.getItem('gt_reset_at')||undefined;   // Reset-Marker mitschleppen, nie verlieren
-    await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:rAt,data:localData()})}}});
-    localStorage.setItem('gt_data_ts',ts);setSyncStatus('ok');
+    await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:rAt,data:localData()})}}},opts&&opts.keepalive);
+    localStorage.setItem('gt_data_ts',ts);_pendingPush=false;setSyncStatus('ok');
   }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
 }
 async function doPull(){
@@ -1183,17 +1255,23 @@ async function doPull(){
     if(rReset&&rReset>lReset){
       // Ein Reset, den dieses Gerät noch nicht kennt → leeren Remote-Stand 1:1 übernehmen (KEINE mergeHistory-Vereinigung, sonst kämen alte Tage zurück)
       localStorage.setItem('gt_reset_at',rReset);
-      applyRemote(rData,rTs||rReset,rData.gt_history3||{});return;
+      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{});return;
     }
     const lTs=localStorage.getItem('gt_data_ts')||'';
     const mergedHist=mergeHistory(history||{},rData.gt_history3||{},lTs,rTs);
-    if(rTs>lTs){applyRemote(rData,rTs,mergedHist);return;}
-    const changed=JSON.stringify(mergedHist)!==JSON.stringify(history||{});
-    if(changed){history=mergedHist;ssave('gt_history3',history);renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
-    if(lTs>rTs||changed){await doPush();}else{setSyncStatus('ok');}
+    const mergedW=mergeWeights(weights||{},rData.gt_weight||{},lTs,rTs);
+    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW);return;}
+    const histChanged=JSON.stringify(mergedHist)!==JSON.stringify(history||{});
+    const wChanged=JSON.stringify(mergedW)!==JSON.stringify(weights||{});
+    if(histChanged){history=mergedHist;ssave('gt_history3',history);}
+    if(wChanged){weights=mergedW;ssave('gt_weight',weights);}
+    if(histChanged||wChanged){renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
+    if(lTs>rTs||histChanged||wChanged){await doPush();}else{setSyncStatus('ok');}
   }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
 }
-function pushSoon(){if(!syncToken||!_syncReady)return;clearTimeout(_syncTimer);_syncTimer=setTimeout(doPush,1500);}
+function pushSoon(){if(!syncToken||!_syncReady)return;_pendingPush=true;clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>doPush(),1500);}
+// Ausstehenden Push sofort wegschicken (z. B. bevor das Handy die Hintergrund-Seite einfriert / die App geschlossen wird).
+function flushSync(keepalive){if(!syncToken||!_syncReady||!_pendingPush)return;clearTimeout(_syncTimer);doPush({keepalive:!!keepalive});}
 async function connectSync(token){
   token=(token||'').trim();if(!token){alert('Bitte Token einfügen.');return;}
   syncToken=token;localStorage.setItem('gt_sync_token',syncToken);_syncReady=true;
@@ -1211,7 +1289,20 @@ function syncStatusText(){
   if(syncStatus==='ok'&&ts)s+=' · '+new Date(ts).toLocaleString('de-DE');
   return s;
 }
-function setSyncStatus(s){syncStatus=s;const el=document.getElementById('syncStatusLine');if(el)el.textContent=syncStatusText();}
+function setSyncStatus(s){syncStatus=s;const el=document.getElementById('syncStatusLine');if(el)el.textContent=syncStatusText();updateSyncPill();}
+// Dezenter Sync-Indikator oben in der Leiste — so siehst du den Stand, ohne in die Einstellungen zu gehen.
+function updateSyncPill(){
+  const p=document.getElementById('syncPill'),ic=document.getElementById('syncPillIcon');
+  if(!p||!ic)return;
+  if(!syncToken){p.hidden=true;return;}
+  p.hidden=false;
+  const map={syncing:['ti-refresh','syncing'],ok:['ti-cloud-check','ok'],error:['ti-cloud-x','error'],offline:['ti-cloud-off','offline'],idle:['ti-cloud','idle'],off:['ti-cloud','idle']};
+  const m=map[syncStatus]||map.idle;
+  ic.className='ti '+m[0];
+  p.className='sync-pill '+m[1];
+  p.title=syncStatusText()+' — tippen zum Sync';
+  if(syncStatus==='ok'){p.classList.add('flash');clearTimeout(_syncPillT);_syncPillT=setTimeout(()=>{const q=document.getElementById('syncPill');if(q)q.classList.remove('flash');},1600);}
+}
 function renderSyncUI(){
   const c=document.getElementById('syncCard');if(!c)return;
   if(!syncToken){
@@ -1270,6 +1361,7 @@ let goals=load('gt_goals3',[
 let startDate=load('gt_start3',ymd(new Date()));
 let history=load('gt_history3',{});
 let events=load('gt_events3',[]);
+let weights=load('gt_weight',{});   // tägliches Morgengewicht: { 'YYYY-MM-DD': kg }
 const todayKey=ymd(new Date());
 
 // Migration: bestehenden Zielen ohne Kategorie automatisch eine zuweisen (nach Namen)
@@ -1288,6 +1380,8 @@ if(!history[todayKey]){history[todayKey]={};goals.forEach(g=>{history[todayKey][
 
 let currentView='overview';
 let ovDate=todayKey;
+let weightRange=90;        // Gewicht-Verlauf: Zeitraum in Tagen (0 = alle)
+let wEditDk=null;          // Tag, dessen Gewicht gerade bearbeitet wird (sonst null)
 let currentRange=7;
 let calMode='week';
 let calCursor=new Date();calCursor.setHours(12,0,0,0);
@@ -2072,6 +2166,7 @@ async function wipeSyncedGist(keepCalendar){
   const ts=new Date().toISOString();
   const cleared={gt_goals3:[],gt_start3:ymd(new Date()),gt_history3:{},
     gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
+    gt_weight:keepCalendar?weights:{},
     gt_theme:themePref,gt_accent:accentPref};
   localStorage.setItem('gt_reset_at',ts);   // Reset-Marker: ältere Geräte übernehmen dadurch beim nächsten Pull den leeren Stand
   await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:ts,data:cleared})}}});
@@ -2088,15 +2183,15 @@ async function resetAllData(){
   if(!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.'))return;
   if(!confirm('Bist du dir sicher? Wirklich alles?'))return;
   settingsDirty=false;
-  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3'].forEach(k=>localStorage.removeItem(k));
+  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight'].forEach(k=>localStorage.removeItem(k));
   try{await wipeSyncedGist(false);}catch(e){}
   location.reload();
 }
 
 // ===== Backup (Export / Import) =====
-const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_theme','gt_accent'];
+const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_theme','gt_accent'];
 function exportData(){
-  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_theme:themePref,gt_accent:accentPref};
+  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_theme:themePref,gt_accent:accentPref};
   const payload={app:'goal-tracker',version:1,exportedAt:new Date().toISOString(),data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -2135,9 +2230,15 @@ renderToolbar();
 setInterval(()=>{if(currentView==='calendar'&&calMode==='week')renderCalendar();},60000);
 
 // Cloud-Sync: beim Start ziehen, danach Push erlauben; bei Rückkehr zur App erneut ziehen
-renderSyncUI();
+renderSyncUI();updateSyncPill();
 if(syncToken){doPull().finally(()=>{_syncReady=true;});}else{_syncReady=true;}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&syncToken&&_syncReady)doPull();});
+document.addEventListener('visibilitychange',()=>{
+  if(!syncToken||!_syncReady)return;
+  if(document.hidden)flushSync(true);   // verlässt App/wechselt Tab → letzte Änderung sofort sichern (Timer würde sonst eingefroren)
+  else doPull();                        // zurück in der App → neuesten Stand holen
+});
+window.addEventListener('pagehide',()=>{if(syncToken&&_syncReady)flushSync(true);}); // App/Tab wird geschlossen → letzten Stand noch wegschicken
+window.addEventListener('online',()=>{if(syncToken&&_syncReady){flushSync();doPull();}}); // wieder online → Nachholen
 // Cloud-Sync: alle 60 Minuten automatisch ziehen (nur wenn App sichtbar & verbunden)
 setInterval(()=>{if(!document.hidden&&syncToken&&_syncReady)doPull();},60*60*1000);
 
@@ -2329,6 +2430,7 @@ function renderOverview(){
     +`<button class="ov-now${isToday?' is-today':''}" onclick="ovToday()">${esc(ovRelLabel(dk))}</button>`
     +`<button class="ov-arrow" onclick="ovStep(1)" aria-label="Nächster Tag"><i class="ti ti-chevron-right"></i></button></div>`
     +`<div class="progress-row"><div class="progress-num"><strong>${p.done}</strong> von ${p.total} erledigt</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-pct">${pct}%</div></div></div>`;
+  h+=weightSectionHtml(dk,isToday);
   if(!isToday){
     const hist=history[dk]||{};
     const list=goals.filter(g=>!isAbst(g)&&isScheduledOn(g,dk));
@@ -2364,6 +2466,148 @@ function toggleOvGoal(id){
   renderOverview();renderStats();
   if(currentView==='stats'){renderHeatmap();renderBars();}
   if(dk===todayKey)renderGoals();
+}
+
+// ===== Gewicht (Übersicht) =====
+function fmtKg(n,dec){const d=dec==null?1:dec;return Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function parseWeight(s){
+  if(s==null)return null;
+  const n=parseFloat(String(s).replace(/\s/g,'').replace(',','.'));
+  if(!isFinite(n))return null;
+  if(n<20||n>400)return null;            // Plausibilitätsgrenzen (kg)
+  return Math.round(n*10)/10;            // auf 0,1 kg runden
+}
+function weightKeys(){return Object.keys(weights).filter(k=>typeof weights[k]==='number'&&isFinite(weights[k])).sort();}
+function lastWeightKey(){const k=weightKeys();return k.length?k[k.length-1]:null;}
+function prevWeightOf(dk){const k=weightKeys().filter(x=>x<dk);return k.length?weights[k[k.length-1]]:null;}
+function weightSeries(rangeDays){
+  const ks=weightKeys();if(!ks.length)return [];
+  if(!rangeDays)return ks.map(k=>({dk:k,v:weights[k]}));
+  const c=new Date();c.setHours(12,0,0,0);c.setDate(c.getDate()-rangeDays);
+  const from=ymd(c);
+  return ks.filter(k=>k>=from).map(k=>({dk:k,v:weights[k]}));
+}
+function setWeightRange(r,btn){
+  haptic('light');weightRange=r;
+  if(btn){btn.parentElement.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  const w=document.getElementById('wChartWrap');if(w)w.innerHTML=weightChartHtml(ovDate);
+}
+function saveWeight(dk){
+  const inp=document.getElementById('wInput');if(!inp)return;
+  const v=parseWeight(inp.value);
+  if(v==null){inp.classList.add('w-bad');inp.focus();inp.select();return;}
+  weights[dk]=v;ssave('gt_weight',weights);
+  wEditDk=null;haptic('medium');renderOverview();
+}
+function editWeight(dk){wEditDk=dk;renderOverview();setTimeout(()=>{const i=document.getElementById('wInput');if(i){i.focus();i.select();}},30);}
+function cancelWeightEdit(){wEditDk=null;renderOverview();}
+function removeWeight(dk){
+  if(weights[dk]==null)return;
+  if(!confirm('Gewicht für diesen Tag entfernen?'))return;
+  delete weights[dk];ssave('gt_weight',weights);
+  wEditDk=null;haptic('light');renderOverview();
+}
+function weightSectionHtml(dk,isToday){
+  const future=_atNoon(dk)>_atNoon(todayKey);
+  const has=typeof weights[dk]==='number'&&isFinite(weights[dk]);
+  let entry='';
+  if(has&&wEditDk!==dk){
+    const prev=prevWeightOf(dk);
+    let delta;
+    if(prev!=null){
+      const d=weights[dk]-prev,dir=d<-0.04?'down':d>0.04?'up':'flat';
+      const ic=dir==='down'?'ti-trending-down':dir==='up'?'ti-trending-up':'ti-minus';
+      delta=`<span class="w-delta ${dir}"><i class="ti ${ic}"></i> ${fmtKg(Math.abs(d))} kg</span>`;
+    }else delta='<span class="w-delta first">erster Eintrag</span>';
+    const when=isToday?'Heute Morgen':ovRelLabel(dk);
+    entry=`<div class="w-shown">`
+      +`<div class="w-shown-main"><div class="w-val">${fmtKg(weights[dk])}<small>kg</small></div>${delta}</div>`
+      +`<div class="w-shown-side"><div class="w-when">${esc(when)}</div>`
+      +`<div class="w-acts"><button class="w-act" onclick="editWeight('${dk}')" title="Ändern" aria-label="Ändern"><i class="ti ti-pencil"></i></button>`
+      +`<button class="w-act" onclick="removeWeight('${dk}')" title="Entfernen" aria-label="Entfernen"><i class="ti ti-trash"></i></button></div></div></div>`;
+  }else if(future){
+    entry=`<div class="w-future"><i class="ti ti-clock"></i> Noch kein Gewicht für diesen Tag.</div>`;
+  }else{
+    const q=isToday?'Wie schwer bist du heute Morgen?':('Gewicht für '+esc(ovRelLabel(dk))+' nachtragen');
+    const lk=lastWeightKey();
+    const pre=has?fmtKg(weights[dk]):'';
+    const ph=pre||(lk?fmtKg(weights[lk]):'78,5');
+    const hint=(!has&&lk)?(' <span class="w-hint">· zuletzt '+fmtKg(weights[lk])+' kg</span>'):'';
+    entry=`<div class="w-ask">`
+      +`<div class="w-ask-q">${q}${hint}</div>`
+      +`<div class="w-input-row">`
+      +`<div class="w-field"><input id="wInput" class="w-input" type="text" inputmode="decimal" autocomplete="off" placeholder="${ph}" value="${pre}" onkeydown="if(event.key==='Enter')saveWeight('${dk}')" oninput="this.classList.remove('w-bad')"><span class="w-unit">kg</span></div>`
+      +`<button class="mb primary w-save" onclick="saveWeight('${dk}')"><i class="ti ti-check"></i> Speichern</button>`
+      +(wEditDk===dk?`<button class="mb w-cancel" onclick="cancelWeightEdit()">Abbrechen</button>`:'')
+      +`</div></div>`;
+  }
+  return `<div class="section-h">Gewicht</div>`
+    +`<div class="card">`
+    +entry
+    +`<div class="wchart-head"><span class="wchart-cap">Verlauf</span>`
+    +`<div class="tb-group">`
+    +[[30,'30T'],[90,'90T'],[365,'1J'],[0,'Alle']].map(([r,l])=>`<button class="tb-btn${weightRange===r?' active':''}" onclick="setWeightRange(${r},this)">${l}</button>`).join('')
+    +`</div></div>`
+    +`<div id="wChartWrap">${weightChartHtml(dk)}</div>`
+    +`</div>`;
+}
+function weightChartHtml(selDk){
+  const series=weightSeries(weightRange);
+  if(!series.length){
+    const msg=weightKeys().length?'Keine Einträge in diesem Zeitraum.':'Noch keine Gewichtsdaten — trag oben dein erstes Gewicht ein.';
+    return '<div class="w-empty"><i class="ti ti-scale"></i><span>'+msg+'</span></div>';
+  }
+  const lk=lastWeightKey();
+  const cur=lk?weights[lk]:series[series.length-1].v;
+  const first=series[0].v,last=series[series.length-1].v;
+  const avg=series.reduce((a,p)=>a+p.v,0)/series.length;
+  const dRange=last-first;
+  const rl=weightRange===0?'gesamt':weightRange===365?'1 J':weightRange+'T';
+  const sign=dRange>0.04?'+':dRange<-0.04?'-':'±';
+  const stats='<div class="w-stats">'
+    +'<div class="w-stat"><span class="wl">Aktuell</span><span class="wv">'+fmtKg(cur)+'<small>kg</small></span></div>'
+    +'<div class="w-stat"><span class="wl">Ø '+rl+'</span><span class="wv">'+fmtKg(avg)+'<small>kg</small></span></div>'
+    +'<div class="w-stat"><span class="wl">Δ '+rl+'</span><span class="wv">'+sign+fmtKg(Math.abs(dRange))+'<small>kg</small></span></div>'
+    +'</div>';
+  return weightSvg(series,selDk)+stats;
+}
+function niceTicks(min,max,count){
+  if(min===max){min-=1;max+=1;}
+  const span=max-min,raw=span/Math.max(1,count-1);
+  const mag=Math.pow(10,Math.floor(Math.log10(raw)));
+  const n=raw/mag,step=(n<1.5?1:n<3?2:n<7?5:10)*mag;
+  const out=[];for(let v=Math.ceil(min/step)*step;v<=max+1e-9;v+=step)out.push(Math.round(v*100)/100);
+  return out.length?out:[min,max];
+}
+function shortDate(dk){const d=_atNoon(dk),mn=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];return d.getDate()+'. '+mn[d.getMonth()];}
+function weightSvg(series,selDk){
+  const W=640,H=200,padL=40,padR=14,padT=14,padB=24;
+  const iw=W-padL-padR,ih=H-padT-padB;
+  const t0=_atNoon(series[0].dk).getTime(),t1=_atNoon(series[series.length-1].dk).getTime();
+  const span=Math.max(1,t1-t0),single=series.length===1;
+  const vals=series.map(p=>p.v),dmin=Math.min(...vals),dmax=Math.max(...vals);
+  let lo=dmin,hi=dmax;if(lo===hi){lo-=1;hi+=1;}
+  const padv=(hi-lo)*0.18;lo-=padv;hi+=padv;
+  const X=p=>single?padL+iw/2:padL+(_atNoon(p.dk).getTime()-t0)/span*iw;
+  const Y=v=>padT+(1-(v-lo)/(hi-lo))*ih;
+  const baseY=(padT+ih).toFixed(1);
+  let grid='',ylab='';
+  niceTicks(dmin,dmax,4).filter(t=>t>=lo&&t<=hi).forEach(t=>{const yy=Y(t).toFixed(1);
+    grid+='<line class="wc-grid" x1="'+padL+'" y1="'+yy+'" x2="'+(W-padR)+'" y2="'+yy+'"/>';
+    ylab+='<text class="wc-axis wc-yl" x="'+(padL-7)+'" y="'+yy+'">'+fmtKg(t,t%1===0?0:1)+'</text>';
+  });
+  const pts=series.map(p=>[X(p),Y(p.v)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=pts.length>1?(line+' L '+pts[pts.length-1][0].toFixed(1)+' '+baseY+' L '+pts[0][0].toFixed(1)+' '+baseY+' Z'):'';
+  let dots='';
+  pts.forEach((p,i)=>{const isLast=i===pts.length-1,isSel=series[i].dk===selDk;
+    if(isSel&&!isLast)dots+='<line class="wc-sel" x1="'+p[0].toFixed(1)+'" y1="'+padT+'" x2="'+p[0].toFixed(1)+'" y2="'+baseY+'"/>';
+    dots+='<circle class="'+(isLast?'wc-dot-last':'wc-dot')+(isSel?' wc-dot-sel':'')+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isLast?3.4:2.1)+'"/>';
+  });
+  const xlab='<text class="wc-axis" x="'+padL+'" y="'+(H-7)+'" text-anchor="start">'+esc(shortDate(series[0].dk))+'</text>'
+    +(single?'':'<text class="wc-axis" x="'+(W-padR)+'" y="'+(H-7)+'" text-anchor="end">'+esc(shortDate(series[series.length-1].dk))+'</text>');
+  return '<svg class="wchart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gewichtsverlauf">'
+    +grid+(area?'<path class="wc-area" d="'+area+'"/>':'')+(pts.length>1?'<path class="wc-line" d="'+line+'"/>':'')+dots+ylab+xlab+'</svg>';
 }
 async function loadOverviewFitness(silent){
   const grid=document.getElementById('ovFitGrid');if(!grid)return;
