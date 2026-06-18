@@ -2160,11 +2160,11 @@ function addNewGoal(){
 }
 // Reset muss auch die Sync-Gist überschreiben — sonst holt der nächste doPull die
 // alten Tage per mergeHistory-Vereinigung zurück und der Reset wirkt wie rückgängig.
-async function wipeSyncedGist(keepCalendar){
+async function wipeSyncedGist(keepCalendar,keepGoals){
   if(!syncToken)return;
   await ensureGist();
   const ts=new Date().toISOString();
-  const cleared={gt_goals3:[],gt_start3:ymd(new Date()),gt_history3:{},
+  const cleared={gt_goals3:Array.isArray(keepGoals)?keepGoals:[],gt_start3:ymd(new Date()),gt_history3:{},
     gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
     gt_weight:keepCalendar?weights:{},
     gt_theme:themePref,gt_accent:accentPref};
@@ -2172,11 +2172,22 @@ async function wipeSyncedGist(keepCalendar){
   await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:ts,data:cleared})}}});
   localStorage.setItem('gt_data_ts',ts);
 }
+// Statistik der Ziele leeren, die Ziele selbst aber behalten:
+// Verlauf + Startdatum zurücksetzen und je Ziel die eingebetteten Zähler
+// (Abstinenz-Streak/Rekord/Rückfälle) auf null stellen.
+function goalStatsReset(g){
+  const c={...g};
+  if(c.type==='abstinence'){c.cleanSince=ymd(new Date());c.record=0;c.relapses=0;c.lastRelapse=null;}
+  return c;
+}
 async function resetGoalsOnly(){
-  if(!confirm('Statistik wirklich zurücksetzen? Alle abgehakten Ziele und der Verlauf werden gelöscht. Der Kalender bleibt erhalten.'))return;
+  if(!confirm('Statistik wirklich zurücksetzen? Verlauf, Streaks und Rekorde werden gelöscht — deine Ziele selbst bleiben erhalten. Der Kalender bleibt ebenfalls erhalten.'))return;
   settingsDirty=false;
-  ['gt_goals3','gt_start3','gt_history3'].forEach(k=>localStorage.removeItem(k));
-  try{await wipeSyncedGist(true);}catch(e){}
+  const keptGoals=goals.map(goalStatsReset);
+  localStorage.setItem('gt_goals3',JSON.stringify(keptGoals));
+  localStorage.setItem('gt_start3',JSON.stringify(ymd(new Date())));
+  localStorage.removeItem('gt_history3');
+  try{await wipeSyncedGist(true,keptGoals);}catch(e){}
   location.reload();
 }
 async function resetAllData(){
