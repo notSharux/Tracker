@@ -918,6 +918,38 @@
   .ov-ev-time{font-size:13px;color:var(--text2);font-family:var(--font-num);font-variant-numeric:tabular-nums;flex:none;}
   .ov-pins{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
   .ov-pin{cursor:pointer;}
+  /* Übersicht: offene Ziele (links) + generelle Ziele (rechts) */
+  .ov-cols{display:grid;grid-template-columns:1fr;gap:8px 20px;align-items:start;}
+  @media(min-width:761px){.ov-cols{grid-template-columns:minmax(0,1fr) 272px;}}
+  .ov-col-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+  .ov-alldone{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:var(--text2);padding:22px 16px;}
+  .ov-alldone i{font-size:32px;color:var(--green);}
+  .ov-alldone .sub{font-size:12.5px;color:var(--text3);}
+  .ov-done{margin-top:12px;border-top:1px solid var(--separator);padding-top:10px;}
+  .ov-done>summary{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text3);font-weight:600;cursor:pointer;list-style:none;letter-spacing:-.01em;user-select:none;}
+  .ov-done>summary::-webkit-details-marker{display:none;}
+  .ov-done>summary .chev{font-size:14px;transition:transform .2s var(--ease-out);}
+  .ov-done[open]>summary .chev{transform:rotate(90deg);}
+  .ov-done-list{display:flex;flex-direction:column;margin-top:4px;}
+  .ov-done-list .day-goal-name{color:var(--text3);text-decoration:line-through;text-decoration-color:var(--text4);}
+  /* Generelle Ziele — reine Anzeige, keine Funktion */
+  .gen-list{display:flex;flex-direction:column;gap:1px;}
+  .gen-item{display:flex;align-items:flex-start;gap:11px;padding:8px 2px;}
+  .gen-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;margin-top:7px;}
+  .gen-item span{font-size:14px;font-weight:500;color:var(--text);letter-spacing:-.01em;line-height:1.35;}
+  .gen-empty{font-size:13px;color:var(--text3);line-height:1.5;padding:4px 2px;}
+  .gen-empty a{color:var(--blue);text-decoration:none;cursor:pointer;font-weight:600;}
+  /* Tagesanmerkung */
+  .ov-note-field{width:100%;min-height:74px;resize:vertical;background:var(--fill3);border:0.5px solid var(--separator-opaque);border-radius:11px;padding:11px 13px;color:var(--text);font-family:inherit;font-size:14px;line-height:1.5;outline:none;letter-spacing:-.01em;transition:border-color .2s var(--ease-out),background .2s var(--ease-out),box-shadow .2s var(--ease-out);}
+  .ov-note-field:focus{border-color:var(--blue);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-ring);}
+  .ov-note-field::placeholder{color:var(--placeholder);}
+  .ov-note-saved{font-size:11px;color:var(--text3);margin-top:7px;display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .2s;}
+  .ov-note-saved.show{opacity:1;}
+  /* Heatmap-Marker für Tage mit Anmerkung */
+  .hm-cell{position:relative;}
+  .hm-cell.has-note::after{content:'';position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--text);opacity:.5;box-shadow:0 0 0 1.5px var(--surface-glass);}
+  .day-note-wrap{margin:8px 2px 2px;}
+  .day-note-wrap .modal-lab{margin-bottom:7px;}
 
   /* ===== Schlaf ===== */
   .sleep-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
@@ -942,15 +974,7 @@
         <div class="brand-icon"><i class="ti ti-circle-check"></i></div>
         <span class="brand-name">Tracker</span>
       </div>
-      <nav class="topnav">
-        <button class="nav-item active" data-view="overview" onclick="switchView('overview')">Übersicht</button>
-        <button class="nav-item" data-view="goals" onclick="switchView('goals')">Ziele <span class="nav-badge" id="navGoalsBadge">0/0</span></button>
-        <button class="nav-item" data-view="calendar" onclick="switchView('calendar')">Kalender</button>
-        <button class="nav-item" data-view="fitness" onclick="switchView('fitness')">Fitness</button>
-        <button class="nav-item" data-view="notes" onclick="switchView('notes')">Notizen</button>
-        <button class="nav-item" data-view="stats" onclick="switchView('stats')">Statistik</button>
-        <button class="nav-item" data-view="settings" onclick="switchView('settings')">Einstellungen</button>
-      </nav>
+      <nav class="topnav" id="topnav"></nav>
       <div class="topbar-right">
         <span class="topbar-date" id="topbarDate"></span>
         <button class="sync-pill" id="syncPill" onclick="syncNow()" aria-label="Sync-Status" title="Synchronisierung" hidden><i class="ti ti-cloud" id="syncPillIcon"></i></button>
@@ -1061,6 +1085,9 @@
             </div>
           </div>
 
+          <div class="section-h">Tabs / Navigation</div>
+          <div class="set-card" id="tabsEditor"></div>
+
           <div class="section-h">Allgemein</div>
           <div class="set-card">
             <div class="set-row">
@@ -1071,6 +1098,9 @@
 
           <div class="section-h">Ziele verwalten</div>
           <div class="set-card" id="goalsEditor"></div>
+
+          <div class="section-h">Generelle Ziele</div>
+          <div class="set-card" id="generalEditor"></div>
 
           <div class="section-h">Cloud-Sync</div>
           <div class="set-card" id="syncCard"></div>
@@ -1109,14 +1139,7 @@
   </main>
 
   <nav class="tabbar" aria-label="Hauptnavigation">
-    <div class="tabbar-inner">
-      <button class="tab active" data-view="overview" onclick="switchView('overview')" aria-label="Übersicht"><i class="ti ti-layout-dashboard"></i><span>Übersicht</span></button>
-      <button class="tab" data-view="goals" onclick="switchView('goals')" aria-label="Ziele"><i class="ti ti-list-check"></i><span>Ziele</span><span class="tab-badge" id="tabGoalsBadge" style="display:none">0</span></button>
-      <button class="tab" data-view="calendar" onclick="switchView('calendar')" aria-label="Kalender"><i class="ti ti-calendar"></i><span>Kalender</span></button>
-      <button class="tab" data-view="fitness" onclick="switchView('fitness')" aria-label="Fitness"><i class="ti ti-activity-heartbeat"></i><span>Fitness</span></button>
-      <button class="tab" data-view="notes" onclick="switchView('notes')" aria-label="Notizen"><i class="ti ti-notes"></i><span>Notizen</span></button>
-      <button class="tab" data-view="stats" onclick="switchView('stats')" aria-label="Statistik"><i class="ti ti-chart-bar"></i><span>Statistik</span></button>
-    </div>
+    <div class="tabbar-inner" id="tabbarInner"></div>
   </nav>
 </div>
 
@@ -1153,6 +1176,10 @@
   <div class="modal">
     <div class="modal-h" id="dayModalTitle">Tag bearbeiten</div>
     <div class="day-goals" id="dayGoals"></div>
+    <div class="day-note-wrap">
+      <div class="modal-lab">Anmerkung zum Tag</div>
+      <textarea class="modal-input modal-textarea" id="dayNoteInput" placeholder="Begründung / was an diesem Tag besonders war …" oninput="onDayNoteInput()" style="min-height:90px;"></textarea>
+    </div>
     <div class="modal-foot"><div class="modal-foot-r"><button class="mb primary" onclick="closeDayModal()">Fertig</button></div></div>
   </div>
 </div>
@@ -1195,7 +1222,7 @@
 <script>
 function ymd(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function load(k,fb){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb;}catch{return fb;}}
-const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_theme','gt_accent'];
+const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
 let syncToken=localStorage.getItem('gt_sync_token')||'';
 let syncGistId=localStorage.getItem('gt_sync_gist')||'';
 let syncStatus=syncToken?'idle':'off';
@@ -1206,9 +1233,11 @@ function ssave(k,v){
 }
 
 // ===== Cloud-Sync (privater GitHub-Gist) =====
-function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_theme:themePref,gt_accent:accentPref};}
+function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
 function mergeHistory(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{out[d]=(a[d]&&b[d])?(bN?{...a[d],...b[d]}:{...b[d],...a[d]}):(a[d]||b[d]);});return out;}
 function mergeWeights(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{const av=a?a[d]:undefined,bv=b?b[d]:undefined;out[d]=(av!=null&&bv!=null)?(bN?bv:av):(av!=null?av:bv);});return out;}
+// Tagesnotizen wie Gewicht feldweise zusammenführen: pro Tag gewinnt bei Konflikt der neuere Stand.
+function mergeDayNotes(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{const av=a?a[d]:undefined,bv=b?b[d]:undefined;out[d]=(av!=null&&bv!=null)?(bN?bv:av):(av!=null?av:bv);});return out;}
 async function ghFetch(method,path,body,keepalive){
   const r=await fetch('https://api.github.com'+path,{method,keepalive:!!keepalive,headers:{'Authorization':'Bearer '+syncToken,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
   if(r.status===401||r.status===403)throw new Error('auth');
@@ -1223,12 +1252,15 @@ async function ensureGist(){
   else{const ts=new Date().toISOString();const c=await ghFetch('POST','/gists',{description:'goal-tracker-data (Tracker Sync) — nicht löschen',public:false,files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:localData()})}}});syncGistId=c.id;localStorage.setItem('gt_data_ts',ts);}
   localStorage.setItem('gt_sync_gist',syncGistId);
 }
-function applyRemote(rData,rTs,mergedHist,mergedW){
+function applyRemote(rData,rTs,mergedHist,mergedW,mergedN){
   const set=(k,v)=>{if(v!==undefined)localStorage.setItem(k,JSON.stringify(v));};
   set('gt_goals3',rData.gt_goals3);set('gt_start3',rData.gt_start3);
   localStorage.setItem('gt_history3',JSON.stringify(mergedHist));
   set('gt_events3',rData.gt_events3);set('gt_notes3',rData.gt_notes3);
   localStorage.setItem('gt_weight',JSON.stringify(mergedW||rData.gt_weight||{}));
+  set('gt_general',rData.gt_general);
+  localStorage.setItem('gt_daynotes',JSON.stringify(mergedN||rData.gt_daynotes||{}));
+  set('gt_taborder',rData.gt_taborder);
   set('gt_theme',rData.gt_theme);set('gt_accent',rData.gt_accent);
   localStorage.setItem('gt_data_ts',rTs);
   location.reload();
@@ -1255,18 +1287,21 @@ async function doPull(){
     if(rReset&&rReset>lReset){
       // Ein Reset, den dieses Gerät noch nicht kennt → leeren Remote-Stand 1:1 übernehmen (KEINE mergeHistory-Vereinigung, sonst kämen alte Tage zurück)
       localStorage.setItem('gt_reset_at',rReset);
-      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{});return;
+      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{},rData.gt_daynotes||{});return;
     }
     const lTs=localStorage.getItem('gt_data_ts')||'';
     const mergedHist=mergeHistory(history||{},rData.gt_history3||{},lTs,rTs);
     const mergedW=mergeWeights(weights||{},rData.gt_weight||{},lTs,rTs);
-    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW);return;}
+    const mergedN=mergeDayNotes(dayNotes||{},rData.gt_daynotes||{},lTs,rTs);
+    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW,mergedN);return;}
     const histChanged=JSON.stringify(mergedHist)!==JSON.stringify(history||{});
     const wChanged=JSON.stringify(mergedW)!==JSON.stringify(weights||{});
+    const nChanged=JSON.stringify(mergedN)!==JSON.stringify(dayNotes||{});
     if(histChanged){history=mergedHist;ssave('gt_history3',history);}
     if(wChanged){weights=mergedW;ssave('gt_weight',weights);}
-    if(histChanged||wChanged){renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
-    if(lTs>rTs||histChanged||wChanged){await doPush();}else{setSyncStatus('ok');}
+    if(nChanged){dayNotes=mergedN;ssave('gt_daynotes',dayNotes);}
+    if(histChanged||wChanged||nChanged){renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
+    if(lTs>rTs||histChanged||wChanged||nChanged){await doPush();}else{setSyncStatus('ok');}
   }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
 }
 function pushSoon(){if(!syncToken||!_syncReady)return;_pendingPush=true;clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>doPush(),1500);}
@@ -1362,6 +1397,9 @@ let startDate=load('gt_start3',ymd(new Date()));
 let history=load('gt_history3',{});
 let events=load('gt_events3',[]);
 let weights=load('gt_weight',{});   // tägliches Morgengewicht: { 'YYYY-MM-DD': kg }
+let generalGoals=load('gt_general',[]); // reine Anzeige-Liste (Leitsätze), KEINE Tracking-Funktion: [{id,text}]
+let dayNotes=load('gt_daynotes',{});    // Anmerkung/Begründung pro Tag: { 'YYYY-MM-DD': 'Text' }
+let tabOrder=load('gt_taborder',['overview','goals','calendar','fitness','notes','stats']); // anpassbare Tab-Reihenfolge (Einstellungen bleibt fix am Ende)
 const todayKey=ymd(new Date());
 
 // Migration: bestehenden Zielen ohne Kategorie automatisch eine zuweisen (nach Namen)
@@ -1407,6 +1445,45 @@ let editingNote=null;
 let noteColor=COLORS[0].val;
 let notePinned=false;
 
+// ===== Navigation (Tab-Reihenfolge anpassbar) =====
+const TAB_DEFS={
+  overview:{label:'Übersicht',icon:'ti-layout-dashboard'},
+  goals:{label:'Ziele',icon:'ti-list-check'},
+  calendar:{label:'Kalender',icon:'ti-calendar'},
+  fitness:{label:'Fitness',icon:'ti-activity-heartbeat'},
+  notes:{label:'Notizen',icon:'ti-notes'},
+  stats:{label:'Statistik',icon:'ti-chart-bar'},
+};
+const TAB_KEYS=Object.keys(TAB_DEFS);
+// Reihenfolge säubern: nur bekannte Tabs, keine Duplikate, fehlende ans Ende (so verschwindet nie ein Tab).
+function sanitizeTabOrder(arr){
+  const seen=new Set(),out=[];
+  (Array.isArray(arr)?arr:[]).forEach(k=>{if(TAB_DEFS[k]&&!seen.has(k)){seen.add(k);out.push(k);}});
+  TAB_KEYS.forEach(k=>{if(!seen.has(k))out.push(k);});
+  return out;
+}
+function renderNav(){
+  tabOrder=sanitizeTabOrder(tabOrder);
+  const tn=document.getElementById('topnav');
+  if(tn){
+    let html='';
+    tabOrder.forEach(k=>{
+      const badge=k==='goals'?' <span class="nav-badge" id="navGoalsBadge">0/0</span>':'';
+      html+=`<button class="nav-item${k===currentView?' active':''}" data-view="${k}" onclick="switchView('${k}')">${TAB_DEFS[k].label}${badge}</button>`;
+    });
+    html+=`<button class="nav-item${currentView==='settings'?' active':''}" data-view="settings" onclick="switchView('settings')">Einstellungen</button>`;
+    tn.innerHTML=html;
+  }
+  const tb=document.getElementById('tabbarInner');
+  if(tb){
+    let html='';
+    tabOrder.forEach(k=>{
+      const badge=k==='goals'?' <span class="tab-badge" id="tabGoalsBadge" style="display:none">0</span>':'';
+      html+=`<button class="tab${k===currentView?' active':''}" data-view="${k}" onclick="switchView('${k}')" aria-label="${TAB_DEFS[k].label}"><i class="ti ${TAB_DEFS[k].icon}"></i><span>${TAB_DEFS[k].label}</span>${badge}</button>`;
+    });
+    tb.innerHTML=html;
+  }
+}
 function switchView(v){
   if(currentView===v)return;
   // Einstellungen mit ungespeicherten Änderungen verlassen → nachfragen
@@ -1425,7 +1502,7 @@ function doSwitchView(v){
   renderToolbar();
   if(v==='calendar')renderCalendar();
   if(v==='stats'){renderHeatmap();renderBars();}
-  if(v==='settings'){renderGoalsEditor();renderSyncUI();renderFitnessSettings();}
+  if(v==='settings'){renderTabsEditor();renderGoalsEditor();renderGeneralEditor();renderSyncUI();renderFitnessSettings();}
   if(v==='notes')renderNotes();
   if(v==='fitness')renderFitness();
   if(v==='overview')renderOverview();
@@ -1493,9 +1570,18 @@ function openDayModal(dateKey){
   const mn=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   document.getElementById('dayModalTitle').textContent=`${dn[dt.getDay()]}, ${dt.getDate()}. ${mn[dt.getMonth()]}`+(dateKey===todayKey?' · heute':'');
   renderDayGoals();
+  const ni=document.getElementById('dayNoteInput');if(ni)ni.value=dayNotes[dateKey]||'';
   document.getElementById('dayOverlay').classList.remove('hidden');
 }
-function closeDayModal(){document.getElementById('dayOverlay').classList.add('hidden');dayModalDate=null;}
+function closeDayModal(){document.getElementById('dayOverlay').classList.add('hidden');dayModalDate=null;renderHeatmap();}
+// Anmerkung im Tag-Fenster direkt sichern (Sync läuft über ssave gedrosselt).
+function onDayNoteInput(){
+  const dk=dayModalDate;if(!dk)return;
+  const el=document.getElementById('dayNoteInput');if(!el)return;
+  const v=el.value;
+  if(v.trim())dayNotes[dk]=v;else delete dayNotes[dk];
+  ssave('gt_daynotes',dayNotes);
+}
 function renderDayGoals(){
   const wrap=document.getElementById('dayGoals');if(!wrap)return;wrap.innerHTML='';
   const dk=dayModalDate;const hist=history[dk]||{};
@@ -1659,7 +1745,10 @@ function renderHeatmap(){
     const div=document.createElement('div');div.className='hm-cell';
     div.style.animationDelay=(idx*0.015)+'s';div.style.cursor='pointer';
     const hist=history[date];
-    if(hist&&eg.length){const done=eg.filter(g=>hist[g.id]).length;const pct=done/eg.length;const a=(0.18+pct*0.82).toFixed(2);div.style.background=`rgba(48,209,88,${a})`;div.title=`${date}: ${done}/${eg.length}`;}
+    let tip=date;
+    if(hist&&eg.length){const done=eg.filter(g=>hist[g.id]).length;const pct=done/eg.length;const a=(0.18+pct*0.82).toFixed(2);div.style.background=`rgba(48,209,88,${a})`;tip=`${date}: ${done}/${eg.length}`;}
+    if(dayNotes[date]){div.classList.add('has-note');tip+=' · '+dayNotes[date];}
+    div.title=tip;
     div.addEventListener('click',()=>openDayModal(date));
     hm.appendChild(div);
   });
@@ -2158,6 +2247,61 @@ function addNewGoal(){
   inp.value='';renderGoalsEditor();
   const ni=document.getElementById('newGoalName');if(ni)ni.focus();
 }
+// ===== Generelle Ziele (reine Anzeige-Leitsätze, sofort gespeichert — kein Draft) =====
+function renderGeneralEditor(){
+  const wrap=document.getElementById('generalEditor');if(!wrap)return;wrap.innerHTML='';
+  const info=document.createElement('div');info.className='set-row';
+  info.innerHTML='<div class="set-label" style="font-weight:400;"><span class="set-sub">Feste Leitsätze, die auf der Übersicht dauerhaft sichtbar sind — reine Erinnerung, ohne Abhaken oder Statistik.</span></div>';
+  wrap.appendChild(info);
+  generalGoals.forEach((g,i)=>{
+    const row=document.createElement('div');row.className='goal-edit';row.draggable=true;
+    row.innerHTML=`
+      <span class="drag" title="Ziehen zum Sortieren"><i class="ti ti-grip-vertical"></i></span>
+      <input type="text" value="${(g.text||'').replace(/"/g,'&quot;')}" placeholder="Leitsatz / generelles Ziel">
+      <button class="icon-btn danger" aria-label="Löschen"><i class="ti ti-trash"></i></button>`;
+    row.querySelector('input').addEventListener('input',e=>{generalGoals[i].text=e.target.value;ssave('gt_general',generalGoals);});
+    row.querySelector('.icon-btn').addEventListener('click',()=>deleteGeneralGoal(g.id));
+    row.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i);row.style.opacity='.4';});
+    row.addEventListener('dragend',()=>row.style.opacity='1');
+    row.addEventListener('dragover',e=>e.preventDefault());
+    row.addEventListener('drop',e=>{e.preventDefault();const f=parseInt(e.dataTransfer.getData('text/plain'));if(f===i)return;const m=generalGoals.splice(f,1)[0];generalGoals.splice(i,0,m);ssave('gt_general',generalGoals);haptic('light');renderGeneralEditor();});
+    wrap.appendChild(row);
+  });
+  const add=document.createElement('div');add.className='add-row';
+  add.innerHTML=`<input type="text" class="set-input" id="newGeneralText" placeholder="Neues generelles Ziel hinzufügen…"><button class="mb primary" onclick="addGeneralGoal()"><i class="ti ti-plus"></i> Hinzufügen</button>`;
+  wrap.appendChild(add);
+  document.getElementById('newGeneralText').addEventListener('keydown',e=>{if(e.key==='Enter')addGeneralGoal();});
+}
+function addGeneralGoal(){
+  const inp=document.getElementById('newGeneralText');const t=(inp.value||'').trim();if(!t)return;
+  generalGoals.push({id:gid(),text:t});
+  ssave('gt_general',generalGoals);haptic('medium');
+  inp.value='';renderGeneralEditor();
+  const ni=document.getElementById('newGeneralText');if(ni)ni.focus();
+}
+function deleteGeneralGoal(id){
+  generalGoals=generalGoals.filter(g=>g.id!==id);
+  ssave('gt_general',generalGoals);haptic('medium');renderGeneralEditor();
+}
+// ===== Tab-Reihenfolge (Drag-Sortierung; sofort gespeichert) =====
+function renderTabsEditor(){
+  const wrap=document.getElementById('tabsEditor');if(!wrap)return;wrap.innerHTML='';
+  const info=document.createElement('div');info.className='set-row';
+  info.innerHTML='<div class="set-label" style="font-weight:400;"><span class="set-sub">Reihenfolge der Tabs in der Navigation — ziehen zum Sortieren. „Einstellungen" bleibt am Ende.</span></div>';
+  wrap.appendChild(info);
+  tabOrder=sanitizeTabOrder(tabOrder);
+  tabOrder.forEach((k,i)=>{
+    const row=document.createElement('div');row.className='goal-edit';row.draggable=true;
+    row.innerHTML=`<span class="drag" title="Ziehen zum Sortieren"><i class="ti ti-grip-vertical"></i></span>`
+      +`<span style="display:flex;align-items:center;gap:11px;flex:1;font-size:15px;font-weight:500;color:var(--text);letter-spacing:-.01em;"><i class="ti ${TAB_DEFS[k].icon}" style="font-size:18px;color:var(--text2);width:20px;text-align:center;"></i>${TAB_DEFS[k].label}</span>`
+      +`<span class="set-sub" style="font-variant-numeric:tabular-nums;">${i+1}</span>`;
+    row.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i);row.style.opacity='.4';});
+    row.addEventListener('dragend',()=>row.style.opacity='1');
+    row.addEventListener('dragover',e=>e.preventDefault());
+    row.addEventListener('drop',e=>{e.preventDefault();const f=parseInt(e.dataTransfer.getData('text/plain'));if(f===i)return;const m=tabOrder.splice(f,1)[0];tabOrder.splice(i,0,m);ssave('gt_taborder',tabOrder);haptic('light');renderTabsEditor();renderNav();renderStats();});
+    wrap.appendChild(row);
+  });
+}
 // Reset muss auch die Sync-Gist überschreiben — sonst holt der nächste doPull die
 // alten Tage per mergeHistory-Vereinigung zurück und der Reset wirkt wie rückgängig.
 async function wipeSyncedGist(keepCalendar,keepGoals){
@@ -2167,6 +2311,8 @@ async function wipeSyncedGist(keepCalendar,keepGoals){
   const cleared={gt_goals3:Array.isArray(keepGoals)?keepGoals:[],gt_start3:ymd(new Date()),gt_history3:{},
     gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
     gt_weight:keepCalendar?weights:{},
+    gt_general:keepCalendar?generalGoals:[],gt_daynotes:{},
+    gt_taborder:tabOrder,
     gt_theme:themePref,gt_accent:accentPref};
   localStorage.setItem('gt_reset_at',ts);   // Reset-Marker: ältere Geräte übernehmen dadurch beim nächsten Pull den leeren Stand
   await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:ts,data:cleared})}}});
@@ -2187,6 +2333,7 @@ async function resetGoalsOnly(){
   localStorage.setItem('gt_goals3',JSON.stringify(keptGoals));
   localStorage.setItem('gt_start3',JSON.stringify(ymd(new Date())));
   localStorage.removeItem('gt_history3');
+  localStorage.removeItem('gt_daynotes');
   try{await wipeSyncedGist(true,keptGoals);}catch(e){}
   location.reload();
 }
@@ -2194,15 +2341,15 @@ async function resetAllData(){
   if(!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.'))return;
   if(!confirm('Bist du dir sicher? Wirklich alles?'))return;
   settingsDirty=false;
-  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight'].forEach(k=>localStorage.removeItem(k));
+  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_general','gt_daynotes'].forEach(k=>localStorage.removeItem(k));
   try{await wipeSyncedGist(false);}catch(e){}
   location.reload();
 }
 
 // ===== Backup (Export / Import) =====
-const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_theme','gt_accent'];
+const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
 function exportData(){
-  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_theme:themePref,gt_accent:accentPref};
+  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
   const payload={app:'goal-tracker',version:1,exportedAt:new Date().toISOString(),data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -2232,6 +2379,7 @@ function importData(input){
 
 applyTheme();
 applyAccent();
+renderNav();
 document.getElementById('startDateInput').value=startDate;
 renderGoals();
 renderStats();
@@ -2379,19 +2527,25 @@ async function loadLyfta(silent){
 }
 function renderFitness(){
   const body=document.getElementById('fitnessBody');if(!body)return;
+  // Gewicht ist unabhängig vom Fitness-Dienst → steht immer ganz oben (eigener Container für gezieltes Neu-Rendern).
+  let h='<div id="fitWeightHost">'+weightSectionHtml(todayKey,true)+'</div>';
   if(!fitBase()){
-    body.innerHTML=`<div class="card"><div class="fit-empty"><i class="ti ti-activity-heartbeat"></i><div style="font-size:16px;font-weight:600;color:var(--text2);">Fitness-Dienst nicht verbunden</div><div class="sub">Garmin (Herzfrequenz, Schritte …) und Lyfta (letztes Workout mit Fortschritt) laufen über einen kleinen, selbst gehosteten Begleit-Dienst — so bleiben dein Garmin-Login und der Lyfta-Schlüssel von dieser Seite getrennt. Trage seine Adresse in den Einstellungen ein.</div><button class="mb primary" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:auto;padding:12px 20px;margin-top:4px;" onclick="switchView('settings')"><i class="ti ti-settings"></i> Zu den Einstellungen</button></div></div>`;
+    h+=`<div class="section-h">Garmin &amp; Lyfta</div><div class="card"><div class="fit-empty"><i class="ti ti-activity-heartbeat"></i><div style="font-size:16px;font-weight:600;color:var(--text2);">Fitness-Dienst nicht verbunden</div><div class="sub">Garmin (Herzfrequenz, Schritte …) und Lyfta (letztes Workout mit Fortschritt) laufen über einen kleinen, selbst gehosteten Begleit-Dienst — so bleiben dein Garmin-Login und der Lyfta-Schlüssel von dieser Seite getrennt. Trage seine Adresse in den Einstellungen ein.</div><button class="mb primary" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:auto;padding:12px 20px;margin-top:4px;" onclick="switchView('settings')"><i class="ti ti-settings"></i> Zu den Einstellungen</button></div></div>`;
+    body.innerHTML=h;
     return;
   }
-  body.innerHTML='<div class="section-h">Garmin · Live</div>'
+  h+='<div class="section-h">Garmin · Live</div>'
     +'<div class="card"><div class="fit-grid" id="fitGarminGrid"></div><div class="fit-sync" id="fitGarminSync"></div></div>'
     +'<div class="section-h">Schlaf · Letzte Nacht</div>'
     +'<div class="card" id="fitSleepCard"></div>'
     +'<div class="section-h">Lyfta · Letztes Workout</div>'
     +'<div class="card" id="fitLyftaCard"></div>';
+  body.innerHTML=h;
   loadGarmin(false);loadLyfta(false);
 }
 function refreshFitness(){haptic('light');loadGarmin(false);loadLyfta(false);}
+// Nur die Gewicht-Karte im Fitness-Tab neu zeichnen (ohne Garmin/Lyfta neu zu laden).
+function renderFitnessWeight(){const host=document.getElementById('fitWeightHost');if(host)host.innerHTML=weightSectionHtml(todayKey,true);}
 
 // ===== Schlaf (Fitness-Tab + Übersicht) =====
 function fitSleepDur(min){min=Math.round(Number(min)||0);const h=Math.floor(min/60),m=min%60;return h+' h'+(m?' '+String(m).padStart(2,'0'):'');}
@@ -2441,8 +2595,29 @@ function renderOverview(){
     +`<button class="ov-now${isToday?' is-today':''}" onclick="ovToday()">${esc(ovRelLabel(dk))}</button>`
     +`<button class="ov-arrow" onclick="ovStep(1)" aria-label="Nächster Tag"><i class="ti ti-chevron-right"></i></button></div>`
     +`<div class="progress-row"><div class="progress-num"><strong>${p.done}</strong> von ${p.total} erledigt</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-pct">${pct}%</div></div></div>`;
-  h+=weightSectionHtml(dk,isToday);
-  if(!isToday){
+  // ── Zwei-Spalten: links offene/nachzutragende Ziele, rechts generelle Ziele ──
+  h+=`<div class="ov-cols"><div class="ov-main">`;
+  if(isToday){
+    const td=history[todayKey]||{};
+    const sched=goals.filter(g=>!isAbst(g)&&isScheduledToday(g));
+    const open=sched.filter(g=>!td[g.id]);
+    const done=sched.filter(g=>td[g.id]);
+    h+=`<div class="section-h">Offen · heute</div><div class="card">`;
+    if(!sched.length){h+='<div class="day-empty">Keine Ziele für heute geplant.</div>';}
+    else if(!open.length){h+=`<div class="ov-alldone"><i class="ti ti-circle-check-filled"></i><div>Alles erledigt für heute</div><div class="sub">${done.length} ${done.length===1?'Ziel':'Ziele'} abgehakt</div></div>`;}
+    else{
+      h+=`<div class="ov-daygoals">`;
+      open.forEach(g=>{h+=`<div class="day-goal" onclick="toggleOvGoal('${g.id}')"><div class="day-goal-box"><i class="ti ti-check"></i></div><div class="day-goal-name">${esc(g.name)}</div></div>`;});
+      h+=`</div>`;
+    }
+    // Erledigte heute dezent & eingeklappt — damit ein versehentlich abgehaktes Ziel nicht in der Sackgasse landet
+    if(done.length){
+      h+=`<details class="ov-done"><summary><i class="ti ti-chevron-right chev"></i> ${done.length} erledigt</summary><div class="ov-done-list">`;
+      done.forEach(g=>{h+=`<div class="day-goal on" onclick="toggleOvGoal('${g.id}')"><div class="day-goal-box"><i class="ti ti-check"></i></div><div class="day-goal-name">${esc(g.name)}</div></div>`;});
+      h+=`</div></details>`;
+    }
+    h+=`</div>`;
+  }else{
     const hist=history[dk]||{};
     const list=goals.filter(g=>!isAbst(g)&&isScheduledOn(g,dk));
     const future=_atNoon(dk)>_atNoon(todayKey);
@@ -2451,15 +2626,30 @@ function renderOverview(){
     else list.forEach(g=>{h+=`<div class="day-goal${hist[g.id]?' on':''}" onclick="toggleOvGoal('${g.id}')"><div class="day-goal-box"><i class="ti ti-check"></i></div><div class="day-goal-name">${esc(g.name)}</div></div>`;});
     h+='</div></div>';
   }
+  h+=`</div><div class="ov-side"><div class="section-h">Generelle Ziele</div><div class="card">`;
+  if(!generalGoals.length){
+    h+=`<div class="gen-empty">Noch keine. Lege sie in den <a onclick="switchView('settings')">Einstellungen</a> an — sie stehen hier dauerhaft als Erinnerung.</div>`;
+  }else{
+    h+=`<div class="gen-list">`;
+    generalGoals.forEach(g=>{h+=`<div class="gen-item"><span class="gen-dot"></span><span>${esc(g.text||'')}</span></div>`;});
+    h+=`</div>`;
+  }
+  h+=`</div></div></div>`;
+  // ── Anmerkung zum Tag (sichtbar in der Heatmap-Statistik) ──
+  const noteLabel=isToday?'Wie war dein Tag? Was ist passiert?':('Anmerkung · '+ovRelLabel(dk));
+  h+=`<div class="section-h">Anmerkung</div><div class="card">`
+    +`<div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px;letter-spacing:-.005em;">${esc(noteLabel)}</div>`
+    +`<textarea class="ov-note-field" id="ovNoteField" placeholder="Begründung, Auslöser, was heute besonders war … — taucht in der Heatmap wieder auf." oninput="onOvNoteInput('${dk}')">${esc(dayNotes[dk]||'')}</textarea>`
+    +`<div class="ov-note-saved" id="ovNoteSaved"><i class="ti ti-check"></i> gespeichert</div>`
+    +`</div>`;
+  // ── Termine (bleiben) ──
   const evs=getEventsForDate(dk,dt.getDay()).slice().sort((a,b)=>(a.start||'').localeCompare(b.start||''));
   if(evs.length){
     h+=`<div class="section-h">Termine</div><div class="card"><div class="ov-events">`;
     evs.forEach(ev=>{const co=eventColor(ev.color);h+=`<div class="ov-event"><span class="ov-ev-bar" style="background:${co.val}"></span><div class="ov-ev-main"><div class="ov-ev-title">${esc(ev.title||'Termin')}</div>${ev.note?`<div class="ov-ev-note">${esc(ev.note)}</div>`:''}</div><div class="ov-ev-time">${esc(ev.start||'')}${ev.end?'–'+esc(ev.end):''}</div></div>`;});
     h+='</div></div>';
   }
-  if(isToday&&fitBase()){
-    h+=`<div class="section-h">Heute · Live</div><div class="card"><div class="fit-grid" id="ovFitGrid"></div></div>`;
-  }
+  // ── Angeheftete Notizen (bleiben) ──
   const pinned=notes.filter(n=>n.pinned);
   if(pinned.length){
     h+=`<div class="section-h">Angeheftet</div><div class="ov-pins">`;
@@ -2468,7 +2658,18 @@ function renderOverview(){
     h+='</div>';
   }
   body.innerHTML=h;
-  if(isToday&&fitBase())loadOverviewFitness(false);
+}
+// Tagesanmerkung auf der Übersicht: lokal sofort puffern, gedrosselt speichern + dezent „gespeichert" zeigen.
+let _ovNoteT=null;
+function onOvNoteInput(dk){
+  const el=document.getElementById('ovNoteField');if(!el)return;
+  const v=el.value;
+  if(v.trim())dayNotes[dk]=v;else delete dayNotes[dk];
+  clearTimeout(_ovNoteT);
+  _ovNoteT=setTimeout(()=>{
+    ssave('gt_daynotes',dayNotes);
+    const s=document.getElementById('ovNoteSaved');if(s){s.classList.add('show');setTimeout(()=>s.classList.remove('show'),1400);}
+  },500);
 }
 function toggleOvGoal(id){
   const dk=ovDate;if(!history[dk])history[dk]={};
@@ -2501,22 +2702,22 @@ function weightSeries(rangeDays){
 function setWeightRange(r,btn){
   haptic('light');weightRange=r;
   if(btn){btn.parentElement.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-  const w=document.getElementById('wChartWrap');if(w)w.innerHTML=weightChartHtml(ovDate);
+  const w=document.getElementById('wChartWrap');if(w)w.innerHTML=weightChartHtml(todayKey);
 }
 function saveWeight(dk){
   const inp=document.getElementById('wInput');if(!inp)return;
   const v=parseWeight(inp.value);
   if(v==null){inp.classList.add('w-bad');inp.focus();inp.select();return;}
   weights[dk]=v;ssave('gt_weight',weights);
-  wEditDk=null;haptic('medium');renderOverview();
+  wEditDk=null;haptic('medium');renderFitnessWeight();
 }
-function editWeight(dk){wEditDk=dk;renderOverview();setTimeout(()=>{const i=document.getElementById('wInput');if(i){i.focus();i.select();}},30);}
-function cancelWeightEdit(){wEditDk=null;renderOverview();}
+function editWeight(dk){wEditDk=dk;renderFitnessWeight();setTimeout(()=>{const i=document.getElementById('wInput');if(i){i.focus();i.select();}},30);}
+function cancelWeightEdit(){wEditDk=null;renderFitnessWeight();}
 function removeWeight(dk){
   if(weights[dk]==null)return;
   if(!confirm('Gewicht für diesen Tag entfernen?'))return;
   delete weights[dk];ssave('gt_weight',weights);
-  wEditDk=null;haptic('light');renderOverview();
+  wEditDk=null;haptic('light');renderFitnessWeight();
 }
 function weightSectionHtml(dk,isToday){
   const future=_atNoon(dk)>_atNoon(todayKey);
@@ -2663,8 +2864,8 @@ function clearFitnessSettings(){
 }
 
 // Live-Aktualisierung der Garmin-Werte, solange der Fitness-Tab sichtbar ist
-setInterval(()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness')loadGarmin(true);else if(currentView==='overview'&&ovDate===todayKey)loadOverviewFitness(true);},30000);
-document.addEventListener('visibilitychange',()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness'){loadGarmin(true);loadLyfta(true);}else if(currentView==='overview'&&ovDate===todayKey)loadOverviewFitness(true);});
+setInterval(()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness')loadGarmin(true);},30000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness'){loadGarmin(true);loadLyfta(true);}});
 </script>
 </body>
 </html>
