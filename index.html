@@ -1387,12 +1387,7 @@ function applyAccent(){
 }
 function setAccent(a){accentPref=a;ssave(ACCENT_KEY,a);haptic('light');applyAccent();}
 
-let goals=load('gt_goals3',[
-  {id:'nofap',name:'NoFap',cat:'general'},{id:'noporn',name:'NoPorn',cat:'general'},{id:'nonicotine',name:'Kein Nicotin',cat:'general'},
-  {id:'nocaffeine',name:'Kein Coffein nach 10h',cat:'general'},{id:'gym',name:'Gym / Laufen',cat:'general'},{id:'asupps',name:'Abend Supplements',cat:'evening'},
-  {id:'msupps',name:'Morgen Supplements',cat:'morning'},{id:'sugar',name:'Zucker Limitieren',cat:'general'},{id:'asc',name:'Abend SkinCare',cat:'evening'},
-  {id:'msc',name:'Morgen SkinCare',cat:'morning'},{id:'hp1',name:'h+p1',cat:'general'},{id:'hp2',name:'h+p2',cat:'general'}
-]);
+let goals=load('gt_goals3',[]);
 let startDate=load('gt_start3',ymd(new Date()));
 let history=load('gt_history3',{});
 let events=load('gt_events3',[]);
