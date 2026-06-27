@@ -817,6 +817,32 @@
   .prog-badge.same{color:var(--text2);background:var(--fill-strong);}
   .prog-badge.down{color:var(--orange);background:color-mix(in srgb,var(--orange) 13%,transparent);}
 
+  /* ===== Trainingsplan (A/B-Wochen) ===== */
+  .tp-card{display:flex;flex-direction:column;gap:18px;}
+  .tp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
+  .tp-today-lab{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:11px;}
+  .tp-today-main{display:flex;align-items:center;gap:13px;}
+  .tp-ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+  .tp-today-name{font-family:var(--font-display);font-size:27px;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--text);}
+  .tp-week-badge{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 15px;border-radius:14px;background:var(--fill3);border:0.5px solid var(--separator);flex-shrink:0;}
+  .tp-week-lab{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);}
+  .tp-week-letter{font-family:var(--font-display);font-size:23px;font-weight:900;line-height:1;letter-spacing:-.01em;}
+  .tp-week-badge.a .tp-week-letter{color:var(--orange);}
+  .tp-week-badge.b .tp-week-letter{color:var(--blue);}
+  .tp-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .tp-day{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 2px 9px;border-radius:12px;background:var(--fill3);border:0.5px solid var(--separator);}
+  .tp-day-dow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--text3);}
+  .tp-day-ico{font-size:17px;line-height:1;}
+  .tp-day-name{font-size:10px;font-weight:600;color:var(--text2);letter-spacing:-.01em;}
+  .tp-day.today{border-color:color-mix(in srgb,var(--blue) 55%,transparent);background:var(--accent-soft);box-shadow:0 0 0 1px color-mix(in srgb,var(--blue) 30%,transparent);}
+  .tp-day.today .tp-day-dow{color:var(--blue);}
+  .tp-ico.run,.tp-day.run .tp-day-ico{color:var(--teal);}
+  .tp-ico.push,.tp-day.push .tp-day-ico{color:var(--orange);}
+  .tp-ico.pull,.tp-day.pull .tp-day-ico{color:var(--blue);}
+  .tp-ico.run{background:color-mix(in srgb,var(--teal) 14%,transparent);}
+  .tp-ico.push{background:color-mix(in srgb,var(--orange) 14%,transparent);}
+  .tp-ico.pull{background:color-mix(in srgb,var(--blue) 14%,transparent);}
+
   /* ===== Gewicht (Übersicht) ===== */
   .w-ask{padding:2px 0 2px;}
   .w-ask-q{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-.01em;margin-bottom:12px;}
@@ -2520,10 +2546,46 @@ async function loadLyfta(silent){
     card.innerHTML='<div class="fit-err"><i class="ti ti-plug-connected-x"></i> '+esc(fitErrMsg(e))+'</div>';
   }
 }
+// ===== Trainingsplan (A/B-Wochen) =====
+// Wochen wechseln Mo–So zwischen A und B. Anker: Mo 22.06.2026 = Woche B
+// (vom Nutzer bestätigt: Sa 27.06.2026 = Woche B). Reine Kalender-Logik, nichts zu speichern.
+const TP_ANCHOR=new Date(2026,5,22); // Montag einer B-Woche (Monat 0-indexiert: 5 = Juni)
+const TP_PLAN={                      // Index 0..6 = Montag..Sonntag
+  A:['run','push','pull','run','pull','push','pull'],
+  B:['run','pull','push','run','push','pull','push']
+};
+const TP_TYPES={
+  run :{name:'Laufen',short:'Lauf',icon:'ti-run'},
+  push:{name:'Push',  short:'Push',icon:'ti-arrow-big-up-lines'},
+  pull:{name:'Pull',  short:'Pull',icon:'ti-arrow-big-down-lines'}
+};
+const TP_DOW=['Mo','Di','Mi','Do','Fr','Sa','So'];
+const TP_DOW_LONG=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+function tpMonday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;} // Montag der Woche von d (lokal)
+function tpWeekOf(d){const diff=Math.round((tpMonday(d)-tpMonday(TP_ANCHOR))/604800000);return ((diff%2)+2)%2===0?'B':'A';} // Anker = B
+function tpDowIndex(d){return (d.getDay()+6)%7;} // Mo=0 … So=6
+function tpCardHtml(){
+  const now=new Date(),week=tpWeekOf(now),di=tpDowIndex(now),plan=TP_PLAN[week],today=TP_TYPES[plan[di]],todayCls=plan[di];
+  let strip='';
+  for(let i=0;i<7;i++){const k=plan[i],t=TP_TYPES[k];
+    strip+=`<div class="tp-day ${k}${i===di?' today':''}"><span class="tp-day-dow">${TP_DOW[i]}</span><span class="tp-day-ico"><i class="ti ${t.icon}"></i></span><span class="tp-day-name">${t.short}</span></div>`;}
+  return '<div class="section-h">Trainingsplan</div>'
+    +'<div class="card tp-card">'
+    +'<div class="tp-head">'
+      +'<div class="tp-today">'
+        +`<div class="tp-today-lab">Heute · ${TP_DOW_LONG[di]}</div>`
+        +`<div class="tp-today-main"><span class="tp-ico ${todayCls}"><i class="ti ${today.icon}"></i></span><span class="tp-today-name">${today.name}</span></div>`
+      +'</div>'
+      +`<div class="tp-week-badge ${week==='B'?'b':'a'}"><span class="tp-week-lab">Woche</span><span class="tp-week-letter">${week}</span></div>`
+    +'</div>'
+    +`<div class="tp-week">${strip}</div>`
+    +'</div>';
+}
 function renderFitness(){
   const body=document.getElementById('fitnessBody');if(!body)return;
   // Gewicht ist unabhängig vom Fitness-Dienst → steht immer ganz oben (eigener Container für gezieltes Neu-Rendern).
   let h='<div id="fitWeightHost">'+weightSectionHtml(todayKey,true)+'</div>';
+  h+=tpCardHtml(); // Trainingsplan steht ebenfalls vor dem Garmin/Lyfta-Block, damit er auch ohne verbundenen Dienst sichtbar ist.
   if(!fitBase()){
     h+=`<div class="section-h">Garmin &amp; Lyfta</div><div class="card"><div class="fit-empty"><i class="ti ti-activity-heartbeat"></i><div style="font-size:16px;font-weight:600;color:var(--text2);">Fitness-Dienst nicht verbunden</div><div class="sub">Garmin (Herzfrequenz, Schritte …) und Lyfta (letztes Workout mit Fortschritt) laufen über einen kleinen, selbst gehosteten Begleit-Dienst — so bleiben dein Garmin-Login und der Lyfta-Schlüssel von dieser Seite getrennt. Trage seine Adresse in den Einstellungen ein.</div><button class="mb primary" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:auto;padding:12px 20px;margin-top:4px;" onclick="switchView('settings')"><i class="ti ti-settings"></i> Zu den Einstellungen</button></div></div>`;
     body.innerHTML=h;
