@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0f17">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Tracker</title>
+<title>Dashboard</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>
@@ -22,6 +22,10 @@
     var _d=window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.setAttribute('data-theme',_t==='system'?(_d?'dark':'light'):_t);
     document.documentElement.setAttribute('data-accent',JSON.parse(localStorage.getItem('gt_accent')||'"evergreen"'));
+    if(JSON.parse(localStorage.getItem('gt_apple')||'false'))document.documentElement.setAttribute('data-design','apple');
+    var _an=Math.max(0,Math.min(100,JSON.parse(localStorage.getItem('gt_anim')||'100')));
+    document.documentElement.style.setProperty('--anim',_an/100);
+    if(_an<=0)document.documentElement.classList.add('anim-off');
   }catch(e){document.documentElement.setAttribute('data-theme','dark');}
 </script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
@@ -29,6 +33,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=general-sans@400,500,600,700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -46,37 +51,37 @@
   :root{
     color-scheme:light;
     /* Schrift */
-    --font-grotesk:'Satoshi',-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif;
-    --font-serif:'Fraunces',Georgia,serif;
+    --font-grotesk:'General Sans','Satoshi',-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif;
+    --font-serif:'Clash Display','Fraunces',Georgia,serif;
     --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
     --font-body:var(--font-grotesk);
-    --font-display:var(--font-grotesk);
+    --font-display:'Clash Display','General Sans',var(--font-grotesk);
     --font-num:var(--font-mono);
     /* Form & Easing — ruhig, ohne Bounce */
-    --radius:12px;--radius-sm:9px;--bw:1px;
+    --radius:16px;--radius-sm:11px;--radius-lg:26px;--bw:1px;
     --spring:cubic-bezier(0.22,0.61,0.36,1);
     --spring-soft:cubic-bezier(0.4,0,0.2,1);
     --ease-out:cubic-bezier(0.22,0.61,0.36,1);
     --safe-top:env(safe-area-inset-top, 0px);
     --safe-bottom:env(safe-area-inset-bottom, 0px);
     /* ===== Neutral · Hell ===== */
-    --bg:#f5f6f7;--surface-glass:#ffffff;--surface-glass2:#f1f2f4;--surface-elevated:#ffffff;--chrome:rgba(255,255,255,0.85);--modal:#ffffff;--scrim:rgba(18,20,26,0.34);--tint-soft:#fafbfc;
-    --text:#16181d;--text2:#5b6069;--text3:#8b9099;--text4:#c2c6cc;--placeholder:#9aa0a8;
-    --separator:#e7e8eb;--separator-opaque:#dcdee2;--separator-thin:#eef0f2;
-    --fill3:#f1f2f4;--fill-hover:#f0f1f3;--fill-strong:#e6e8eb;--track:#e9eaed;--inset:#f2f3f5;--sheen:transparent;
-    --blue:#1f7a5b;--on-accent:#ffffff;--accent-grad:#1f7a5b;--accent-soft:rgba(31,122,91,0.10);--accent-ring:rgba(31,122,91,0.22);
-    --green:#1f7a5b;--orange:#a96f1c;--red:#c0392b;--teal:#2a7d8c;
-    --shadow-card:0 1px 2px rgba(18,20,26,0.05),0 1px 1px rgba(18,20,26,0.03);--shadow-pop:0 24px 60px rgba(18,20,26,0.18);
+    --bg:#eceef6;--surface-glass:#ffffff;--surface-glass2:#f3f5fb;--surface-elevated:#ffffff;--chrome:rgba(255,255,255,0.70);--modal:#ffffff;--scrim:rgba(16,18,32,0.36);--tint-soft:#f6f7fc;
+    --text:#0e1019;--text2:#545b71;--text3:#868ca0;--text4:#bfc3d2;--placeholder:#959bad;
+    --separator:#e5e7f0;--separator-opaque:#d6dae6;--separator-thin:#eef0f7;
+    --fill3:#f0f2f9;--fill-hover:#eaedf5;--fill-strong:#e1e4f0;--track:#e6e8f2;--inset:#f0f2f9;--sheen:rgba(255,255,255,0.6);
+    --blue:#0f9d6b;--on-accent:#ffffff;--accent-grad:#0f9d6b;--accent-soft:rgba(15,157,107,0.10);--accent-ring:rgba(15,157,107,0.22);
+    --green:#0f9d6b;--orange:#b1741a;--red:#d23b35;--teal:#1f8aa0;
+    --shadow-card:0 1px 2px rgba(16,18,32,0.05),0 14px 32px -18px rgba(16,18,32,0.18);--shadow-pop:0 30px 72px rgba(16,18,32,0.22);
   }
   :root[data-theme="dark"]{
     color-scheme:dark;
-    --bg:#0c0d10;--surface-glass:#16181d;--surface-glass2:#1c1f25;--surface-elevated:#1a1d22;--chrome:rgba(16,18,22,0.88);--modal:#16181d;--scrim:rgba(0,0,0,0.55);--tint-soft:#121419;
-    --text:#edeef0;--text2:#9a9ea7;--text3:#6b7079;--text4:#3a3e45;--placeholder:#6b7079;
-    --separator:rgba(255,255,255,0.08);--separator-opaque:rgba(255,255,255,0.14);--separator-thin:rgba(255,255,255,0.05);
-    --fill3:rgba(255,255,255,0.04);--fill-hover:rgba(255,255,255,0.06);--fill-strong:rgba(255,255,255,0.10);--track:rgba(255,255,255,0.09);--inset:rgba(0,0,0,0.30);--sheen:transparent;
-    --blue:#3aae86;--on-accent:#08130e;--accent-grad:#3aae86;--accent-soft:rgba(58,174,134,0.14);--accent-ring:rgba(58,174,134,0.26);
-    --green:#3aae86;--orange:#cf9b4a;--red:#e5675c;--teal:#4aa9ba;
-    --shadow-card:none;--shadow-pop:0 28px 70px rgba(0,0,0,0.6);
+    --bg:#06070d;--surface-glass:#13151e;--surface-glass2:#191c27;--surface-elevated:#171a24;--chrome:rgba(9,10,16,0.62);--modal:#15171f;--scrim:rgba(3,4,9,0.62);--tint-soft:#0f111a;
+    --text:#eef0f7;--text2:#a4a9bd;--text3:#6b7188;--text4:#3a3f52;--placeholder:#6b7188;
+    --separator:rgba(255,255,255,0.075);--separator-opaque:rgba(255,255,255,0.13);--separator-thin:rgba(255,255,255,0.045);
+    --fill3:rgba(255,255,255,0.045);--fill-hover:rgba(255,255,255,0.07);--fill-strong:rgba(255,255,255,0.11);--track:rgba(255,255,255,0.08);--inset:rgba(0,0,0,0.30);--sheen:rgba(255,255,255,0.06);
+    --blue:#34d399;--on-accent:#04130d;--accent-grad:#34d399;--accent-soft:rgba(52,211,153,0.14);--accent-ring:rgba(52,211,153,0.28);
+    --green:#34d399;--orange:#e0a13f;--red:#f0655c;--teal:#2dd4bf;
+    --shadow-card:0 1px 0 rgba(255,255,255,0.04) inset,0 22px 50px -26px rgba(0,0,0,0.85);--shadow-pop:0 36px 90px rgba(0,0,0,0.7);
   }
 
   /* ===== Akzent-Paletten — Struktur bleibt, nur der Akzent wechselt ===== */
@@ -92,7 +97,25 @@
   .accent-dot:hover{transform:scale(1.12);}
   .accent-dot.active{box-shadow:0 0 0 2px var(--surface-glass),0 0 0 4px var(--sw);}
 
-  .app{display:flex;flex-direction:column;height:100vh;width:100%;background:transparent;position:relative;overflow:hidden;z-index:1;}
+  .app{display:grid;grid-template-columns:264px minmax(0,1fr);height:100vh;width:100%;background:transparent;position:relative;overflow:hidden;z-index:1;}
+
+  /* ===== Floating Glass-Sidebar (Desktop) ===== */
+  .sidebar{
+    position:relative;display:flex;flex-direction:column;min-height:0;
+    margin:16px;padding:16px 12px;border-radius:24px;
+    background:var(--chrome);
+    backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);
+    border:1px solid var(--separator);
+    box-shadow:var(--shadow-card),inset 0 1px 0 var(--glass-edge);
+    overflow:hidden;z-index:5;
+  }
+  .sidebar .brand{padding:8px 12px 18px;gap:11px;}
+  .side-orb{
+    position:absolute;bottom:-70px;left:-50px;width:220px;height:220px;border-radius:50%;
+    background:radial-gradient(circle,color-mix(in srgb,var(--blue) 42%,transparent),transparent 70%);
+    filter:blur(34px);pointer-events:none;opacity:.55;z-index:-1;
+  }
+  .head-controls{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
 
   /* ===== Topbar ===== */
   .topbar{position:sticky;top:0;z-index:20;flex-shrink:0;background:var(--chrome);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--separator);padding-top:var(--safe-top);}
@@ -133,17 +156,21 @@
   .topbar-right{display:flex;align-items:center;gap:14px;flex-shrink:0;margin-left:auto;}
   .topbar-date{font-family:var(--font-num);font-size:12px;color:var(--text3);letter-spacing:.02em;white-space:nowrap;}
 
-  .topnav{display:flex;align-items:center;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;}
+  .topnav{display:flex;flex-direction:column;align-items:stretch;gap:3px;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
   .topnav::-webkit-scrollbar{display:none;}
   .nav-item{
     appearance:none;-webkit-appearance:none;background:transparent;border:none;font-family:inherit;cursor:pointer;
-    display:inline-flex;align-items:center;gap:7px;
-    padding:8px 13px;border-radius:8px;white-space:nowrap;
-    font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--text2);
-    transition:color .15s var(--ease-out),background .15s var(--ease-out);
+    display:flex;align-items:center;gap:12px;
+    padding:11px 13px;border-radius:14px;white-space:nowrap;
+    font-size:14.5px;font-weight:500;letter-spacing:-.01em;color:var(--text2);
+    transition:color .15s var(--ease-out),background .18s var(--ease-out),box-shadow .18s var(--ease-out);
   }
+  .nav-item i{font-size:19px;width:22px;text-align:center;flex-shrink:0;color:var(--text3);transition:color .15s var(--ease-out),transform .2s var(--spring);}
+  .nav-item span{flex:1;text-align:left;}
   .nav-item:hover{color:var(--text);background:var(--fill-hover);}
-  .nav-item.active{color:var(--text);font-weight:600;background:var(--accent-soft);}
+  .nav-item:hover i{color:var(--text2);transform:scale(1.08);}
+  .nav-item.active{color:var(--text);font-weight:600;background:var(--accent-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--blue) 24%,transparent);}
+  .nav-item.active i{color:var(--blue);}
   .nav-badge{
     font-family:var(--font-num);font-size:11px;font-weight:600;color:var(--text3);
     background:var(--fill-strong);padding:1px 6px;border-radius:6px;letter-spacing:0;
@@ -744,7 +771,9 @@
   @media(max-width:560px){.goal-edit{flex-wrap:wrap;}.goal-edit input{min-width:120px;}}
 
   /* ===== Untere Tab-Leiste (Mobil) ===== */
-  .settings-gear{display:none;}
+  /* Einstellungen = eigenes Zahnrad oben rechts (Desktop + Mobil), abgesetzt von den Tabs */
+  .settings-gear{display:flex;}
+  .settings-gear.active{color:var(--blue);background:var(--accent-soft);}
   .tabbar{display:none;}
   .tabbar-inner{
     display:flex;align-items:stretch;justify-content:space-around;
@@ -788,11 +817,6 @@
   .fit-stat .lab i{font-size:14px;}
   .fit-stat .val{font-family:var(--font-num);font-size:27px;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--text);}
   .fit-stat .val small{font-size:13px;color:var(--text3);font-weight:500;margin-left:3px;letter-spacing:0;}
-  .fit-stat.hr .val{color:var(--red);}
-  .fit-stat.hr .lab i{color:var(--red);}
-  .fit-pulse{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 8px color-mix(in srgb,var(--red) 70%,transparent);animation:nowPulse 1.3s ease-in-out infinite;flex-shrink:0;}
-  .fit-sync{font-size:12px;color:var(--text3);margin-top:14px;display:flex;align-items:center;gap:6px;letter-spacing:-.01em;}
-  .fit-sync.stale{color:var(--orange);}
   .fit-err{font-size:13px;color:var(--red);padding:14px 2px;display:flex;align-items:center;gap:8px;}
   .fit-skel{background:var(--track);border-radius:8px;height:27px;width:64px;animation:fitPulse 1.2s ease-in-out infinite;}
   @keyframes fitPulse{0%,100%{opacity:.5;}50%{opacity:.9;}}
@@ -900,10 +924,9 @@
     .tabbar{display:none!important;}
   }
   @media(max-width:760px){
-    .topnav{display:none;}
+    .app{grid-template-columns:1fr;}
+    .sidebar{display:none;}
     .topbar-date{display:none;}
-    .settings-gear{display:flex;}
-    .settings-gear.active{color:var(--blue);background:var(--accent-soft);}
     .topbar-inner{height:54px;gap:12px;padding:0 16px;}
     .tabbar{
       display:block;flex-shrink:0;z-index:30;
@@ -977,44 +1000,487 @@
   .day-note-wrap{margin:8px 2px 2px;}
   .day-note-wrap .modal-lab{margin-bottom:7px;}
 
-  /* ===== Schlaf ===== */
-  .sleep-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
-  .sleep-dur{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.02em;font-family:var(--font-num);display:flex;align-items:center;gap:8px;}
-  .sleep-dur i{color:#9775fa;font-size:20px;}
-  .sleep-score{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1;}
-  .sleep-score .sv{font-size:20px;font-weight:700;color:var(--text);font-family:var(--font-num);}
-  .sleep-score .sl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;}
-  .sleep-bar{display:flex;width:100%;height:10px;border-radius:6px;overflow:hidden;background:var(--track);}
-  .sleep-bar span{display:block;height:100%;}
-  .sleep-leg{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:10px;}
-  .sleg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
-  .sleg .sdot{width:9px;height:9px;border-radius:50%;display:inline-block;font-style:normal;}
+  /* ════════════════════════════════════════════════════════════════
+     REDESIGN 2026 · Atmosphäre, Tiefe & Bewegung — rein additiv,
+     keine Funktion / kein DOM-Hook verändert.
+     ════════════════════════════════════════════════════════════════ */
+
+  /* — Aurora-Tokens (passen sich dem Akzent an) — */
+  :root{
+    --aurora-1:rgba(31,122,91,0.12);
+    --aurora-2:rgba(56,128,196,0.07);
+    --aurora-3:rgba(150,120,200,0.05);
+    --glass-edge:rgba(255,255,255,0.55);
+    --ring-from:var(--blue);
+    --ring-to:color-mix(in srgb,var(--blue) 50%,#7fd9b6);
+  }
+  :root[data-theme="dark"]{
+    --aurora-1:color-mix(in srgb, var(--blue) 34%, transparent);
+    --aurora-2:rgba(50,124,190,0.18);
+    --aurora-3:rgba(152,112,212,0.14);
+    --glass-edge:rgba(255,255,255,0.07);
+    --ring-to:color-mix(in srgb,var(--blue) 52%,#b6f0d8);
+  }
+
+  /* — Mesh/Aurora-Welt hinter der gesamten App (zeigt sich in allen Lücken) — */
+  body::before{
+    content:'';position:fixed;inset:-18%;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(38% 34% at 16% 8%,  rgba(124,99,255,0.26) 0%, transparent 60%),
+      radial-gradient(34% 32% at 86% 2%,  rgba(34,211,238,0.16) 0%, transparent 62%),
+      radial-gradient(48% 46% at 82% 96%, color-mix(in srgb,var(--blue) 34%,transparent) 0%, transparent 60%),
+      radial-gradient(40% 40% at 4% 92%,  rgba(244,114,182,0.12) 0%, transparent 62%);
+    filter:saturate(122%);
+    will-change:transform;
+    animation:auroraDrift 30s ease-in-out infinite alternate;
+  }
+  :root[data-theme="light"] body::before,:root:not([data-theme="dark"]) body::before{filter:saturate(118%);opacity:.7;}
+  @keyframes auroraDrift{
+    0%{transform:translate3d(0,0,0) scale(1);}
+    100%{transform:translate3d(0,-1.8%,0) scale(1.06);}
+  }
+
+  /* — Glas-Kanten-Highlight an den oberen Rändern der Flächen — */
+  .card,.set-card,.note-card,.cal-wrap,.modal{
+    box-shadow:var(--shadow-card),inset 0 1px 0 var(--glass-edge);
+  }
+  .modal{box-shadow:var(--shadow-pop),inset 0 1px 0 var(--glass-edge);}
+
+  /* — Akzent-Glow auf Schlüssel-Elementen — */
+  .nav-item.active{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--blue) 20%,transparent);}
+  .tb-btn.primary,.mb.primary{box-shadow:0 4px 18px var(--accent-ring),0 1px 0 rgba(255,255,255,0.18) inset;}
+  .tb-btn.primary:hover,.mb.primary:hover{box-shadow:0 6px 24px var(--accent-ring),0 1px 0 rgba(255,255,255,0.22) inset;}
+  .progress-fill{box-shadow:0 0 14px color-mix(in srgb,var(--blue) 55%,transparent);}
+  .goal.done .goal-check{box-shadow:0 0 16px color-mix(in srgb,var(--blue) 40%,transparent);}
+  .brand-icon{box-shadow:0 4px 14px var(--accent-ring),inset 0 1px 0 rgba(255,255,255,0.25);}
+
+  /* — Sanftere, etwas „teurere" View-Einblendung (überschreibt das Original) — */
+  .view.active{animation:viewIn calc(.42s * var(--anim,1)) var(--ease-out);}
+  @keyframes viewIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  /* — Karten heben sich beim Erscheinen dezent gestaffelt an — */
+  .view.active .card,
+  .view.active .stats,
+  .view.active .cal-wrap,
+  .view.active .set-card,
+  .view.active > #overviewBody > .today-hero,
+  .view.active #fitnessBody > div{
+    animation:riseIn calc(.55s * var(--anim,1)) var(--ease-out) backwards;
+  }
+  .view.active .card:nth-of-type(2){animation-delay:.05s;}
+  .view.active .card:nth-of-type(3){animation-delay:.10s;}
+  .view.active .card:nth-of-type(4){animation-delay:.15s;}
+  .view.active .set-card:nth-of-type(2){animation-delay:.04s;}
+  .view.active .set-card:nth-of-type(3){animation-delay:.08s;}
+  .view.active .set-card:nth-of-type(4){animation-delay:.12s;}
+  @keyframes riseIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+  /* — Karten reagieren beim Überfahren (nur die, die es verdienen) — */
+  .card{transition:box-shadow .3s var(--ease-out),transform .3s var(--spring),border-color .3s var(--ease-out);}
+
+  /* — Übersicht-Hero: Radial-Fortschrittsring (das „Wow" in den ersten Sekunden) — */
+  .ov-hero{justify-content:space-between;align-items:center;gap:18px 36px;}
+  .ov-hero-l{display:flex;flex-direction:column;flex:1 1 auto;min-width:0;}
+  .ov-hero .ov-nav{justify-content:flex-start;margin:18px 0 0;}
+  .ov-hero-r{display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0;}
+  .ov-ring{position:relative;width:142px;height:142px;}
+  .ov-ring-svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible;}
+  .ov-ring-track{fill:none;stroke:var(--track);stroke-width:8.5;}
+  .ov-ring-prog{
+    fill:none;stroke-width:8.5;stroke-linecap:round;
+    transition:stroke-dashoffset calc(1.1s * var(--anim,1)) var(--spring-soft);
+    filter:drop-shadow(0 0 7px color-mix(in srgb,var(--blue) 60%,transparent));
+  }
+  .ov-ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+  .ov-ring-pct{font-family:var(--font-num);font-size:40px;font-weight:700;letter-spacing:-.04em;line-height:.9;color:var(--text);}
+  .ov-ring-pct span{font-size:18px;color:var(--text3);font-weight:600;letter-spacing:0;margin-left:1px;}
+  .ov-ring-cap{font-family:var(--font-num);font-size:12px;color:var(--text3);font-weight:500;letter-spacing:.02em;white-space:nowrap;}
+  .ov-ring-cap strong{color:var(--text2);font-weight:700;}
+  @media(max-width:560px){
+    .ov-hero{align-items:flex-start;gap:18px 24px;}
+    .ov-hero-r{width:100%;margin-top:6px;}
+    .ov-ring{width:132px;height:132px;}
+    .ov-ring-pct{font-size:37px;}
+  }
+
+  /* — Heatmap: kompaktere, bewusst gesetzte Zellen statt riesiger Blöcke — */
+  .hm-labels,.hm{max-width:516px;}
+  .hm-cell{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02);}
+  .hm-cell:hover{box-shadow:inset 0 0 0 1px var(--glass-edge),0 6px 18px -8px rgba(0,0,0,0.6);}
+
+  /* ════════════ R3 · Bento-Panels · Buttons · Floating Dock ════════════ */
+
+  /* Panels: größerer Radius, weicher Tiefen-Verlauf, Spotlight-Hover */
+  .card,.cal-wrap{border-radius:24px;}
+  .card{background:linear-gradient(180deg,var(--surface-glass2),var(--surface-glass));padding:22px 24px;position:relative;}
+  .note-card,.set-card{border-radius:20px;}
+  .card::after{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;
+    background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--blue) 12%,transparent),transparent 60%);
+    transition:opacity .35s var(--ease-out);z-index:0;
+  }
+  .card:hover::after{opacity:1;}
+  .card:hover{border-color:var(--separator-opaque);}
+  .card>*{position:relative;z-index:1;}
+
+  /* Section-Header: Akzent-Tick vorn */
+  .section-h{font-size:11.5px;letter-spacing:.10em;}
+  .section-h::before{content:'';width:16px;height:2px;border-radius:2px;background:var(--blue);box-shadow:0 0 8px color-mix(in srgb,var(--blue) 60%,transparent);flex:none;}
+
+  /* Page-Head */
+  .toolbar{max-width:1200px;padding-top:24px;}
+  .toolbar-title{font-size:12px;letter-spacing:.14em;}
+  .content-inner{max-width:1200px;}
+  .head-controls .theme-toggle,.head-controls .sync-pill{border-radius:12px;}
+
+  /* Bento-Spalten: mehr Luft */
+  .ov-cols{gap:16px 20px;}
+  @media(min-width:761px){.ov-cols{grid-template-columns:minmax(0,1fr) 300px;}}
+
+  /* Floating Mobile-Dock */
+  @media(max-width:760px){
+    .app{display:flex;flex-direction:column;}
+    .tabbar{
+      margin:0 12px calc(10px + var(--safe-bottom));
+      border:1px solid var(--separator);border-top:1px solid var(--separator);
+      border-radius:22px;background:var(--chrome);
+      box-shadow:var(--shadow-pop),inset 0 1px 0 var(--glass-edge);
+      padding-bottom:0;
+    }
+    .content-inner{padding-bottom:22px;}
+    .toolbar{padding-top:16px;}
+  }
+
+  /* ════════════════════ WETTER ════════════════════ */
+  @keyframes wxspin{to{transform:rotate(360deg);}}
+  .wx-spin{display:inline-block;animation:wxspin 1s linear infinite;}
+
+  /* Hero */
+  .wx-hero{position:relative;overflow:hidden;border-radius:26px;padding:24px 26px;margin-bottom:18px;
+    border:1px solid var(--separator);box-shadow:var(--shadow-card),inset 0 1px 0 var(--glass-edge);
+    min-height:196px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;color:#fff;}
+  .wx-hero.is-day{background:linear-gradient(150deg,#1f4e8f 0%,#2f74b5 52%,#3f93c9 100%);}
+  .wx-hero.is-night{background:linear-gradient(160deg,#0c1230 0%,#181f4d 60%,#241a52 100%);}
+  .wx-hero.is-night{background-image:linear-gradient(160deg,#0c1230 0%,#181f4d 60%,#241a52 100%),
+    radial-gradient(1.5px 1.5px at 18% 30%,rgba(255,255,255,.7),transparent),
+    radial-gradient(1.5px 1.5px at 42% 18%,rgba(255,255,255,.5),transparent),
+    radial-gradient(1.5px 1.5px at 67% 38%,rgba(255,255,255,.6),transparent),
+    radial-gradient(1.5px 1.5px at 82% 22%,rgba(255,255,255,.45),transparent),
+    radial-gradient(1.5px 1.5px at 30% 52%,rgba(255,255,255,.4),transparent);}
+  .wx-hero-bg{position:absolute;inset:0;pointer-events:none;}
+  .wx-hero.is-day .wx-hero-bg{background:radial-gradient(150px 150px at 86% 8%,rgba(255,224,150,0.85),rgba(255,200,90,0.2) 45%,transparent 70%);animation:wxGlow 8s ease-in-out infinite alternate;}
+  .wx-hero.is-night .wx-hero-bg{background:radial-gradient(120px 120px at 84% 12%,rgba(220,228,255,0.45),transparent 70%);}
+  @keyframes wxGlow{from{opacity:.85;transform:translateY(0);}to{opacity:1;transform:translateY(-4px);}}
+  .wx-hero-top,.wx-hero-main{position:relative;z-index:1;}
+  .wx-hero-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+  .wx-loc{font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:6px;}
+  .wx-updated{font-family:var(--font-num);opacity:.8;font-size:12px;}
+  .wx-hero-main{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;}
+  .wx-bigtemp{font-family:var(--font-display);font-size:76px;font-weight:600;line-height:.86;letter-spacing:-.04em;}
+  .wx-deg{font-weight:400;opacity:.7;}
+  .wx-cond{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;margin-top:8px;letter-spacing:-.01em;}
+  .wx-cond i{font-size:21px;}
+  .wx-hero-r{text-align:right;display:flex;flex-direction:column;gap:8px;}
+  .wx-feels{font-size:13px;opacity:.85;}.wx-feels b{font-weight:700;}
+  .wx-hilo{display:flex;gap:14px;justify-content:flex-end;font-family:var(--font-num);font-weight:700;font-size:15px;}
+  .wx-hilo i{font-size:14px;}.wx-lo{opacity:.75;}
+
+  /* Bento-Kacheln */
+  .wx-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:6px;}
+  .wx-tile{padding:18px 18px 16px;min-height:128px;}
+  .wx-tile-h{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:14px;}
+  .wx-tile-h i{font-size:15px;color:var(--text2);}
+  .wx-tile-body{display:flex;flex-direction:column;gap:8px;}
+  .wx-big{font-family:var(--font-num);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--text);}
+  .wx-big small{font-size:14px;color:var(--text3);font-weight:600;margin-left:3px;letter-spacing:0;}
+  .wx-tile-sub{font-size:12.5px;color:var(--text3);font-weight:500;letter-spacing:-.01em;}
+  .wx-gauge{position:relative;width:84px;height:84px;}
+  .wx-gauge-svg{width:100%;height:100%;}
+  .wx-gauge-c{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .wx-gauge-v{font-family:var(--font-num);font-size:28px;font-weight:700;color:var(--text);}
+  .wx-wind{display:flex;align-items:center;gap:14px;}
+  .wx-compass{width:60px;height:60px;flex-shrink:0;}
+  .wx-comp-n{fill:var(--text3);font-family:var(--font-num);font-size:10px;font-weight:700;text-anchor:middle;}
+
+  /* Stündlich */
+  .wx-hourly{padding:14px 12px 6px;}
+  .wx-hourly-svg{width:100%;height:auto;display:block;overflow:visible;}
+  .wx-area{fill:var(--accent-soft);stroke:none;}
+  .wx-line{fill:none;stroke:var(--blue);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 2px 6px color-mix(in srgb,var(--blue) 45%,transparent));}
+  .wx-pbar{fill:color-mix(in srgb,#5aa9ff 70%,transparent);}
+  .wx-hx{fill:var(--text3);font-family:var(--font-num);font-size:12px;text-anchor:middle;}
+  .wx-ht{fill:var(--text);font-family:var(--font-num);font-size:13px;font-weight:700;text-anchor:middle;}
+
+  /* 7 Tage */
+  .wx-daily{padding:6px 20px;}
+  .wx-day{display:grid;grid-template-columns:52px 26px 56px 32px 1fr 32px;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--separator-thin);}
+  .wx-day:last-child{border-bottom:none;}
+  .wx-day-name{font-weight:600;font-size:14px;letter-spacing:-.01em;}
+  .wx-day-ico{font-size:19px;color:var(--text2);text-align:center;}
+  .wx-day-pp{font-size:11.5px;color:#5aa9ff;font-family:var(--font-num);font-weight:600;display:flex;align-items:center;gap:3px;}
+  .wx-day-pp i{font-size:12px;}
+  .wx-day-lo{font-family:var(--font-num);color:var(--text3);text-align:right;font-size:14px;font-weight:600;}
+  .wx-day-hi{font-family:var(--font-num);color:var(--text);text-align:right;font-size:14px;font-weight:700;}
+  .wx-day-bar{position:relative;height:7px;background:var(--track);border-radius:99px;}
+  .wx-day-fill{position:absolute;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,#4aa9ba,var(--blue) 55%,#e0a13f);}
+
+  /* Sonne & Mond */
+  .wx-sunmoon{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+  .wx-sun,.wx-moon{padding:18px 20px;}
+  .wx-sun-svg{width:100%;height:auto;display:block;margin:6px 0;}
+  .wx-arc-track{fill:none;stroke:var(--separator-opaque);stroke-width:2.5;stroke-dasharray:3 5;stroke-linecap:round;}
+  .wx-horizon{stroke:var(--separator);stroke-width:1;}
+  .wx-sun-dot{fill:#ffd166;filter:drop-shadow(0 0 8px rgba(255,209,102,0.9));}
+  .wx-times{display:flex;justify-content:space-between;gap:12px;margin-top:8px;}
+  .wx-times>div{display:flex;flex-direction:column;gap:3px;}
+  .wx-tl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-weight:600;}
+  .wx-tv{font-family:var(--font-num);font-size:17px;font-weight:700;color:var(--text);}
+  .wx-moon-row{display:flex;align-items:center;gap:16px;margin:6px 0 12px;}
+  .wx-moon-svg{width:60px;height:60px;flex-shrink:0;filter:drop-shadow(0 0 10px rgba(233,237,246,0.18));}
+  .wx-moon-dark{fill:#262b40;}
+  .wx-moon-lit{fill:#eaeef7;}
+  .wx-moon-edge{fill:none;stroke:rgba(255,255,255,0.14);stroke-width:1;}
+  .wx-moon-phase{font-family:var(--font-display);font-size:17px;font-weight:600;letter-spacing:-.01em;}
+  .wx-moon-ill{font-size:13px;color:var(--text3);font-family:var(--font-num);margin-top:3px;}
+
+  /* Standort-Setup */
+  .wx-setup{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:36px 24px;}
+  .wx-setup-ico{width:54px;height:54px;border-radius:16px;background:var(--accent-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 0 24px var(--accent-ring);}
+  .wx-setup-h{font-family:var(--font-display);font-size:22px;font-weight:600;letter-spacing:-.02em;}
+  .wx-setup-sub{font-size:13.5px;color:var(--text3);max-width:360px;line-height:1.5;}
+  .wx-search{width:100%;max-width:420px;background:var(--fill3);border:1px solid var(--separator-opaque);border-radius:13px;padding:13px 16px;color:var(--text);font-family:inherit;font-size:15px;outline:none;transition:all .2s var(--ease-out);}
+  .wx-search:focus{border-color:var(--blue);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-ring);}
+  .wx-results{width:100%;max-width:420px;display:flex;flex-direction:column;gap:4px;}
+  .wx-result{display:flex;align-items:center;gap:11px;width:100%;padding:11px 13px;border-radius:12px;border:1px solid transparent;background:var(--fill3);color:var(--text);cursor:pointer;font-family:inherit;font-size:14px;text-align:left;transition:all .15s var(--ease-out);}
+  .wx-result:hover{background:var(--fill-hover);border-color:var(--separator-opaque);}
+  .wx-result i{color:var(--blue);font-size:17px;}
+  .wx-result-name{flex:1;font-weight:600;letter-spacing:-.01em;}
+  .wx-result-admin{color:var(--text3);font-weight:500;}
+  .wx-result small{color:var(--text3);font-family:var(--font-num);font-size:12px;}
+  .wx-empty-res{font-size:13px;color:var(--text3);padding:6px;}
+  .wx-or{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);font-weight:700;margin-top:6px;}
+  .wx-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:480px;}
+  .wx-chip{padding:9px 15px;border-radius:99px;border:1px solid var(--separator-opaque);background:var(--fill3);color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s var(--ease-out);}
+  .wx-chip:hover{background:var(--accent-soft);border-color:transparent;color:var(--blue);transform:translateY(-1px);}
+  .wx-geo{margin-top:4px;}
+  .wx-err{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;color:var(--text2);padding:40px 20px;}
+  .wx-err i{font-size:38px;color:var(--red);opacity:.8;}
+
+  /* Übersicht-Widget */
+  .wx-ov{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;width:100%;
+    padding:14px 18px;border-radius:18px;cursor:pointer;
+    background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 12%,var(--surface-glass)),var(--surface-glass));
+    border:1px solid var(--separator);box-shadow:var(--shadow-card),inset 0 1px 0 var(--glass-edge);
+    transition:border-color .2s var(--ease-out),transform .2s var(--spring);}
+  .wx-ov:hover{border-color:var(--separator-opaque);transform:translateY(-1px);}
+  .wx-ov-main{display:flex;align-items:center;gap:12px;}
+  .wx-ov-ic{font-size:30px;color:var(--blue);}
+  .wx-ov-temp{font-family:var(--font-num);font-size:30px;font-weight:700;letter-spacing:-.02em;color:var(--text);}
+  .wx-ov-cond{display:flex;flex-direction:column;font-size:14px;font-weight:600;color:var(--text);letter-spacing:-.01em;line-height:1.2;}
+  .wx-ov-cond small{font-size:11.5px;color:var(--text3);font-weight:500;margin-top:2px;}
+  .wx-ov-metrics{display:flex;gap:10px;}
+  .wx-ovm{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:54px;padding:6px 10px;border-radius:12px;background:var(--fill3);}
+  .wx-ovm i{font-size:16px;color:var(--text2);}
+  .wx-ovm span{font-family:var(--font-num);font-size:15px;font-weight:700;color:var(--text);}
+  .wx-ovm small{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.03em;font-weight:600;}
+  .wx-ov-empty{justify-content:center;color:var(--text2);font-weight:600;font-family:inherit;gap:8px;}
+  .wx-ov-load{display:flex;align-items:center;gap:8px;color:var(--text3);font-weight:500;padding:4px;}
+
+  @media(max-width:760px){
+    .wx-tiles{grid-template-columns:repeat(2,1fr);}
+    .wx-sunmoon{grid-template-columns:1fr;}
+    .wx-bigtemp{font-size:64px;}
+    .wx-ov-metrics{width:100%;justify-content:space-between;}
+  }
+
+</style>
+<style>
+  /* ════════════════════════════════════════════════════════════════════
+     Zusatz-Stile (2026-06-27): Dropdown-Fix, Toggles, Übersicht-Uhr/Training,
+     Wetterkarte, dynamischer Wetter-Hintergrund, Apple-inspiriertes Design.
+     Bewusst in einem eigenen Block, um die bestehenden Stile nicht zu stören.
+     ════════════════════════════════════════════════════════════════════ */
+
+  /* ── 0. Globaler Animations-Regler (--anim 0..1, per Slider) ── */
+  :root{--anim:1;}
+  /* Aurora-Hintergrund dimmt mit dem Regler (body.wxbg-on::before bleibt per !important verborgen) */
+  body::before{opacity:var(--anim);}
+  :root[data-theme="light"] body::before,:root:not([data-theme="dark"]) body::before{opacity:calc(.7 * var(--anim));}
+  /* 0 % = komplett ruhig: kanonischer Reduce-Motion-Override (instant statt sichtbar) */
+  html.anim-off *,html.anim-off *::before,html.anim-off *::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important;
+  }
+
+  /* ── 1. Dark-Mode: native Dropdown-Liste deckend & kontraststark ── */
+  select option{background:var(--surface-elevated);color:var(--text);}
+  :root[data-theme="dark"] select option{background:#1b1e29;color:#eef0f7;}
+  :root[data-theme="dark"] select option:checked,
+  :root[data-theme="dark"] select option:hover{background:#283042;color:#fff;}
+  :root[data-theme="dark"] .cat-sel,
+  :root[data-theme="dark"] .modal-select,
+  :root[data-theme="dark"] .set-input{background:rgba(255,255,255,0.06);}
+
+  /* ── 2. iOS-Schalter (Einstellungen) ── */
+  .set-switch{position:relative;display:inline-flex;align-items:center;flex:none;width:46px;height:28px;cursor:pointer;}
+  .set-switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:2;}
+  .set-switch-track{position:absolute;inset:0;border-radius:99px;background:var(--fill-strong);transition:background .28s var(--ease-out);}
+  .set-switch-thumb{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35),0 0 0 .5px rgba(0,0,0,.06);transition:transform .28s var(--spring);pointer-events:none;}
+  .set-switch input:checked ~ .set-switch-track{background:var(--blue);}
+  .set-switch input:checked ~ .set-switch-thumb{transform:translateX(18px);}
+  .set-switch input:focus-visible ~ .set-switch-track{box-shadow:0 0 0 3px var(--accent-ring);}
+
+  /* Animations-Slider (Range) */
+  .set-slider-wrap{display:flex;align-items:center;gap:12px;flex:none;}
+  .set-slider{-webkit-appearance:none;appearance:none;width:160px;max-width:42vw;height:6px;border-radius:99px;background:var(--track);outline:none;cursor:pointer;margin:0;}
+  .set-slider::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:transparent;}
+  .set-slider::-moz-range-track{height:6px;border-radius:99px;background:var(--track);}
+  .set-slider::-moz-range-progress{height:6px;border-radius:99px;background:var(--blue);}
+  .set-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;margin-top:-6px;border-radius:50%;background:#fff;border:none;box-shadow:0 1px 4px rgba(0,0,0,.35),0 0 0 1px var(--blue);transition:transform .15s var(--spring);}
+  .set-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:none;box-shadow:0 1px 4px rgba(0,0,0,.35),0 0 0 1px var(--blue);}
+  .set-slider:active::-webkit-slider-thumb{transform:scale(1.15);}
+  .set-slider:focus-visible{box-shadow:0 0 0 3px var(--accent-ring);}
+  .set-slider-val{font-family:var(--font-num);font-size:13px;font-weight:600;color:var(--text2);min-width:42px;text-align:right;font-variant-numeric:tabular-nums;}
+
+  /* ── 3. Übersicht: Live-Uhr + Trainings-Hinweis ── */
+  .ov-clock{font-family:var(--font-num);font-weight:600;color:var(--text3);letter-spacing:.04em;margin-left:8px;font-variant-numeric:tabular-nums;}
+  .ov-train{display:inline-flex;align-items:center;gap:8px;margin-top:13px;padding:6px 13px 6px 10px;border-radius:99px;background:var(--fill3);border:0.5px solid var(--separator-opaque);width:fit-content;max-width:100%;}
+  .ov-train i{font-size:16px;color:var(--blue);}
+  .ov-train span{font-size:13px;font-weight:600;color:var(--text);letter-spacing:-.01em;}
+  .ov-train small{font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.01em;white-space:nowrap;}
+  .ov-train.run i{color:var(--teal);}
+  .ov-train.push i{color:var(--orange);}
+  .ov-train.pull i{color:var(--blue);}
+
+  /* ── 4. Wetterkarte (Leaflet) ── */
+  .wx-map-card{padding:0;overflow:hidden;}
+  .wx-map{height:340px;width:100%;border-radius:24px;overflow:hidden;background:var(--inset);}
+  @media(max-width:760px){.wx-map{height:260px;}}
+  .leaflet-container{font-family:var(--font-body);background:var(--inset);}
+  .leaflet-bar a,.leaflet-control-layers-toggle{background:var(--surface-elevated)!important;color:var(--text)!important;border-color:var(--separator)!important;}
+  .leaflet-bar a:hover{background:var(--fill-strong)!important;}
+  .leaflet-touch .leaflet-bar a{border-radius:8px;}
+  .leaflet-control-layers{background:var(--surface-elevated)!important;color:var(--text)!important;border:0.5px solid var(--separator)!important;border-radius:10px!important;box-shadow:var(--shadow-card)!important;}
+  .leaflet-control-attribution{background:color-mix(in srgb,var(--surface-elevated) 75%,transparent)!important;color:var(--text3)!important;}
+  .leaflet-control-attribution a{color:var(--text2)!important;}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface-elevated)!important;color:var(--text)!important;box-shadow:var(--shadow-pop)!important;}
+
+  /* ── 5. Dynamischer Wetter-Hintergrund (Apple-Wetter-Stil) ── */
+  #wxBg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;overflow:hidden;transition:opacity 1.4s ease;}
+  body.wxbg-on #wxBg{opacity:1;}
+  body.wxbg-on::before{opacity:0!important;}            /* App-Aurora ausblenden, solange Wetter aktiv */
+  .wxbg-veil{position:absolute;inset:0;background:rgba(6,7,13,.5);}
+  :root[data-theme="light"] .wxbg-veil{background:rgba(240,242,248,.55);}
+  .wxbg-fx{position:absolute;inset:-20%;opacity:var(--anim);}
+  /* Szenen-Verläufe (einmalig, themenunabhängig — der Schleier oben sorgt für Lesbarkeit) */
+  [data-wxscene="clear-day"]   #wxBg{background:radial-gradient(40% 38% at 80% 16%,rgba(255,239,194,.9),transparent 55%),linear-gradient(180deg,#2e6fb0,#5ba3da 50%,#a7d2ec);}
+  [data-wxscene="clear-night"] #wxBg{background:radial-gradient(26% 24% at 78% 18%,rgba(180,200,255,.35),transparent 60%),linear-gradient(180deg,#070b1a,#0e1630 55%,#1a2745);}
+  [data-wxscene="partly-day"]  #wxBg{background:linear-gradient(180deg,#3d72a4,#6a9fc8 50%,#bcd4e6);}
+  [data-wxscene="partly-night"]#wxBg{background:linear-gradient(180deg,#0a0f22,#141d38 60%,#22304f);}
+  [data-wxscene="cloudy-day"]  #wxBg{background:linear-gradient(180deg,#5b6b7d,#8497a8 50%,#aab8c6);}
+  [data-wxscene="cloudy-night"]#wxBg{background:linear-gradient(180deg,#0d1119,#1a2230 60%,#2a3340);}
+  [data-wxscene="rain-day"]    #wxBg{background:linear-gradient(180deg,#3f4a59,#566576 50%,#74828f);}
+  [data-wxscene="rain-night"]  #wxBg{background:linear-gradient(180deg,#090c14,#141b27 60%,#222c3a);}
+  [data-wxscene="snow-day"]    #wxBg{background:linear-gradient(180deg,#6b7a8d,#9aabbd 50%,#cdd8e3);}
+  [data-wxscene="snow-night"]  #wxBg{background:linear-gradient(180deg,#0d1320,#1b2638 60%,#2c3a52);}
+  [data-wxscene="storm-day"]   #wxBg{background:linear-gradient(180deg,#2f3540,#454e5b 50%,#5a6470);}
+  [data-wxscene="storm-night"] #wxBg{background:linear-gradient(180deg,#06080e,#10141d 60%,#1c222e);}
+  /* Regen + Gewitter: diagonale Tropfen */
+  [data-wxscene^="rain"] .wxbg-fx,[data-wxscene^="storm"] .wxbg-fx{
+    background-image:repeating-linear-gradient(transparent 0 13px,rgba(255,255,255,.26) 13px 14px);
+    animation:wxRain .55s linear infinite;
+  }
+  @keyframes wxRain{from{transform:rotate(13deg) scale(1.5) translateY(-14px);}to{transform:rotate(13deg) scale(1.5) translateY(0);}}
+  /* Gewitter: seltenes Blitzen */
+  [data-wxscene^="storm"] #wxBg::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.55);opacity:0;animation:wxFlash 8s linear infinite;}
+  @keyframes wxFlash{0%,92%,100%{opacity:0;}93%{opacity:calc(.32 * var(--anim));}94%{opacity:0;}96%{opacity:calc(.5 * var(--anim));}97%{opacity:0;}}
+  /* Schnee: zwei Ebenen für Tiefe */
+  [data-wxscene^="snow"] .wxbg-fx{
+    background-image:radial-gradient(2.4px 2.4px at 20px 30px,rgba(255,255,255,.95),transparent),radial-gradient(2px 2px at 75px 80px,rgba(255,255,255,.8),transparent),radial-gradient(2.6px 2.6px at 120px 45px,rgba(255,255,255,.9),transparent);
+    background-size:150px 150px;animation:wxSnow 8s linear infinite;
+  }
+  [data-wxscene^="snow"] .wxbg-fx::after{content:'';position:absolute;inset:0;background-image:radial-gradient(1.7px 1.7px at 40px 60px,rgba(255,255,255,.75),transparent),radial-gradient(1.7px 1.7px at 95px 25px,rgba(255,255,255,.65),transparent);background-size:110px 110px;animation:wxSnow 5.5s linear infinite;}
+  @keyframes wxSnow{from{transform:translateY(-150px);}to{transform:translateY(0);}}
+  /* Wolken: sanftes Driften */
+  [data-wxscene^="cloudy"] .wxbg-fx,[data-wxscene="partly-day"] .wxbg-fx,[data-wxscene="partly-night"] .wxbg-fx{
+    background-image:radial-gradient(40% 60% at 20% 30%,rgba(255,255,255,.16),transparent 70%),radial-gradient(34% 54% at 70% 24%,rgba(255,255,255,.12),transparent 70%),radial-gradient(46% 60% at 52% 72%,rgba(255,255,255,.10),transparent 70%);
+    background-size:170% 100%;animation:wxClouds 46s ease-in-out infinite alternate;
+  }
+  @keyframes wxClouds{from{transform:translateX(-7%);}to{transform:translateX(7%);}}
+  /* Klare Nacht: Sternenfunkeln */
+  [data-wxscene="clear-night"] .wxbg-fx,[data-wxscene="partly-night"] .wxbg-fx{
+    background-image:radial-gradient(1.4px 1.4px at 15% 22%,rgba(255,255,255,.95),transparent),radial-gradient(1.2px 1.2px at 72% 16%,rgba(255,255,255,.75),transparent),radial-gradient(1px 1px at 48% 40%,rgba(255,255,255,.6),transparent),radial-gradient(1.3px 1.3px at 85% 56%,rgba(255,255,255,.8),transparent),radial-gradient(1px 1px at 30% 66%,rgba(255,255,255,.55),transparent),radial-gradient(1.2px 1.2px at 60% 80%,rgba(255,255,255,.7),transparent);
+    animation:wxTwinkle 5s ease-in-out infinite alternate;
+  }
+  @keyframes wxTwinkle{from{opacity:calc(.45 * var(--anim));}to{opacity:var(--anim);}}
+  @media(prefers-reduced-motion:reduce){.wxbg-fx,.wxbg-fx::after,[data-wxscene^="storm"] #wxBg::after{animation:none!important;}}
+
+  /* ── 6. Apple-inspiriertes Design (Toggle) ── */
+  :root[data-design="apple"]{
+    --font-grotesk:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;
+    --font-body:var(--font-grotesk);
+    --font-display:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif;
+    --font-num:ui-monospace,'SF Mono','SFMono-Regular',Menlo,monospace;
+    --radius:20px;--radius-sm:13px;--radius-lg:30px;
+  }
+  :root[data-design="apple"] .sidebar,
+  :root[data-design="apple"] .topbar,
+  :root[data-design="apple"] .tabbar{backdrop-filter:blur(40px) saturate(190%);-webkit-backdrop-filter:blur(40px) saturate(190%);}
+  :root[data-design="apple"] .card,
+  :root[data-design="apple"] .cal-wrap{
+    background:color-mix(in srgb,var(--surface-glass) 72%,transparent);
+    backdrop-filter:blur(34px) saturate(175%);-webkit-backdrop-filter:blur(34px) saturate(175%);
+    border:0.5px solid var(--separator-opaque);border-radius:26px;
+    box-shadow:0 1px 0 var(--glass-edge) inset,0 20px 50px -28px rgba(0,0,0,.5);
+  }
+  :root[data-design="apple"] .set-card,
+  :root[data-design="apple"] .note-card{
+    background:color-mix(in srgb,var(--surface-glass) 70%,transparent);
+    backdrop-filter:blur(34px) saturate(175%);-webkit-backdrop-filter:blur(34px) saturate(175%);border-radius:22px;
+  }
+  :root[data-design="apple"] .stats,
+  :root[data-design="apple"] .goals{background:color-mix(in srgb,var(--surface-glass) 70%,transparent);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border-radius:20px;}
+  :root[data-design="apple"] .modal{border-radius:28px;background:color-mix(in srgb,var(--modal) 82%,transparent);backdrop-filter:blur(46px) saturate(190%);-webkit-backdrop-filter:blur(46px) saturate(190%);}
+  :root[data-design="apple"] .mb,
+  :root[data-design="apple"] .tb-btn{border-radius:13px;}
+  :root[data-design="apple"] .theme-toggle,
+  :root[data-design="apple"] .sync-pill{border-radius:13px;}
+  :root[data-design="apple"] .nav-item{border-radius:13px;}
+  :root[data-design="apple"] .set-input,
+  :root[data-design="apple"] .cat-sel,
+  :root[data-design="apple"] .modal-input,
+  :root[data-design="apple"] .modal-select{border-radius:12px;}
+  :root[data-design="apple"] .today-h1,
+  :root[data-design="apple"] .modal-h,
+  :root[data-design="apple"] .note-title{letter-spacing:-.022em;}
 </style>
 </head>
 <body>
 
+<!-- Dynamischer Wetter-Hintergrund (nur sichtbar, wenn in den Einstellungen aktiviert) -->
+<div id="wxBg" aria-hidden="true"><div class="wxbg-veil"></div><div class="wxbg-fx"></div></div>
+
 <div class="app">
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="brand-icon"><i class="ti ti-circle-check"></i></div>
-        <span class="brand-name">Tracker</span>
-      </div>
-      <nav class="topnav" id="topnav"></nav>
-      <div class="topbar-right">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-circle-check"></i></div>
+      <span class="brand-name">Dashboard</span>
+    </div>
+    <nav class="topnav" id="topnav"></nav>
+    <div class="side-orb" aria-hidden="true"></div>
+  </aside>
+
+  <main class="main">
+    <header class="toolbar">
+      <div class="toolbar-title" id="tbTitle">Ziele</div>
+      <div id="tbActions"></div>
+      <div class="head-controls">
         <span class="topbar-date" id="topbarDate"></span>
         <button class="sync-pill" id="syncPill" onclick="syncNow()" aria-label="Sync-Status" title="Synchronisierung" hidden><i class="ti ti-cloud" id="syncPillIcon"></i></button>
         <button class="theme-toggle settings-gear" data-view="settings" onclick="switchView('settings')" aria-label="Einstellungen" title="Einstellungen"><i class="ti ti-settings"></i></button>
         <button class="theme-toggle" id="themeToggle" onclick="cycleTheme()" aria-label="Erscheinungsbild wechseln" title="Erscheinungsbild wechseln"><i class="ti ti-moon-stars" id="themeToggleIcon"></i></button>
       </div>
-    </div>
-  </header>
-
-  <main class="main">
-    <div class="toolbar">
-      <div class="toolbar-title" id="tbTitle">Ziele</div>
-      <div id="tbActions"></div>
-    </div>
+    </header>
 
     <div class="content">
       <div class="content-inner">
@@ -1066,6 +1532,10 @@
           <div id="fitnessBody"></div>
         </div>
 
+        <div class="view" id="view-weather">
+          <div id="weatherBody"></div>
+        </div>
+
         <div class="view" id="view-stats">
           <div class="card">
             <div class="card-h">
@@ -1103,10 +1573,25 @@
             <div class="set-row">
               <div class="set-label">Akzentfarbe</div>
               <div class="accent-picker">
-                <button class="accent-dot" data-accent-opt="evergreen" style="--sw:#1f7a5b" onclick="setAccent('evergreen')" title="Evergreen" aria-label="Evergreen"></button>
+                <button class="accent-dot" data-accent-opt="evergreen" style="--sw:#10b981" onclick="setAccent('evergreen')" title="Emerald" aria-label="Emerald"></button>
                 <button class="accent-dot" data-accent-opt="blue" style="--sw:#2f5fd0" onclick="setAccent('blue')" title="Slate Blue" aria-label="Slate Blue"></button>
                 <button class="accent-dot" data-accent-opt="amber" style="--sw:#bb8523" onclick="setAccent('amber')" title="Amber" aria-label="Amber"></button>
                 <button class="accent-dot" data-accent-opt="graphite" style="--sw:#52565e" onclick="setAccent('graphite')" title="Graphit" aria-label="Graphit"></button>
+              </div>
+            </div>
+            <div class="set-row">
+              <div class="set-label">Apple-inspiriertes Design<div class="set-sub">Glas-Optik, weiche Tiefen & systemnahe Typografie im Stil aktueller iOS-Versionen.</div></div>
+              <label class="set-switch"><input type="checkbox" id="appleToggle" onchange="toggleAppleDesign(this.checked)"><span class="set-switch-track"></span><span class="set-switch-thumb"></span></label>
+            </div>
+            <div class="set-row">
+              <div class="set-label">Dynamischer Wetterhintergrund<div class="set-sub">Hintergrund der App passt sich Wetter &amp; Tageszeit des gewählten Orts an (Wetter-Tab).</div></div>
+              <label class="set-switch"><input type="checkbox" id="wxBgToggle" onchange="toggleWxBg(this.checked)"><span class="set-switch-track"></span><span class="set-switch-thumb"></span></label>
+            </div>
+            <div class="set-row">
+              <div class="set-label">Animationen<div class="set-sub">Tempo &amp; Intensität aller Bewegungen — 0 % = aus, 100 % = voll.</div></div>
+              <div class="set-slider-wrap">
+                <input type="range" min="0" max="100" step="5" value="100" id="animSlider" class="set-slider" aria-label="Animationsstärke" oninput="setAnim(this.value)">
+                <span class="set-slider-val" id="animVal">100%</span>
               </div>
             </div>
           </div>
@@ -1462,6 +1947,10 @@ const COLORS=[
 ];
 let selectedColor=COLORS[0].val;
 let notes=load('gt_notes3',[]);
+/* Wetter-Status früh initialisieren (vor dem ersten Übersicht-Render → kein TDZ) */
+const WX_KEY='gt_weather_loc';
+var wx={loc:null,data:null,ts:0,loading:false,error:null,results:null,searching:false,pickMode:false};
+try{wx.loc=JSON.parse(localStorage.getItem(WX_KEY)||'null');}catch(e){}
 let editingNote=null;
 let noteColor=COLORS[0].val;
 let notePinned=false;
@@ -1472,6 +1961,7 @@ const TAB_DEFS={
   goals:{label:'Ziele',icon:'ti-list-check'},
   calendar:{label:'Kalender',icon:'ti-calendar'},
   fitness:{label:'Fitness',icon:'ti-activity-heartbeat'},
+  weather:{label:'Wetter',icon:'ti-cloud'},
   notes:{label:'Notizen',icon:'ti-notes'},
   stats:{label:'Statistik',icon:'ti-chart-bar'},
 };
@@ -1490,9 +1980,9 @@ function renderNav(){
     let html='';
     tabOrder.forEach(k=>{
       const badge=k==='goals'?' <span class="nav-badge" id="navGoalsBadge">0/0</span>':'';
-      html+=`<button class="nav-item${k===currentView?' active':''}" data-view="${k}" onclick="switchView('${k}')">${TAB_DEFS[k].label}${badge}</button>`;
+      html+=`<button class="nav-item${k===currentView?' active':''}" data-view="${k}" onclick="switchView('${k}')"><i class="ti ${TAB_DEFS[k].icon}"></i><span>${TAB_DEFS[k].label}</span>${badge}</button>`;
     });
-    html+=`<button class="nav-item${currentView==='settings'?' active':''}" data-view="settings" onclick="switchView('settings')">Einstellungen</button>`;
+    // „Einstellungen" ist kein Sidebar-Tab mehr — es ist das abgesetzte Zahnrad oben rechts (siehe .settings-gear in der Topbar).
     tn.innerHTML=html;
   }
   const tb=document.getElementById('tabbarInner');
@@ -1517,15 +2007,16 @@ function doSwitchView(v){
   document.querySelectorAll('.nav-item,.tab,.settings-gear').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const titles={overview:'Übersicht',goals:'Ziele',calendar:'Kalender',fitness:'Fitness',notes:'Notizen',stats:'Statistik',settings:'Einstellungen'};
+  const titles={overview:'Übersicht',goals:'Ziele',calendar:'Kalender',fitness:'Fitness',weather:'Wetter',notes:'Notizen',stats:'Statistik',settings:'Einstellungen'};
   document.getElementById('tbTitle').textContent=titles[v];
   if(v==='settings')initSettingsDraft();
   renderToolbar();
   if(v==='calendar')renderCalendar();
   if(v==='stats'){renderHeatmap();renderBars();}
-  if(v==='settings'){renderTabsEditor();renderGoalsEditor();renderGeneralEditor();renderSyncUI();renderFitnessSettings();}
+  if(v==='settings'){renderTabsEditor();renderGoalsEditor();renderGeneralEditor();renderSyncUI();renderFitnessSettings();syncDesignToggles();}
   if(v==='notes')renderNotes();
   if(v==='fitness')renderFitness();
+  if(v==='weather')renderWeather();
   if(v==='overview')renderOverview();
   if(v==='goals'){renderGoals();renderStats();}
   document.querySelector('.content').scrollTop=0;
@@ -1563,6 +2054,8 @@ function renderToolbar(){
     tb.innerHTML=`<button class="tb-btn primary" onclick="openNoteModal()"><i class="ti ti-plus"></i> Notiz</button>`;
   }else if(currentView==='fitness'){
     tb.innerHTML=`<button class="tb-btn" onclick="refreshFitness()"><i class="ti ti-refresh"></i> Aktualisieren</button>`;
+  }else if(currentView==='weather'){
+    tb.innerHTML=`<button class="tb-btn" onclick="wxChangeLocation()"><i class="ti ti-map-pin"></i> Ort</button><button class="tb-btn" onclick="loadWeather(true)"><i class="ti ti-refresh"></i> Aktualisieren</button>`;
   }
 }
 
@@ -2308,7 +2801,7 @@ function deleteGeneralGoal(id){
 function renderTabsEditor(){
   const wrap=document.getElementById('tabsEditor');if(!wrap)return;wrap.innerHTML='';
   const info=document.createElement('div');info.className='set-row';
-  info.innerHTML='<div class="set-label" style="font-weight:400;"><span class="set-sub">Reihenfolge der Tabs in der Navigation — ziehen zum Sortieren. „Einstellungen" bleibt am Ende.</span></div>';
+  info.innerHTML='<div class="set-label" style="font-weight:400;"><span class="set-sub">Reihenfolge der Tabs in der Navigation — ziehen zum Sortieren. Die Einstellungen erreichst du jederzeit über das Zahnrad oben rechts.</span></div>';
   wrap.appendChild(info);
   tabOrder=sanitizeTabOrder(tabOrder);
   tabOrder.forEach((k,i)=>{
@@ -2398,8 +2891,25 @@ function importData(input){
   reader.readAsText(file);
 }
 
+// ===== Trainingsplan-Konstanten (früh, vor dem Init — Übersicht nutzt sie beim ersten Render) =====
+// Wochen wechseln Mo–So zwischen A und B. Anker: Mo 22.06.2026 = Woche B
+// (vom Nutzer bestätigt: Sa 27.06.2026 = Woche B). Reine Kalender-Logik, nichts zu speichern.
+const TP_ANCHOR=new Date(2026,5,22); // Montag einer B-Woche (Monat 0-indexiert: 5 = Juni)
+const TP_PLAN={                      // Index 0..6 = Montag..Sonntag
+  A:['run','push','pull','run','pull','push','pull'],
+  B:['run','pull','push','run','push','pull','push']
+};
+const TP_TYPES={
+  run :{name:'Laufen',short:'Lauf',icon:'ti-run'},
+  push:{name:'Push',  short:'Push',icon:'ti-arrow-big-up-lines'},
+  pull:{name:'Pull',  short:'Pull',icon:'ti-arrow-big-down-lines'}
+};
+const TP_DOW=['Mo','Di','Mi','Do','Fr','Sa','So'];
+const TP_DOW_LONG=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+
 applyTheme();
 applyAccent();
+applyAppleDesign();
 renderNav();
 document.getElementById('startDateInput').value=startDate;
 renderGoals();
@@ -2457,15 +2967,6 @@ function fitErrMsg(e){
   if(/http 5\d\d/.test(m))return 'Dienst-Fehler — später erneut versuchen.';
   return 'Fehler: '+m;
 }
-function fitRelTime(ts){
-  if(!ts)return '';
-  const d=new Date(ts);if(isNaN(d))return '';
-  const s=Math.max(0,Math.round((Date.now()-d.getTime())/1000));
-  if(s<60)return 'vor '+s+' s';
-  const m=Math.round(s/60);if(m<60)return 'vor '+m+' min';
-  const h=Math.round(m/60);if(h<24)return 'vor '+h+' h';
-  return noteDateLabel(ts);
-}
 function fitW(v){const n=Number(v);if(!Number.isFinite(n))return esc(String(v));return Number.isInteger(n)?String(n):n.toFixed(1);}
 function fitDur(min){min=Math.round(Number(min)||0);if(min<60)return min+' min';const h=Math.floor(min/60),m=min%60;return h+' h'+(m?' '+String(m).padStart(2,'0'):'');}
 function fitVol(v,unit){const n=Number(v);if(!Number.isFinite(n))return esc(String(v));return Math.round(n).toLocaleString('de-DE')+' '+(unit||'kg');}
@@ -2510,23 +3011,12 @@ async function loadLyfta(silent){
   }
 }
 // ===== Trainingsplan (A/B-Wochen) =====
-// Wochen wechseln Mo–So zwischen A und B. Anker: Mo 22.06.2026 = Woche B
-// (vom Nutzer bestätigt: Sa 27.06.2026 = Woche B). Reine Kalender-Logik, nichts zu speichern.
-const TP_ANCHOR=new Date(2026,5,22); // Montag einer B-Woche (Monat 0-indexiert: 5 = Juni)
-const TP_PLAN={                      // Index 0..6 = Montag..Sonntag
-  A:['run','push','pull','run','pull','push','pull'],
-  B:['run','pull','push','run','push','pull','push']
-};
-const TP_TYPES={
-  run :{name:'Laufen',short:'Lauf',icon:'ti-run'},
-  push:{name:'Push',  short:'Push',icon:'ti-arrow-big-up-lines'},
-  pull:{name:'Pull',  short:'Pull',icon:'ti-arrow-big-down-lines'}
-};
-const TP_DOW=['Mo','Di','Mi','Do','Fr','Sa','So'];
-const TP_DOW_LONG=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+// TP_ANCHOR/TP_PLAN/TP_TYPES/TP_DOW/TP_DOW_LONG sind weiter oben (vor dem Init) definiert,
+// damit die Übersicht den heutigen Trainingstag schon beim ersten Render anzeigen kann.
 function tpMonday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;} // Montag der Woche von d (lokal)
 function tpWeekOf(d){const diff=Math.round((tpMonday(d)-tpMonday(TP_ANCHOR))/604800000);return ((diff%2)+2)%2===0?'B':'A';} // Anker = B
 function tpDowIndex(d){return (d.getDay()+6)%7;} // Mo=0 … So=6
+function tpForDate(d){const week=tpWeekOf(d),di=tpDowIndex(d),k=TP_PLAN[week][di];return {week,di,cls:k,type:TP_TYPES[k]};} // Trainingseinheit für ein beliebiges Datum
 function tpCardHtml(){
   const now=new Date(),week=tpWeekOf(now),di=tpDowIndex(now),plan=TP_PLAN[week],today=TP_TYPES[plan[di]],todayCls=plan[di];
   let strip='';
@@ -2589,12 +3079,25 @@ function renderOverview(){
   if(isToday){const hr=new Date().getHours();heading=hr<11?'Guten Morgen':hr<18?'Guten Tag':'Guten Abend';}
   else heading=dn[dt.getDay()];
   const p=ovProgress(dk),pct=p.total?Math.round(p.done/p.total*100):0;
-  let h=`<div class="today-hero"><div class="hero-head"><div class="today-date">${esc(dateStr)}</div><div class="today-h1">${esc(heading)}</div></div>`
+  const ring=`<div class="ov-ring" role="img" aria-label="${pct}% erledigt">`
+    +`<svg class="ov-ring-svg" viewBox="0 0 120 120">`
+      +`<defs><linearGradient id="ovRingGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--ring-from)"/><stop offset="100%" stop-color="var(--ring-to)"/></linearGradient></defs>`
+      +`<circle class="ov-ring-track" cx="60" cy="60" r="52" pathLength="100"/>`
+      +`<circle class="ov-ring-prog" cx="60" cy="60" r="52" pathLength="100" stroke="url(#ovRingGrad)" stroke-dasharray="100" stroke-dashoffset="${100-pct}"/>`
+    +`</svg>`
+    +`<div class="ov-ring-c"><div class="ov-ring-pct">${pct}<span>%</span></div></div>`
+  +`</div>`;
+  const tps=tpForDate(dt); // heutige (bzw. gewählte) Trainingseinheit aus dem A/B-Plan
+  const tpName=tps.cls==='run'?tps.type.name:tps.type.name+' '+tps.week; // Laufen ohne A/B; Push/Pull mit Wochen-Buchstabe
+  let h=`<div class="today-hero ov-hero">`
+    +`<div class="ov-hero-l"><div class="hero-head"><div class="today-date">${esc(dateStr)} <span class="ov-clock" id="ovClock" aria-label="Uhrzeit">··:··:··</span></div><div class="today-h1">${esc(heading)}</div></div>`
     +`<div class="ov-nav"><button class="ov-arrow" onclick="ovStep(-1)" aria-label="Vorheriger Tag"><i class="ti ti-chevron-left"></i></button>`
     +`<button class="ov-now${isToday?' is-today':''}" onclick="ovToday()">${esc(ovRelLabel(dk))}</button>`
     +`<button class="ov-arrow" onclick="ovStep(1)" aria-label="Nächster Tag"><i class="ti ti-chevron-right"></i></button></div>`
-    +`<div class="progress-row"><div class="progress-num"><strong>${p.done}</strong> von ${p.total} erledigt</div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-pct">${pct}%</div></div></div>`;
+    +`<div class="ov-train ${tps.cls}" title="Trainingsplan"><i class="ti ${tps.type.icon}"></i><span>${esc(tpName)}</span><small>Training · ${esc(ovRelLabel(dk).toLowerCase())}</small></div></div>`
+    +`<div class="ov-hero-r">${ring}<div class="ov-ring-cap"><strong>${p.done}</strong> von ${p.total} erledigt</div></div></div>`;
   // ── Zwei-Spalten: links offene/nachzutragende Ziele, rechts generelle Ziele ──
+  h+=`<div class="section-h">Wetter</div><div id="ovWeatherHost"></div>`;
   h+=`<div class="ov-cols"><div class="ov-main">`;
   if(isToday){
     const td=history[todayKey]||{};
@@ -2657,6 +3160,8 @@ function renderOverview(){
     h+='</div>';
   }
   body.innerHTML=h;
+  renderWeatherOverview();
+  updateOvClock(); // Live-Uhr sofort befüllen (Sekundentakt läuft global)
 }
 // Tagesanmerkung auf der Übersicht: lokal sofort puffern, gedrosselt speichern + dezent „gespeichert" zeigen.
 let _ovNoteT=null;
@@ -2847,6 +3352,360 @@ function clearFitnessSettings(){
 
 // Lyfta beim Zurückkehren auf den sichtbaren Fitness-Tab aktualisieren
 document.addEventListener('visibilitychange',()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness')loadLyfta(true);});
+
+/* ════════════════════════════════════════════════════════════════
+   WETTER · Open-Meteo (kostenlos, kein API-Key) + Mond via SunCalc
+   ════════════════════════════════════════════════════════════════ */
+/* SunCalc (MIT · V. Agafonkin) — gekürzt auf Mond: Phase + Auf-/Untergang */
+var SunCalc=(function(){
+  var PI=Math.PI,rad=PI/180,dayMs=86400000,J1970=2440588,J2000=2451545,e=rad*23.4397;
+  function toDays(d){return d.valueOf()/dayMs-0.5+J1970-J2000;}
+  function ra(l,b){return Math.atan2(Math.sin(l)*Math.cos(e)-Math.tan(b)*Math.sin(e),Math.cos(l));}
+  function dec(l,b){return Math.asin(Math.sin(b)*Math.cos(e)+Math.cos(b)*Math.sin(e)*Math.sin(l));}
+  function sidereal(d,lw){return rad*(280.16+360.9856235*d)-lw;}
+  function astroRef(h){if(h<0)h=0;return 0.0002967/Math.tan(h+0.00312536/(h+0.08901179));}
+  function sunCoords(d){var M=rad*(357.5291+0.98560028*d),L=M+rad*(1.9148*Math.sin(M)+0.02*Math.sin(2*M)+0.0003*Math.sin(3*M))+rad*102.9372+PI;return {dec:dec(L,0),ra:ra(L,0)};}
+  function moonCoords(d){var L=rad*(218.316+13.176396*d),M=rad*(134.963+13.064993*d),F=rad*(93.272+13.229350*d),l=L+rad*6.289*Math.sin(M),b=rad*5.128*Math.sin(F),dt=385001-20905*Math.cos(M);return {ra:ra(l,b),dec:dec(l,b),dist:dt};}
+  function altitude(H,phi,d){return Math.asin(Math.sin(phi)*Math.sin(d)+Math.cos(phi)*Math.cos(d)*Math.cos(H));}
+  function moonPos(date,lat,lng){var lw=rad*-lng,phi=rad*lat,d=toDays(date),c=moonCoords(d),H=sidereal(d,lw)-c.ra,h=altitude(H,phi,c.dec);return h+astroRef(h);}
+  var SC={};
+  SC.getMoonIllumination=function(date){var d=toDays(date||new Date()),s=sunCoords(d),m=moonCoords(d),sd=149598000,phi=Math.acos(Math.sin(s.dec)*Math.sin(m.dec)+Math.cos(s.dec)*Math.cos(m.dec)*Math.cos(s.ra-m.ra)),inc=Math.atan2(sd*Math.sin(phi),m.dist-sd*Math.cos(phi)),ang=Math.atan2(Math.cos(s.dec)*Math.sin(s.ra-m.ra),Math.sin(s.dec)*Math.cos(m.dec)-Math.cos(s.dec)*Math.sin(m.dec)*Math.cos(s.ra-m.ra));return {fraction:(1+Math.cos(inc))/2,phase:0.5+0.5*inc*(ang<0?-1:1)/PI,angle:ang};};
+  function hoursLater(date,h){return new Date(date.valueOf()+h*dayMs/24);}
+  SC.getMoonTimes=function(date,lat,lng){var t=new Date(date);t.setHours(0,0,0,0);var hc=0.133*rad,h0=moonPos(t,lat,lng)-hc,rise,set,ye,x1,x2,h1,h2,a,b,xe,d,roots;
+    for(var i=1;i<=24;i+=2){h1=moonPos(hoursLater(t,i),lat,lng)-hc;h2=moonPos(hoursLater(t,i+1),lat,lng)-hc;a=(h0+h2)/2-h1;b=(h2-h0)/2;xe=-b/(2*a);ye=(a*xe+b)*xe+h1;d=b*b-4*a*h1;roots=0;
+      if(d>=0){var dx=Math.sqrt(d)/(Math.abs(a)*2);x1=xe-dx;x2=xe+dx;if(Math.abs(x1)<=1)roots++;if(Math.abs(x2)<=1)roots++;if(x1<-1)x1=x2;}
+      if(roots===1){if(h0<0)rise=i+x1;else set=i+x1;}else if(roots===2){rise=i+(ye<0?x2:x1);set=i+(ye<0?x1:x2);}
+      if(rise&&set)break;h0=h2;}
+    var res={};if(rise)res.rise=hoursLater(t,rise);if(set)res.set=hoursLater(t,set);return res;};
+  return SC;
+})();
+
+const WMO={0:['Klar','ti-sun','ti-moon-stars'],1:['Heiter','ti-sun','ti-moon-stars'],2:['Wolkig','ti-cloud','ti-cloud'],3:['Bedeckt','ti-cloud','ti-cloud'],45:['Nebel','ti-mist','ti-mist'],48:['Reifnebel','ti-mist','ti-mist'],51:['Leichter Niesel','ti-cloud-rain','ti-cloud-rain'],53:['Niesel','ti-cloud-rain','ti-cloud-rain'],55:['Starker Niesel','ti-cloud-rain','ti-cloud-rain'],56:['Gefr. Niesel','ti-cloud-rain','ti-cloud-rain'],57:['Gefr. Niesel','ti-cloud-rain','ti-cloud-rain'],61:['Leichter Regen','ti-cloud-rain','ti-cloud-rain'],63:['Regen','ti-cloud-rain','ti-cloud-rain'],65:['Starker Regen','ti-cloud-rain','ti-cloud-rain'],66:['Gefr. Regen','ti-cloud-rain','ti-cloud-rain'],67:['Gefr. Regen','ti-cloud-rain','ti-cloud-rain'],71:['Leichter Schnee','ti-snowflake','ti-snowflake'],73:['Schnee','ti-snowflake','ti-snowflake'],75:['Starker Schnee','ti-snowflake','ti-snowflake'],77:['Schneegriesel','ti-snowflake','ti-snowflake'],80:['Schauer','ti-cloud-rain','ti-cloud-rain'],81:['Schauer','ti-cloud-rain','ti-cloud-rain'],82:['Heftige Schauer','ti-cloud-storm','ti-cloud-storm'],85:['Schneeschauer','ti-snowflake','ti-snowflake'],86:['Schneeschauer','ti-snowflake','ti-snowflake'],95:['Gewitter','ti-cloud-storm','ti-cloud-storm'],96:['Gewitter, Hagel','ti-cloud-storm','ti-cloud-storm'],99:['Gewitter, Hagel','ti-cloud-storm','ti-cloud-storm']};
+function wmo(c,day){const w=WMO[c]||['—','ti-cloud','ti-cloud'];return {label:w[0],icon:day?w[1]:w[2]};}
+function wxDir(d){return ['N','NO','O','SO','S','SW','W','NW'][Math.round((d||0)/45)%8];}
+function uvInfo(uv){uv=Math.round(uv);if(uv<=2)return{l:'Niedrig',c:'#34d399'};if(uv<=5)return{l:'Mäßig',c:'#e0a13f'};if(uv<=7)return{l:'Hoch',c:'#f0894a'};if(uv<=10)return{l:'Sehr hoch',c:'#f0655c'};return{l:'Extrem',c:'#bf5af2'};}
+function wxT(t){return Math.round(t);}
+function wxTime(iso){if(!iso)return '—';const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function wxHourLabel(iso){return String(new Date(iso).getHours()).padStart(2,'0');}
+function wxCurUV(d){const ct=d.current.time,arr=d.hourly.time;let i=arr.findIndex(t=>t.slice(0,13)===ct.slice(0,13));if(i<0)i=0;return {uv:d.hourly.uv_index[i]||0,idx:i};}
+
+async function wxFetch(loc){
+  const u='https://api.open-meteo.com/v1/forecast?latitude='+loc.lat+'&longitude='+loc.lon
+    +'&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl'
+    +'&hourly=temperature_2m,precipitation_probability,weather_code,uv_index,is_day'
+    +'&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max,precipitation_sum,wind_speed_10m_max'
+    +'&timezone=auto&forecast_days=7';
+  const r=await fetch(u,{cache:'no-store'});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+async function loadWeather(force){
+  if(!wx.loc)return;
+  if(wx.loading)return;
+  if(!force&&wx.data&&Date.now()-wx.ts<600000){if(currentView==='weather')renderWeather();renderWeatherOverview();applyWeatherBg();return;}
+  wx.loading=true;wx.error=null;
+  if(currentView==='weather')renderWeather();
+  try{wx.data=await wxFetch(wx.loc);wx.ts=Date.now();}catch(e){wx.error=e;}
+  wx.loading=false;
+  if(currentView==='weather')renderWeather();
+  renderWeatherOverview();
+  applyWeatherBg(); // dynamischen Wetter-Hintergrund an die neuen Daten anpassen (falls aktiviert)
+}
+/* Standort: Geolocation + Stadtsuche (Open-Meteo Geocoding, gratis) */
+function wxGeolocate(){
+  if(!navigator.geolocation){alert('Geolocation nicht verfügbar.');return;}
+  wx.searching=true;if(currentView==='weather')renderWeather();
+  navigator.geolocation.getCurrentPosition(
+    p=>{wx.loc={lat:+p.coords.latitude.toFixed(3),lon:+p.coords.longitude.toFixed(3),name:'Aktueller Standort'};localStorage.setItem(WX_KEY,JSON.stringify(wx.loc));wx.searching=false;wx.pickMode=false;wx.data=null;loadWeather(true);},
+    err=>{wx.searching=false;if(currentView==='weather')renderWeather();alert('Standort nicht ermittelbar: '+err.message);},
+    {enableHighAccuracy:false,timeout:10000,maximumAge:600000}
+  );
+}
+async function wxSearchCity(q){
+  q=(q||'').trim();
+  const box=document.getElementById('wxResults');
+  if(!q){if(box)box.innerHTML='';wx.results=null;return;}
+  let results;
+  try{const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?name='+encodeURIComponent(q)+'&count=6&language=de&format=json');const j=await r.json();results=(j&&j.results)||[];}
+  catch(e){results=null;}
+  wx.results=results||null;
+  const b=document.getElementById('wxResults');if(!b)return; // nur die Trefferliste neu zeichnen → Eingabefeld behält Fokus & Text
+  if(results===null){b.innerHTML='<div class="wx-empty-res">Suche fehlgeschlagen — Internet prüfen.</div>';return;}
+  if(!results.length){b.innerHTML='<div class="wx-empty-res">Keine Treffer.</div>';return;}
+  b.innerHTML=results.map((r,i)=>`<button class="wx-result" onclick="wxPickIdx(${i})"><i class="ti ti-map-pin"></i><span class="wx-result-name">${esc(r.name)}${r.admin1?', <span class="wx-result-admin">'+esc(r.admin1)+'</span>':''}</span><small>${esc(r.country||r.country_code||'')}</small></button>`).join('');
+}
+let _wxSearchT=null;
+function wxOnSearchInput(v){clearTimeout(_wxSearchT);_wxSearchT=setTimeout(()=>wxSearchCity(v),350);}
+function wxPickIdx(i){const r=wx.results&&wx.results[i];if(!r)return;wx.loc={lat:+r.latitude.toFixed(3),lon:+r.longitude.toFixed(3),name:r.name+(r.admin1?', '+r.admin1:'')};localStorage.setItem(WX_KEY,JSON.stringify(wx.loc));wx.results=null;wx.pickMode=false;wx.data=null;loadWeather(true);}
+function wxChangeLocation(){wx.pickMode=true;wx.results=null;if(currentView!=='weather')switchView('weather');else renderWeather();}
+
+/* ── Rendering ── */
+function renderWeather(){
+  const host=document.getElementById('weatherBody');if(!host)return;
+  if(!wx.loc||wx.pickMode){host.innerHTML=wxSetupHtml();const inp=host.querySelector('.wx-search');if(inp)setTimeout(()=>inp.focus(),30);return;}
+  if(wx.error&&!wx.data){host.innerHTML=`<div class="card"><div class="wx-err"><i class="ti ti-cloud-off"></i><div>Wetter nicht abrufbar — ${esc(wx.error.message||'')}</div><button class="mb primary" onclick="loadWeather(true)"><i class="ti ti-refresh"></i> Erneut</button></div></div>`;return;}
+  if(!wx.data){if(!wx.loading)loadWeather();host.innerHTML=wxSkeletonHtml();return;}
+  host.innerHTML=wxFullHtml(wx.data);
+  wxRenderMap(); // interaktive Karte für den aktuellen Ort einsetzen
+}
+function wxSkeletonHtml(){return `<div class="card" style="min-height:200px;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--text3);font-weight:500;"><i class="ti ti-loader-2 wx-spin"></i> Wetter wird geladen …</div>`;}
+const WX_CITIES=[
+  {n:'Wien',lat:48.208,lon:16.374},{n:'München',lat:48.137,lon:11.575},{n:'Berlin',lat:52.52,lon:13.405},
+  {n:'Hamburg',lat:53.551,lon:9.994},{n:'Köln',lat:50.938,lon:6.96},{n:'Frankfurt',lat:50.111,lon:8.682},
+  {n:'Stuttgart',lat:48.776,lon:9.183},{n:'Zürich',lat:47.377,lon:8.542},{n:'Salzburg',lat:47.81,lon:13.055},
+  {n:'Graz',lat:47.071,lon:15.439},{n:'Innsbruck',lat:47.269,lon:11.404},{n:'Linz',lat:48.307,lon:14.286}
+];
+function wxPickCity(lat,lon,name){wx.loc={lat:lat,lon:lon,name:name};localStorage.setItem(WX_KEY,JSON.stringify(wx.loc));wx.results=null;wx.pickMode=false;wx.data=null;loadWeather(true);}
+function wxSetupHtml(){
+  const chips=WX_CITIES.map(c=>`<button class="wx-chip" onclick="wxPickCity(${c.lat},${c.lon},'${c.n}')">${c.n}</button>`).join('');
+  return `<div class="card wx-setup">`
+    +`<div class="wx-setup-ico"><i class="ti ti-map-pin"></i></div>`
+    +`<div class="wx-setup-h">Stadt wählen</div>`
+    +`<div class="wx-setup-sub">Tippe eine Stadt an, suche sie oder nutze deinen Standort. Daten von Open-Meteo — kostenlos, kein Konto.</div>`
+    +`<input class="wx-search" type="text" placeholder="Stadt suchen …" oninput="wxOnSearchInput(this.value)">`
+    +`<div id="wxResults" class="wx-results"></div>`
+    +`<div class="wx-or">Schnellauswahl</div>`
+    +`<div class="wx-chips">${chips}</div>`
+    +`<button class="mb primary wx-geo" onclick="wxGeolocate()"><i class="ti ti-current-location"></i> Aktuellen Standort verwenden</button>`
+    +(wx.loc?`<button class="mb" onclick="wx.pickMode=false;renderWeather();">Abbrechen</button>`:'')
+  +`</div>`;
+}
+function wxTile(label,icon,inner){return `<div class="card wx-tile"><div class="wx-tile-h"><i class="ti ${icon}"></i> ${label}</div><div class="wx-tile-body">${inner}</div></div>`;}
+function wxGaugeSvg(p,color){p=Math.max(0,Math.min(1,p));return `<svg viewBox="0 0 80 80" class="wx-gauge-svg"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--track)" stroke-width="7"/><circle cx="40" cy="40" r="32" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="${(100-p*100).toFixed(1)}" transform="rotate(-90 40 40)" style="filter:drop-shadow(0 0 5px ${color})"/></svg>`;}
+function wxCompassSvg(deg){return `<svg viewBox="0 0 64 64" class="wx-compass"><circle cx="32" cy="32" r="27" fill="none" stroke="var(--separator-opaque)" stroke-width="1.5"/><text x="32" y="13" class="wx-comp-n">N</text><g transform="rotate(${(deg||0)+180} 32 32)"><path d="M32 16 L37 40 L32 35 L27 40 Z" fill="var(--blue)"/></g></svg>`;}
+function wxFullHtml(d){
+  const cur=d.current,day=cur.is_day===1,w=wmo(cur.weather_code,day),{uv}=wxCurUV(d),uvi=uvInfo(uv);
+  const hi=Math.round(d.daily.temperature_2m_max[0]),lo=Math.round(d.daily.temperature_2m_min[0]);
+  let h='';
+  h+=`<div class="wx-hero ${day?'is-day':'is-night'}"><div class="wx-hero-bg" aria-hidden="true"></div>`
+    +`<div class="wx-hero-top"><div class="wx-loc"><i class="ti ti-map-pin"></i> ${esc(wx.loc.name||'Standort')}</div><div class="wx-updated">${wxTime(cur.time)} Uhr</div></div>`
+    +`<div class="wx-hero-main">`
+      +`<div class="wx-hero-l"><div class="wx-bigtemp">${wxT(cur.temperature_2m)}<span class="wx-deg">°</span></div><div class="wx-cond"><i class="ti ${w.icon}"></i> ${w.label}</div></div>`
+      +`<div class="wx-hero-r"><div class="wx-feels">gefühlt <b>${wxT(cur.apparent_temperature)}°</b></div><div class="wx-hilo"><span class="wx-hi"><i class="ti ti-arrow-up-right"></i> ${hi}°</span><span class="wx-lo"><i class="ti ti-arrow-down-right"></i> ${lo}°</span></div></div>`
+    +`</div></div>`;
+  h+=`<div class="wx-tiles">`;
+  h+=wxTile('UV-Index','ti-sun-high',`<div class="wx-gauge">${wxGaugeSvg(Math.min(uv/11,1),uvi.c)}<div class="wx-gauge-c"><span class="wx-gauge-v">${Math.round(uv)}</span></div></div><div class="wx-tile-sub" style="color:${uvi.c}">${uvi.l}</div>`);
+  h+=wxTile('Niederschlag','ti-droplet',`<div class="wx-big">${Math.round(d.daily.precipitation_probability_max[0]||0)}<small>%</small></div><div class="wx-tile-sub">${(d.daily.precipitation_sum[0]||0).toFixed(1)} mm heute</div>`);
+  h+=wxTile('Wind','ti-wind',`<div class="wx-wind">${wxCompassSvg(cur.wind_direction_10m)}<div><div class="wx-big">${Math.round(cur.wind_speed_10m)}<small>km/h</small></div><div class="wx-tile-sub">${wxDir(cur.wind_direction_10m)} · Böen ${Math.round(cur.wind_gusts_10m)}</div></div></div>`);
+  h+=wxTile('Luftfeuchte','ti-droplet-half-2-filled',`<div class="wx-big">${Math.round(cur.relative_humidity_2m)}<small>%</small></div><div class="wx-tile-sub">Bewölkung ${Math.round(cur.cloud_cover)}%</div>`);
+  h+=wxTile('Luftdruck','ti-gauge',`<div class="wx-big">${Math.round(cur.pressure_msl)}<small>hPa</small></div><div class="wx-tile-sub">auf Meereshöhe</div>`);
+  h+=wxTile('Gefühlt','ti-temperature',`<div class="wx-big">${wxT(cur.apparent_temperature)}<small>°</small></div><div class="wx-tile-sub">real ${wxT(cur.temperature_2m)}°</div>`);
+  h+=`</div>`;
+  h+=`<div class="section-h">Karte</div><div class="card wx-map-card"><div id="wxMap" class="wx-map"></div></div>`;
+  h+=`<div class="section-h">Stündlich · 24 h</div><div class="card wx-hourly">${wxHourlyHtml(d)}</div>`;
+  h+=`<div class="section-h">7-Tage-Vorhersage</div><div class="card wx-daily">${wxDailyHtml(d)}</div>`;
+  h+=`<div class="section-h">Sonne & Mond</div><div class="wx-sunmoon">${wxSunHtml(d)}${wxMoonHtml(d)}</div>`;
+  return h;
+}
+function wxHourlyHtml(d){
+  const start=wxCurUV(d).idx,N=24,t=[],p=[],times=[],codes=[],isd=[];
+  for(let i=0;i<N;i++){const j=start+i;if(j>=d.hourly.time.length)break;t.push(d.hourly.temperature_2m[j]);p.push(d.hourly.precipitation_probability[j]||0);times.push(d.hourly.time[j]);codes.push(d.hourly.weather_code[j]);isd.push(d.hourly.is_day[j]===1);}
+  const n=t.length;if(!n)return '';
+  const W=760,H=170,padX=18,padTop=30,padBot=46,mn=Math.min(...t),mx=Math.max(...t),rng=(mx-mn)||1;
+  const X=i=>padX+(W-2*padX)*(n<=1?0.5:i/(n-1)),Y=v=>padTop+(H-padTop-padBot)*(1-(v-mn)/rng);
+  let line='',bars='',labels='';
+  t.forEach((v,i)=>{line+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';});
+  const area=`M${X(0).toFixed(1)} ${H-padBot} `+t.map((v,i)=>'L'+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' ')+` L${X(n-1).toFixed(1)} ${H-padBot} Z`;
+  p.forEach((pp,i)=>{if(pp<5)return;const bh=(H-padBot-padTop)*(pp/100)*0.55;bars+=`<rect x="${(X(i)-2.5).toFixed(1)}" y="${(H-padBot-bh).toFixed(1)}" width="5" height="${bh.toFixed(1)}" rx="2.5" class="wx-pbar"/>`;});
+  for(let i=0;i<n;i+=3){const x=X(i).toFixed(1);labels+=`<text x="${x}" y="${H-22}" class="wx-hx">${wxHourLabel(times[i])}</text>`;labels+=`<text x="${x}" y="${(Y(t[i])-10).toFixed(1)}" class="wx-ht">${Math.round(t[i])}°</text>`;}
+  let icons='';for(let i=0;i<n;i+=3){const x=X(i);icons+=`<text x="${x.toFixed(1)}" y="${H-7}" class="wx-hi-ico">${p[i]>=20?'☔':''}</text>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" class="wx-hourly-svg"><path d="${area}" class="wx-area"/>${bars}<path d="${line}" class="wx-line"/>${labels}</svg>`;
+}
+function wxDailyHtml(d){
+  const wn=['So','Mo','Di','Mi','Do','Fr','Sa'],maxes=d.daily.temperature_2m_max,mins=d.daily.temperature_2m_min;
+  const wkMax=Math.max(...maxes),wkMin=Math.min(...mins),wkRng=(wkMax-wkMin)||1;let h='';
+  d.daily.time.forEach((iso,i)=>{
+    const dt=new Date(iso+'T12:00:00'),lbl=i===0?'Heute':wn[dt.getDay()],w=wmo(d.daily.weather_code[i],true),lo=Math.round(mins[i]),hi=Math.round(maxes[i]);
+    const l=((mins[i]-wkMin)/wkRng*100).toFixed(0),r=(100-(maxes[i]-wkMin)/wkRng*100).toFixed(0),pp=Math.round(d.daily.precipitation_probability_max[i]||0);
+    h+=`<div class="wx-day"><div class="wx-day-name">${lbl}</div><div class="wx-day-ico"><i class="ti ${w.icon}"></i></div><div class="wx-day-pp">${pp>=20?'<i class="ti ti-droplet"></i>'+pp+'%':''}</div><div class="wx-day-lo">${lo}°</div><div class="wx-day-bar"><div class="wx-day-fill" style="left:${l}%;right:${r}%"></div></div><div class="wx-day-hi">${hi}°</div></div>`;
+  });
+  return h;
+}
+function wxSunHtml(d){
+  const srD=new Date(d.daily.sunrise[0]),ssD=new Date(d.daily.sunset[0]),now=new Date(d.current.time);
+  let frac=(now-srD)/((ssD-srD)||1);const up=d.current.is_day===1;frac=Math.max(0,Math.min(1,frac));
+  const W=300,H=128,cx0=26,cx1=W-26,cy=H-30,r=(cx1-cx0)/2,mcx=(cx0+cx1)/2,a=Math.PI*(1-frac);
+  const sx=(mcx+r*Math.cos(a)).toFixed(1),sy=(cy-r*Math.sin(a)).toFixed(1);
+  return `<div class="card wx-sun"><div class="wx-tile-h"><i class="ti ti-sun"></i> Sonne</div>`
+    +`<svg viewBox="0 0 ${W} ${H}" class="wx-sun-svg"><path d="M${cx0} ${cy} A ${r} ${r} 0 0 1 ${cx1} ${cy}" class="wx-arc-track"/><line x1="${cx0-6}" y1="${cy}" x2="${cx1+6}" y2="${cy}" class="wx-horizon"/>${up?`<circle cx="${sx}" cy="${sy}" r="8" class="wx-sun-dot"/>`:''}</svg>`
+    +`<div class="wx-times"><div><span class="wx-tl">Aufgang</span><span class="wx-tv">${wxTime(d.daily.sunrise[0])}</span></div><div><span class="wx-tl">Untergang</span><span class="wx-tv">${wxTime(d.daily.sunset[0])}</span></div></div></div>`;
+}
+function wxMoonPhaseName(ph){if(ph<0.03||ph>0.97)return 'Neumond';if(ph<0.22)return 'Zunehmende Sichel';if(ph<0.28)return 'Erstes Viertel';if(ph<0.47)return 'Zunehmender Mond';if(ph<0.53)return 'Vollmond';if(ph<0.72)return 'Abnehmender Mond';if(ph<0.78)return 'Letztes Viertel';return 'Abnehmende Sichel';}
+function wxMoonSvg(phase){
+  const r=26,c=30,k=Math.cos(phase*2*Math.PI),rx=(r*Math.abs(k)).toFixed(2);
+  const sideSweep=phase<0.5?1:0,innerSweep=(k>0)?(phase<0.5?0:1):(phase<0.5?1:0);
+  const pth=`M ${c} ${c-r} A ${r} ${r} 0 0 ${sideSweep} ${c} ${c+r} A ${rx} ${r} 0 0 ${innerSweep} ${c} ${c-r} Z`;
+  return `<svg viewBox="0 0 60 60" class="wx-moon-svg"><circle cx="${c}" cy="${c}" r="${r}" class="wx-moon-dark"/><path d="${pth}" class="wx-moon-lit"/><circle cx="${c}" cy="${c}" r="${r}" class="wx-moon-edge"/></svg>`;
+}
+function wxMoonHtml(d){
+  const ill=SunCalc.getMoonIllumination(new Date()),times=SunCalc.getMoonTimes(new Date(),wx.loc.lat,wx.loc.lon),pct=Math.round(ill.fraction*100);
+  return `<div class="card wx-moon"><div class="wx-tile-h"><i class="ti ti-moon"></i> Mond</div>`
+    +`<div class="wx-moon-row">${wxMoonSvg(ill.phase)}<div class="wx-moon-info"><div class="wx-moon-phase">${wxMoonPhaseName(ill.phase)}</div><div class="wx-moon-ill">${pct}% beleuchtet</div></div></div>`
+    +`<div class="wx-times"><div><span class="wx-tl">Aufgang</span><span class="wx-tv">${times.rise?wxTime(times.rise):'—'}</span></div><div><span class="wx-tl">Untergang</span><span class="wx-tv">${times.set?wxTime(times.set):'—'}</span></div></div></div>`;
+}
+/* Übersicht-Widget: nur jetzige Temp, UV, Niederschlag, Wind */
+function renderWeatherOverview(){
+  const host=document.getElementById('ovWeatherHost');if(!host)return;
+  if(!wx.loc){host.innerHTML=`<button class="wx-ov wx-ov-empty" onclick="switchView('weather')"><i class="ti ti-cloud-plus"></i> Wetter einrichten</button>`;return;}
+  if(!wx.data){host.innerHTML=`<div class="wx-ov"><div class="wx-ov-load"><i class="ti ti-loader-2 wx-spin"></i> Wetter …</div></div>`;if(!wx.loading)loadWeather();return;}
+  const cur=wx.data.current,day=cur.is_day===1,w=wmo(cur.weather_code,day),{uv}=wxCurUV(wx.data),uvi=uvInfo(uv);
+  host.innerHTML=`<div class="wx-ov" onclick="switchView('weather')" role="button" title="Zum Wetter-Tab">`
+    +`<div class="wx-ov-main"><i class="ti ${w.icon} wx-ov-ic"></i><span class="wx-ov-temp">${wxT(cur.temperature_2m)}°</span><span class="wx-ov-cond">${w.label}<small>${esc(wx.loc.name||'')}</small></span></div>`
+    +`<div class="wx-ov-metrics">`
+      +`<div class="wx-ovm"><i class="ti ti-sun-high" style="color:${uvi.c}"></i><span>${Math.round(uv)}</span><small>UV</small></div>`
+      +`<div class="wx-ovm"><i class="ti ti-droplet"></i><span>${Math.round(wx.data.daily.precipitation_probability_max[0]||0)}%</span><small>Regen</small></div>`
+      +`<div class="wx-ovm"><i class="ti ti-wind"></i><span>${Math.round(cur.wind_speed_10m)}</span><small>km/h</small></div>`
+    +`</div></div>`;
+}
+
+/* Spotlight-Hover auf Panels — rein visuell, setzt nur CSS-Variablen (--mx/--my), blockiert keine Klicks */
+(function(){
+  let raf=0,pend=null;
+  function apply(){raf=0;if(!pend)return;pend.card.style.setProperty('--mx',pend.x+'px');pend.card.style.setProperty('--my',pend.y+'px');}
+  document.addEventListener('pointermove',function(e){
+    const card=e.target.closest&&e.target.closest('.card');
+    if(!card)return;
+    const r=card.getBoundingClientRect();
+    pend={card,x:e.clientX-r.left,y:e.clientY-r.top};
+    if(!raf)raf=requestAnimationFrame(apply);
+  },{passive:true});
+})();
+
+/* ════════════════════════════════════════════════════════════════════
+   Zusatz-Funktionen (2026-06-27) — als Funktions-Deklarationen (hoisted),
+   daher von den oben aufgerufenen Stellen erreichbar.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Übersicht: Live-Uhr (HH:MM:SS) ── */
+function updateOvClock(){
+  const el=document.getElementById('ovClock');if(!el)return;
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  el.textContent=p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+
+/* ── Apple-inspiriertes Design ── */
+function applyAppleDesign(){
+  if(load('gt_apple',false))document.documentElement.setAttribute('data-design','apple');
+  else document.documentElement.removeAttribute('data-design');
+}
+function toggleAppleDesign(on){ssave('gt_apple',!!on);applyAppleDesign();haptic('light');}
+
+/* ── Dynamischer Wetter-Hintergrund ── */
+function wxScene(){
+  if(!wx.data||!wx.data.current)return null;
+  const c=wx.data.current.weather_code,day=wx.data.current.is_day===1;
+  let kind;
+  if(c===0||c===1)kind='clear';
+  else if(c===2)kind='partly';
+  else if(c===3||c===45||c===48)kind='cloudy';
+  else if((c>=51&&c<=67)||(c>=80&&c<=82))kind='rain';
+  else if((c>=71&&c<=77)||c===85||c===86)kind='snow';
+  else if(c>=95)kind='storm';
+  else kind='cloudy';
+  return {kind,day};
+}
+function applyWeatherBg(){
+  const sc=load('gt_wx_bg',false)?wxScene():null;
+  if(sc){
+    document.documentElement.setAttribute('data-wxscene',sc.kind+'-'+(sc.day?'day':'night'));
+    document.body.classList.add('wxbg-on');
+  }else{
+    document.body.classList.remove('wxbg-on');
+    document.documentElement.removeAttribute('data-wxscene');
+  }
+}
+function toggleWxBg(on){
+  ssave('gt_wx_bg',!!on);
+  if(on&&wx.loc&&!wx.data)loadWeather();  // beim Einschalten ggf. Wetter nachladen
+  applyWeatherBg();haptic('light');
+}
+
+/* ── Animations-Regler (--anim 0..1) ── */
+function applyAnim(v){
+  const f=Math.max(0,Math.min(100,Number(v)||0))/100;
+  document.documentElement.style.setProperty('--anim',f);
+  document.documentElement.classList.toggle('anim-off',f===0);
+}
+function _animFill(v){const s=document.getElementById('animSlider');if(s)s.style.background='linear-gradient(90deg,var(--blue) '+v+'%,var(--track) '+v+'%)';}
+function setAnim(v){
+  v=Math.max(0,Math.min(100,Math.round(Number(v)||0)));
+  ssave('gt_anim',v);
+  const lbl=document.getElementById('animVal');if(lbl)lbl.textContent=v+'%';
+  _animFill(v);
+  applyAnim(v);
+}
+
+/* ── Einstellungen: Schalter-/Regler-Zustände spiegeln ── */
+function syncDesignToggles(){
+  const a=document.getElementById('appleToggle');if(a)a.checked=!!load('gt_apple',false);
+  const w=document.getElementById('wxBgToggle');if(w)w.checked=!!load('gt_wx_bg',false);
+  const av=load('gt_anim',100);
+  const s=document.getElementById('animSlider');if(s)s.value=av;
+  const lv=document.getElementById('animVal');if(lv)lv.textContent=av+'%';
+  _animFill(av);
+}
+
+/* ── Wetterkarte (Leaflet, bei Bedarf nachgeladen) ── */
+let _leafletReq=null;
+function ensureLeaflet(){
+  if(window.L)return Promise.resolve();
+  if(_leafletReq)return _leafletReq;
+  _leafletReq=new Promise((res,rej)=>{
+    const css=document.createElement('link');css.rel='stylesheet';css.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(css);
+    const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
+    s.onload=()=>res();s.onerror=()=>{_leafletReq=null;rej(new Error('leaflet'));};
+    document.head.appendChild(s);
+  });
+  return _leafletReq;
+}
+let wxMap=null,wxMapView=null,wxMapKey=null;
+function wxRenderMap(){
+  const el=document.getElementById('wxMap');
+  if(!el||!wx.loc)return;
+  const key=wx.loc.lat+','+wx.loc.lon;
+  if(wxMapKey!==key){wxMapView=null;wxMapKey=key;} // Ort gewechselt → Ansicht zurücksetzen
+  ensureLeaflet().then(()=>{
+    const host=document.getElementById('wxMap');
+    if(!host||!window.L||!wx.loc)return;
+    if(wxMap){try{wxMap.remove();}catch(e){}wxMap=null;}
+    const dark=document.documentElement.getAttribute('data-theme')==='dark';
+    wxMap=L.map(host,{zoomControl:true,attributionControl:true,scrollWheelZoom:false});
+    // Beim 10-Min-Refresh die Zoom-/Schwenk-Ansicht des Nutzers beibehalten (gleicher Ort)
+    if(wxMapView)wxMap.setView(wxMapView.center,wxMapView.zoom);
+    else wxMap.setView([wx.loc.lat,wx.loc.lon],8);
+    wxMap.on('moveend zoomend',()=>{try{wxMapView={center:wxMap.getCenter(),zoom:wxMap.getZoom()};}catch(e){}});
+    const tiles=dark?'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                    :'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    L.tileLayer(tiles,{maxZoom:19,subdomains:'abcd',attribution:'© OpenStreetMap · © CARTO'}).addTo(wxMap);
+    const accent=(getComputedStyle(document.documentElement).getPropertyValue('--blue')||'#34d399').trim();
+    L.circleMarker([wx.loc.lat,wx.loc.lon],{radius:8,color:'#fff',weight:2,fillColor:accent,fillOpacity:1}).addTo(wxMap).bindPopup(wx.loc.name||'Standort');
+    wxAddRadar(wxMap);
+    setTimeout(()=>{try{wxMap.invalidateSize();}catch(e){}},150);
+  }).catch(()=>{ /* offline / CDN blockiert → Karte bleibt leer, Rest läuft weiter */ });
+}
+/* RainViewer: kostenlose Radar-/Wolken-Layer, kein Schlüssel nötig */
+function wxAddRadar(map){
+  fetch('https://api.rainviewer.com/public/weather-maps.json',{cache:'no-store'})
+    .then(r=>r.json()).then(j=>{
+      if(!map||!map._container||!document.body.contains(map._container)||!window.L||!j||!j.host)return;
+      const host=j.host,overlays={};
+      // RainViewer-Radar liefert echte Kacheln nur bis Zoom 7 (darüber „Zoom Level Not Supported")
+      // → maxNativeZoom:7 lässt Leaflet die z7-Kachel hochskalieren statt nicht unterstützte Zooms anzufragen.
+      const rad=(j.radar&&[].concat(j.radar.past||[],j.radar.nowcast||[]))||[];
+      if(rad.length){const p=rad[rad.length-1].path;const rl=L.tileLayer(host+p+'/256/{z}/{x}/{y}/2/1_1.png',{opacity:.6,zIndex:6,maxNativeZoom:7,maxZoom:19});rl.addTo(map);overlays['Niederschlag (Radar)']=rl;}
+      const sat=(j.satellite&&j.satellite.infrared)||[];
+      if(sat.length){const p=sat[sat.length-1].path;overlays['Wolken (Satellit)']=L.tileLayer(host+p+'/256/{z}/{x}/{y}/0/0_0.png',{opacity:.5,zIndex:5,maxNativeZoom:6,maxZoom:19});}
+      if(Object.keys(overlays).length)L.control.layers(null,overlays,{collapsed:true,position:'topright'}).addTo(map);
+    }).catch(()=>{});
+}
+
+/* ── Init der Zusatz-Funktionen ── */
+applyAnim(load('gt_anim',100));
+syncDesignToggles();
+applyWeatherBg();
+setInterval(updateOvClock,1000);                                              // Live-Uhr (Sekundentakt)
+setInterval(()=>{if(!document.hidden&&wx.loc)loadWeather(true);},600000);     // Wetter alle 10 Min
+setInterval(()=>{if(!document.hidden&&fitBase())loadLyfta(true);},3600000);   // Lyfta jede Stunde
 </script>
 </body>
 </html>
