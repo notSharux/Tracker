@@ -26,6 +26,8 @@
     var _an=Math.max(0,Math.min(100,JSON.parse(localStorage.getItem('gt_anim')||'100')));
     document.documentElement.style.setProperty('--anim',_an/100);
     if(_an<=0)document.documentElement.classList.add('anim-off');
+    var _anb=Math.max(0,Math.min(100,JSON.parse(localStorage.getItem('gt_anim_bg')||String(_an))));
+    document.documentElement.style.setProperty('--anim-bg',_anb/100);
   }catch(e){document.documentElement.setAttribute('data-theme','dark');}
 </script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
@@ -1301,13 +1303,15 @@
      Bewusst in einem eigenen Block, um die bestehenden Stile nicht zu stören.
      ════════════════════════════════════════════════════════════════════ */
 
-  /* ── 0. Globaler Animations-Regler (--anim 0..1, per Slider) ── */
-  :root{--anim:1;}
-  /* Aurora-Hintergrund dimmt mit dem Regler (body.wxbg-on::before bleibt per !important verborgen) */
-  body::before{opacity:var(--anim);}
-  :root[data-theme="light"] body::before,:root:not([data-theme="dark"]) body::before{opacity:calc(.7 * var(--anim));}
-  /* 0 % = komplett ruhig: kanonischer Reduce-Motion-Override (instant statt sichtbar) */
-  html.anim-off *,html.anim-off *::before,html.anim-off *::after{
+  /* ── 0. Animations-Regler: UI (--anim) & Hintergrund (--anim-bg) getrennt ── */
+  :root{--anim:1;--anim-bg:1;}
+  /* Aurora-Hintergrund dimmt mit dem HINTERGRUND-Regler (body.wxbg-on::before bleibt per !important verborgen) */
+  body::before{opacity:var(--anim-bg);}
+  :root[data-theme="light"] body::before,:root:not([data-theme="dark"]) body::before{opacity:calc(.7 * var(--anim-bg));}
+  /* UI 0 % = ruhige Oberfläche: Reduce-Motion-Override NUR für .app + Overlays.
+     Hintergrund (Aurora + #wxBg-Canvas) bleibt unberührt → beide Regler wirklich getrennt. */
+  html.anim-off .app *,html.anim-off .app *::before,html.anim-off .app *::after,
+  html.anim-off .overlay,html.anim-off .overlay *,html.anim-off .overlay *::before,html.anim-off .overlay *::after{
     animation-duration:.01ms!important;animation-iteration-count:1!important;
     transition-duration:.01ms!important;scroll-behavior:auto!important;
   }
@@ -1365,17 +1369,19 @@
   .leaflet-control-attribution a{color:var(--text2)!important;}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface-elevated)!important;color:var(--text)!important;box-shadow:var(--shadow-pop)!important;}
 
-  /* ── 5. Dynamischer Wetter-Hintergrund (Apple-Wetter-Stil) ── */
+  /* ── 5. Dynamischer Wetter-Hintergrund (Apple-Wetter-Stil) ──
+     Himmelfarbe = CSS-Verlauf; die Bewegung (Regen/Gewitter/Schnee/Wolken/Wind/Nebel/Sterne)
+     zeichnet ein Canvas darüber (siehe JS-Modul wxAnim). */
   #wxBg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;overflow:hidden;transition:opacity 1.4s ease;}
   body.wxbg-on #wxBg{opacity:1;}
   body.wxbg-on::before{opacity:0!important;}            /* App-Aurora ausblenden, solange Wetter aktiv */
   .wxbg-veil{position:absolute;inset:0;background:rgba(6,7,13,.5);}
   :root[data-theme="light"] .wxbg-veil{background:rgba(240,242,248,.55);}
-  .wxbg-fx{position:absolute;inset:-20%;opacity:var(--anim);}
-  /* Szenen-Verläufe (einmalig, themenunabhängig — der Schleier oben sorgt für Lesbarkeit) */
-  [data-wxscene="clear-day"]   #wxBg{background:radial-gradient(40% 38% at 80% 16%,rgba(255,239,194,.9),transparent 55%),linear-gradient(180deg,#2e6fb0,#5ba3da 50%,#a7d2ec);}
+  .wxbg-canvas{position:absolute;inset:0;width:100%;height:100%;}
+  /* Szenen-Verläufe (themenunabhängig — der Schleier oben sorgt für Lesbarkeit) */
+  [data-wxscene="clear-day"]   #wxBg{background:radial-gradient(42% 40% at 80% 14%,rgba(255,238,190,.95),transparent 55%),linear-gradient(180deg,#2e6fb0,#5ba3da 50%,#a7d2ec);}
   [data-wxscene="clear-night"] #wxBg{background:radial-gradient(26% 24% at 78% 18%,rgba(180,200,255,.35),transparent 60%),linear-gradient(180deg,#070b1a,#0e1630 55%,#1a2745);}
-  [data-wxscene="partly-day"]  #wxBg{background:linear-gradient(180deg,#3d72a4,#6a9fc8 50%,#bcd4e6);}
+  [data-wxscene="partly-day"]  #wxBg{background:radial-gradient(34% 32% at 82% 16%,rgba(255,238,190,.6),transparent 55%),linear-gradient(180deg,#3d72a4,#6a9fc8 50%,#bcd4e6);}
   [data-wxscene="partly-night"]#wxBg{background:linear-gradient(180deg,#0a0f22,#141d38 60%,#22304f);}
   [data-wxscene="cloudy-day"]  #wxBg{background:linear-gradient(180deg,#5b6b7d,#8497a8 50%,#aab8c6);}
   [data-wxscene="cloudy-night"]#wxBg{background:linear-gradient(180deg,#0d1119,#1a2230 60%,#2a3340);}
@@ -1385,35 +1391,10 @@
   [data-wxscene="snow-night"]  #wxBg{background:linear-gradient(180deg,#0d1320,#1b2638 60%,#2c3a52);}
   [data-wxscene="storm-day"]   #wxBg{background:linear-gradient(180deg,#2f3540,#454e5b 50%,#5a6470);}
   [data-wxscene="storm-night"] #wxBg{background:linear-gradient(180deg,#06080e,#10141d 60%,#1c222e);}
-  /* Regen + Gewitter: diagonale Tropfen */
-  [data-wxscene^="rain"] .wxbg-fx,[data-wxscene^="storm"] .wxbg-fx{
-    background-image:repeating-linear-gradient(transparent 0 13px,rgba(255,255,255,.26) 13px 14px);
-    animation:wxRain .55s linear infinite;
-  }
-  @keyframes wxRain{from{transform:rotate(13deg) scale(1.5) translateY(-14px);}to{transform:rotate(13deg) scale(1.5) translateY(0);}}
-  /* Gewitter: seltenes Blitzen */
-  [data-wxscene^="storm"] #wxBg::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.55);opacity:0;animation:wxFlash 8s linear infinite;}
-  @keyframes wxFlash{0%,92%,100%{opacity:0;}93%{opacity:calc(.32 * var(--anim));}94%{opacity:0;}96%{opacity:calc(.5 * var(--anim));}97%{opacity:0;}}
-  /* Schnee: zwei Ebenen für Tiefe */
-  [data-wxscene^="snow"] .wxbg-fx{
-    background-image:radial-gradient(2.4px 2.4px at 20px 30px,rgba(255,255,255,.95),transparent),radial-gradient(2px 2px at 75px 80px,rgba(255,255,255,.8),transparent),radial-gradient(2.6px 2.6px at 120px 45px,rgba(255,255,255,.9),transparent);
-    background-size:150px 150px;animation:wxSnow 8s linear infinite;
-  }
-  [data-wxscene^="snow"] .wxbg-fx::after{content:'';position:absolute;inset:0;background-image:radial-gradient(1.7px 1.7px at 40px 60px,rgba(255,255,255,.75),transparent),radial-gradient(1.7px 1.7px at 95px 25px,rgba(255,255,255,.65),transparent);background-size:110px 110px;animation:wxSnow 5.5s linear infinite;}
-  @keyframes wxSnow{from{transform:translateY(-150px);}to{transform:translateY(0);}}
-  /* Wolken: sanftes Driften */
-  [data-wxscene^="cloudy"] .wxbg-fx,[data-wxscene="partly-day"] .wxbg-fx,[data-wxscene="partly-night"] .wxbg-fx{
-    background-image:radial-gradient(40% 60% at 20% 30%,rgba(255,255,255,.16),transparent 70%),radial-gradient(34% 54% at 70% 24%,rgba(255,255,255,.12),transparent 70%),radial-gradient(46% 60% at 52% 72%,rgba(255,255,255,.10),transparent 70%);
-    background-size:170% 100%;animation:wxClouds 46s ease-in-out infinite alternate;
-  }
-  @keyframes wxClouds{from{transform:translateX(-7%);}to{transform:translateX(7%);}}
-  /* Klare Nacht: Sternenfunkeln */
-  [data-wxscene="clear-night"] .wxbg-fx,[data-wxscene="partly-night"] .wxbg-fx{
-    background-image:radial-gradient(1.4px 1.4px at 15% 22%,rgba(255,255,255,.95),transparent),radial-gradient(1.2px 1.2px at 72% 16%,rgba(255,255,255,.75),transparent),radial-gradient(1px 1px at 48% 40%,rgba(255,255,255,.6),transparent),radial-gradient(1.3px 1.3px at 85% 56%,rgba(255,255,255,.8),transparent),radial-gradient(1px 1px at 30% 66%,rgba(255,255,255,.55),transparent),radial-gradient(1.2px 1.2px at 60% 80%,rgba(255,255,255,.7),transparent);
-    animation:wxTwinkle 5s ease-in-out infinite alternate;
-  }
-  @keyframes wxTwinkle{from{opacity:calc(.45 * var(--anim));}to{opacity:var(--anim);}}
-  @media(prefers-reduced-motion:reduce){.wxbg-fx,.wxbg-fx::after,[data-wxscene^="storm"] #wxBg::after{animation:none!important;}}
+  [data-wxscene="fog-day"]     #wxBg{background:linear-gradient(180deg,#8b939c,#aab1b8 55%,#c6ccd1);}
+  [data-wxscene="fog-night"]   #wxBg{background:linear-gradient(180deg,#10141a,#1d242c 60%,#2b333b);}
+  [data-wxscene="wind-day"]    #wxBg{background:radial-gradient(34% 32% at 82% 16%,rgba(255,238,190,.45),transparent 55%),linear-gradient(180deg,#4f6a82,#7c9bb0 50%,#b3c8d6);}
+  [data-wxscene="wind-night"]  #wxBg{background:linear-gradient(180deg,#0b1018,#18212e 60%,#26303d);}
 
   /* ── 6. Apple-inspiriertes Design (Toggle) ── */
   :root[data-design="apple"]{
@@ -1458,7 +1439,7 @@
 <body>
 
 <!-- Dynamischer Wetter-Hintergrund (nur sichtbar, wenn in den Einstellungen aktiviert) -->
-<div id="wxBg" aria-hidden="true"><div class="wxbg-veil"></div><div class="wxbg-fx"></div></div>
+<div id="wxBg" aria-hidden="true"><div class="wxbg-veil"></div><canvas class="wxbg-canvas"></canvas></div>
 
 <div class="app">
   <aside class="sidebar">
@@ -1588,10 +1569,17 @@
               <label class="set-switch"><input type="checkbox" id="wxBgToggle" onchange="toggleWxBg(this.checked)"><span class="set-switch-track"></span><span class="set-switch-thumb"></span></label>
             </div>
             <div class="set-row">
-              <div class="set-label">Animationen<div class="set-sub">Tempo &amp; Intensität aller Bewegungen — 0 % = aus, 100 % = voll.</div></div>
+              <div class="set-label">UI-Animationen<div class="set-sub">Übergänge der Oberfläche (Tabs, Karten, Fortschrittsring) — 0 % = aus.</div></div>
               <div class="set-slider-wrap">
-                <input type="range" min="0" max="100" step="5" value="100" id="animSlider" class="set-slider" aria-label="Animationsstärke" oninput="setAnim(this.value)">
+                <input type="range" min="0" max="100" step="5" value="100" id="animSlider" class="set-slider" aria-label="UI-Animationsstärke" oninput="setAnim(this.value)">
                 <span class="set-slider-val" id="animVal">100%</span>
+              </div>
+            </div>
+            <div class="set-row">
+              <div class="set-label">Hintergrund-Animationen<div class="set-sub">Aurora &amp; dynamischer Wetter-Hintergrund (Regen, Schnee …) — 0 % = aus.</div></div>
+              <div class="set-slider-wrap">
+                <input type="range" min="0" max="100" step="5" value="100" id="animBgSlider" class="set-slider" aria-label="Hintergrund-Animationsstärke" oninput="setAnimBg(this.value)">
+                <span class="set-slider-val" id="animBgVal">100%</span>
               </div>
             </div>
           </div>
@@ -3593,25 +3581,31 @@ function toggleAppleDesign(on){ssave('gt_apple',!!on);applyAppleDesign();haptic(
 /* ── Dynamischer Wetter-Hintergrund ── */
 function wxScene(){
   if(!wx.data||!wx.data.current)return null;
-  const c=wx.data.current.weather_code,day=wx.data.current.is_day===1;
+  const cur=wx.data.current,c=cur.weather_code,day=cur.is_day===1;
+  const wind=cur.wind_speed_10m||0,gust=cur.wind_gusts_10m||0;
   let kind;
-  if(c===0||c===1)kind='clear';
+  if(c===45||c===48)kind='fog';
+  else if(c===0||c===1)kind='clear';
   else if(c===2)kind='partly';
-  else if(c===3||c===45||c===48)kind='cloudy';
+  else if(c===3)kind='cloudy';
   else if((c>=51&&c<=67)||(c>=80&&c<=82))kind='rain';
   else if((c>=71&&c<=77)||c===85||c===86)kind='snow';
   else if(c>=95)kind='storm';
   else kind='cloudy';
-  return {kind,day};
+  // Klarer/bewölkter Himmel, aber kräftiger Wind → Wind-Szene (wie Apple)
+  if((kind==='clear'||kind==='partly'||kind==='cloudy')&&(wind>=35||gust>=55))kind='wind';
+  return {kind,day,wind:Math.max(wind,gust*0.6)};
 }
 function applyWeatherBg(){
   const sc=load('gt_wx_bg',false)?wxScene():null;
   if(sc){
     document.documentElement.setAttribute('data-wxscene',sc.kind+'-'+(sc.day?'day':'night'));
     document.body.classList.add('wxbg-on');
+    wxAnim.set(sc);
   }else{
     document.body.classList.remove('wxbg-on');
     document.documentElement.removeAttribute('data-wxscene');
+    wxAnim.stop();
   }
 }
 function toggleWxBg(on){
@@ -3620,19 +3614,34 @@ function toggleWxBg(on){
   applyWeatherBg();haptic('light');
 }
 
-/* ── Animations-Regler (--anim 0..1) ── */
+/* ── Animations-Regler — getrennt: UI (--anim) und Hintergrund (--anim-bg) ── */
+// UI: Übergänge, Tab-/Karten-Einblendungen, Fortschrittsring; 0 % schaltet UI-Bewegung ganz ab.
 function applyAnim(v){
   const f=Math.max(0,Math.min(100,Number(v)||0))/100;
   document.documentElement.style.setProperty('--anim',f);
   document.documentElement.classList.toggle('anim-off',f===0);
 }
-function _animFill(v){const s=document.getElementById('animSlider');if(s)s.style.background='linear-gradient(90deg,var(--blue) '+v+'%,var(--track) '+v+'%)';}
+// Hintergrund: Aurora-Verlauf + Wetter-Canvas (Regen/Schnee/…).
+function applyAnimBg(v){
+  const f=Math.max(0,Math.min(100,Number(v)||0))/100;
+  _wxAnimF=f;
+  document.documentElement.style.setProperty('--anim-bg',f);
+  if(typeof wxAnim!=='undefined')wxAnim.refresh(); // Canvas-Dichte/An-Aus an Regler anpassen
+}
+function _animFill(id,v){const s=document.getElementById(id);if(s)s.style.background='linear-gradient(90deg,var(--blue) '+v+'%,var(--track) '+v+'%)';}
 function setAnim(v){
   v=Math.max(0,Math.min(100,Math.round(Number(v)||0)));
   ssave('gt_anim',v);
   const lbl=document.getElementById('animVal');if(lbl)lbl.textContent=v+'%';
-  _animFill(v);
+  _animFill('animSlider',v);
   applyAnim(v);
+}
+function setAnimBg(v){
+  v=Math.max(0,Math.min(100,Math.round(Number(v)||0)));
+  ssave('gt_anim_bg',v);
+  const lbl=document.getElementById('animBgVal');if(lbl)lbl.textContent=v+'%';
+  _animFill('animBgSlider',v);
+  applyAnimBg(v);
 }
 
 /* ── Einstellungen: Schalter-/Regler-Zustände spiegeln ── */
@@ -3642,7 +3651,11 @@ function syncDesignToggles(){
   const av=load('gt_anim',100);
   const s=document.getElementById('animSlider');if(s)s.value=av;
   const lv=document.getElementById('animVal');if(lv)lv.textContent=av+'%';
-  _animFill(av);
+  _animFill('animSlider',av);
+  const bv=load('gt_anim_bg',load('gt_anim',100));
+  const sb=document.getElementById('animBgSlider');if(sb)sb.value=bv;
+  const lvb=document.getElementById('animBgVal');if(lvb)lvb.textContent=bv+'%';
+  _animFill('animBgSlider',bv);
 }
 
 /* ── Wetterkarte (Leaflet, bei Bedarf nachgeladen) ── */
@@ -3699,8 +3712,135 @@ function wxAddRadar(map){
     }).catch(()=>{});
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   Wetter-Hintergrund: Canvas-Partikel-Engine (Apple-Wetter-Stil).
+   Zeichnet Regen/Gewitter, Schnee, Wolken, Wind, Nebel & Sterne über den
+   Himmel-Verlauf. Läuft NUR bei aktivem Wetter-Hintergrund; pausiert bei
+   verstecktem Tab, bei Animations-Regler 0 % und „reduzierte Bewegung".
+   Dichte/Deckkraft skalieren mit dem Regler (_wxAnimF).
+   ════════════════════════════════════════════════════════════════════ */
+let _wxAnimF=Math.max(0,Math.min(100,(function(){try{return JSON.parse(localStorage.getItem('gt_anim_bg')||localStorage.getItem('gt_anim')||'100');}catch(e){return 100;}})()))/100; // 0..1 — vom Hintergrund-Regler (in applyAnimBg gesetzt)
+const wxAnim=(function(){
+  let cv,ctx,W=0,H=0,dpr=1,raf=0,last=0,running=false,scene=null,clock=0,_sprite=null,_resizeT=0;
+  let P={drops:[],flakes:[],clouds:[],streaks:[],stars:[],fog:[]};
+  let flash=0,boltAt=0,bolt=null,boltT=0;
+  const reduce=()=>!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  function setup(){
+    cv=document.querySelector('.wxbg-canvas'); if(!cv)return false;
+    ctx=cv.getContext&&cv.getContext('2d'); if(!ctx)return false;
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    W=cv.clientWidth||window.innerWidth||360; H=cv.clientHeight||window.innerHeight||640;
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0); return true;
+  }
+  function cnt(per,cap){return Math.max(0,Math.min(cap,Math.round((W*H)/per*_wxAnimF)));}
+  function sprite(){ // weiche Wolken-/Nebel-Textur, einmal gezeichnet → schnelles drawImage
+    if(_sprite)return _sprite;
+    const c=document.createElement('canvas');c.width=360;c.height=200;const x=c.getContext('2d');
+    const pf=[[180,120,82],[110,128,60],[252,128,60],[150,96,64],[218,98,58],[180,140,72]];
+    for(const p of pf){const g=x.createRadialGradient(p[0],p[1],0,p[0],p[1],p[2]);
+      g.addColorStop(0,'rgba(255,255,255,0.9)');g.addColorStop(1,'rgba(255,255,255,0)');
+      x.fillStyle=g;x.beginPath();x.arc(p[0],p[1],p[2],0,6.2832);x.fill();}
+    _sprite=c;return c;
+  }
+  function build(){
+    P={drops:[],flakes:[],clouds:[],streaks:[],stars:[],fog:[]};
+    if(!scene)return;
+    const k=scene.kind,day=scene.day,wf=Math.max(0,Math.min(1,(scene.wind||0)/70));
+    if(k==='rain'||k==='storm'){const c=cnt(k==='storm'?5400:7400,k==='storm'?320:240);
+      for(let i=0;i<c;i++)P.drops.push(mkDrop(wf,k==='storm'));
+      if(k==='storm')boltAt=clock+rnd(1,3);}
+    else if(k==='snow'){const c=cnt(11000,180);for(let i=0;i<c;i++)P.flakes.push(mkFlake());}
+    else if(k==='wind'){const c=cnt(24000,70);for(let i=0;i<c;i++)P.streaks.push(mkStreak());
+      for(let i=0;i<4;i++)P.clouds.push(mkCloud(0.6));}
+    else if(k==='fog'){for(let i=0;i<6;i++)P.fog.push(mkFog());}
+    else if(k==='cloudy'){for(let i=0;i<7;i++)P.clouds.push(mkCloud(1));}
+    else if(k==='partly'){for(let i=0;i<4;i++)P.clouds.push(mkCloud(0.85));
+      if(!day){const s=cnt(15000,120);for(let i=0;i<s;i++)P.stars.push(mkStar());}}
+    else if(k==='clear'){if(day){for(let i=0;i<2;i++)P.clouds.push(mkCloud(0.5));}
+      else{const s=cnt(13000,150);for(let i=0;i<s;i++)P.stars.push(mkStar());}}
+  }
+  function mkDrop(wf,st){return {x:rnd(-0.2*W,W),y:rnd(-H,H),v:rnd(700,1300)*(st?1.15:1),len:rnd(9,22)*(st?1.1:1),a:rnd(.12,.42),sl:0.12+wf*0.5};}
+  function mkFlake(){return {x:rnd(0,W),y:rnd(-0.1*H,H),r:rnd(1.1,3.4),v:rnd(28,80),sw:rnd(8,26),ph:rnd(0,6.28),sp:rnd(.4,1.1),a:rnd(.5,.95)};}
+  function mkCloud(sc){return {x:rnd(-0.25*W,W),y:rnd(0.03*H,0.5*H),s:rnd(0.7,1.5)*sc,v:rnd(4,16),a:rnd(.10,.22)};}
+  function mkStreak(){return {x:rnd(-0.3*W,W),y:rnd(0,H),len:rnd(40,170),v:rnd(180,520),a:rnd(.05,.18),dy:rnd(-10,10)};}
+  function mkStar(){return {x:rnd(0,W),y:rnd(0,H*0.72),r:rnd(.5,1.6),a:rnd(.3,.9),ph:rnd(0,6.28),sp:rnd(.6,2)};}
+  function mkFog(){return {x:rnd(-0.4*W,0),y:rnd(0,H),h:rnd(H*0.12,H*0.34),v:rnd(6,20),a:rnd(.05,.14)};}
+  function frame(ts){
+    if(!running){raf=0;return;}
+    const dt=Math.min(((ts-last)/1000)||0,0.05); last=ts; clock+=dt;
+    ctx.clearRect(0,0,W,H);
+    const day=scene?scene.day:true;
+    if(P.fog.length)drawFog(dt,day);
+    if(P.clouds.length)drawClouds(dt,day);
+    if(P.stars.length)drawStars(dt);
+    if(P.streaks.length)drawStreaks(dt);
+    if(P.drops.length)drawRain(dt);
+    if(P.flakes.length)drawSnow(dt);
+    if(scene&&scene.kind==='storm')drawLightning(dt);
+    raf=requestAnimationFrame(frame);
+  }
+  function drawRain(dt){ctx.strokeStyle='rgb(205,225,255)';ctx.lineCap='round';
+    for(const d of P.drops){d.y+=d.v*dt;d.x+=d.v*dt*d.sl;
+      if(d.y>H+d.len){d.y=rnd(-0.3*H,0);d.x=rnd(-0.2*W,W);}
+      ctx.globalAlpha=d.a*_wxAnimF;ctx.lineWidth=Math.max(0.6,d.len/16);
+      ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-d.sl*d.len,d.y-d.len);ctx.stroke();}
+    ctx.globalAlpha=1;}
+  function drawSnow(dt){ctx.fillStyle='#fff';
+    for(const f of P.flakes){f.ph+=f.sp*dt;f.y+=f.v*dt;f.x+=Math.sin(f.ph)*f.sw*dt;
+      if(f.y>H+4){f.y=-4;f.x=rnd(0,W);}
+      ctx.globalAlpha=f.a*_wxAnimF;ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,6.2832);ctx.fill();}
+    ctx.globalAlpha=1;}
+  function drawClouds(dt,day){const sp=sprite();
+    for(const c of P.clouds){c.x+=c.v*dt;const w=360*c.s,h=200*c.s;if(c.x>W+30)c.x=-w-30;
+      ctx.globalAlpha=Math.min(1,c.a*_wxAnimF*(day?1:0.65));ctx.drawImage(sp,c.x,c.y-h*0.5,w,h);}
+    ctx.globalAlpha=1;}
+  function drawFog(dt,day){const sp=sprite();
+    for(const f of P.fog){f.x+=f.v*dt;const w=W*1.5,h=f.h*2.4;if(f.x>W)f.x=-w*0.5;
+      ctx.globalAlpha=Math.min(1,f.a*_wxAnimF);ctx.drawImage(sp,f.x,f.y-h*0.5,w,h);}
+    ctx.globalAlpha=Math.min(1,0.06*_wxAnimF);ctx.fillStyle=day?'rgb(220,224,228)':'rgb(70,78,88)';ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=1;}
+  function drawStreaks(dt){ctx.strokeStyle='#fff';ctx.lineCap='round';ctx.lineWidth=1.4;
+    for(const s of P.streaks){s.x+=s.v*dt;s.y+=s.dy*dt;if(s.x-s.len>W){s.x=-s.len;s.y=rnd(0,H);}
+      ctx.globalAlpha=s.a*_wxAnimF;ctx.beginPath();ctx.moveTo(s.x,s.y);
+      ctx.quadraticCurveTo(s.x-s.len*0.5,s.y-6,s.x-s.len,s.y);ctx.stroke();}
+    ctx.globalAlpha=1;}
+  function drawStars(dt){ctx.fillStyle='#fff';
+    for(const s of P.stars){s.ph+=s.sp*dt;ctx.globalAlpha=Math.max(0,s.a*(0.5+0.5*Math.sin(s.ph))*_wxAnimF);
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.2832);ctx.fill();}
+    ctx.globalAlpha=1;}
+  function drawLightning(dt){
+    if(clock>=boltAt){boltAt=clock+rnd(3.5,9);flash=1;bolt=mkBolt();boltT=0.18;}
+    if(boltT>0&&bolt){boltT-=dt;ctx.globalAlpha=Math.min(1,0.9*_wxAnimF);ctx.strokeStyle='#fff';ctx.lineWidth=2.2;
+      ctx.beginPath();ctx.moveTo(bolt[0][0],bolt[0][1]);for(let i=1;i<bolt.length;i++)ctx.lineTo(bolt[i][0],bolt[i][1]);ctx.stroke();ctx.globalAlpha=1;}
+    if(flash>0){ctx.globalAlpha=flash*0.5*_wxAnimF;ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;flash-=dt*3.2;if(flash<0)flash=0;}
+  }
+  function mkBolt(){let x=rnd(W*0.2,W*0.8),y=0;const p=[[x,y]],seg=Math.round(rnd(6,10)),step=H*0.6/seg;
+    for(let i=0;i<seg;i++){x+=rnd(-28,28);y+=step;p.push([x,y]);}return p;}
+  function _stop(){running=false;if(raf)cancelAnimationFrame(raf);raf=0;if(ctx)ctx.clearRect(0,0,W,H);}
+  function start(){
+    if(!scene||!document.body.classList.contains('wxbg-on'))return;
+    if(reduce()||_wxAnimF<=0){_stop();return;}
+    if(document.hidden)return;
+    if(!ctx&&!setup())return;
+    if(running)return;
+    running=true;last=performance.now();raf=requestAnimationFrame(frame);
+  }
+  return {
+    set(s){scene=s;if(!setup())return;build();start();},
+    stop(){scene=null;_stop();},
+    pause(){_stop();},
+    refresh(){if(!scene)return;if(_wxAnimF<=0||reduce()){_stop();return;}if(setup())build();start();},
+    resize(){clearTimeout(_resizeT);_resizeT=setTimeout(()=>{if(scene&&setup())build();},180);}
+  };
+})();
+window.addEventListener('resize',()=>wxAnim.resize());
+document.addEventListener('visibilitychange',()=>{if(document.hidden)wxAnim.pause();else wxAnim.refresh();});
+
 /* ── Init der Zusatz-Funktionen ── */
 applyAnim(load('gt_anim',100));
+applyAnimBg(load('gt_anim_bg',load('gt_anim',100)));
 syncDesignToggles();
 applyWeatherBg();
 setInterval(updateOvClock,1000);                                              // Live-Uhr (Sekundentakt)
