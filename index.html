@@ -2433,14 +2433,13 @@ document.addEventListener('keydown',e=>{
 
 window.addEventListener('beforeunload',e=>{if(settingsDirty){e.preventDefault();e.returnValue='';}});
 
-// ===== Fitness (Garmin live + Lyfta letztes Workout) =====
+// ===== Fitness (Lyfta letztes Workout) =====
 // Liest aus einem selbst gehosteten Begleit-Dienst (Zugangsdaten liegen nur dort).
 // Erwarteter Vertrag:
-//   GET {base}/api/garmin/live  -> { ok:true, ts, heartRate, restingHeartRate, steps, stepGoal,
-//                                     calories, bodyBattery, stress, distanceKm }   (Felder optional/null)
 //   GET {base}/api/lyfta/last   -> { ok:true, workout:{ title, date, durationMin, volume, weightUnit,
 //                                     exercises:[{ name, sets:[{weight,reps,duration,pr}],
 //                                       progress:{ kind:'pr'|'up'|'same'|'down', label } }] } }
+// Garmin am 27.06.2026 aus dem Frontend entfernt (Cloudflare blockt Renders Datacenter-IP; Backend-Endpunkt /api/garmin/live existiert noch, ungenutzt).
 function fitBase(){return (localStorage.getItem('gt_fit_base')||'').replace(/\/+$/,'');}
 function fitKey(){return localStorage.getItem('gt_fit_key')||'';}
 async function fitFetch(path){
@@ -2467,52 +2466,16 @@ function fitRelTime(ts){
   const h=Math.round(m/60);if(h<24)return 'vor '+h+' h';
   return noteDateLabel(ts);
 }
-function fitNum(v){const n=Number(v);return Number.isFinite(n)?n.toLocaleString('de-DE'):null;}
 function fitW(v){const n=Number(v);if(!Number.isFinite(n))return esc(String(v));return Number.isInteger(n)?String(n):n.toFixed(1);}
 function fitDur(min){min=Math.round(Number(min)||0);if(min<60)return min+' min';const h=Math.floor(min/60),m=min%60;return h+' h'+(m?' '+String(m).padStart(2,'0'):'');}
 function fitVol(v,unit){const n=Number(v);if(!Number.isFinite(n))return esc(String(v));return Math.round(n).toLocaleString('de-DE')+' '+(unit||'kg');}
 function fitWorkoutDate(date){const lbl=noteDateLabel(date);return lbl||esc(String(date||''));}
 function fitSkeletonCards(n){let s='';for(let i=0;i<n;i++)s+='<div class="fit-stat"><div class="lab"><span class="fit-skel" style="height:11px;width:78px;"></span></div><div class="val"><span class="fit-skel"></span></div></div>';return s;}
-function fitStat(cls,icon,label,val,unit,live){
-  const has=!(val===null||val===undefined||val==='');
-  const v=has?String(val):'—';
-  const u=(unit&&has)?`<small>${esc(String(unit))}</small>`:'';
-  const pulse=live?'<span class="fit-pulse"></span>':'';
-  return `<div class="fit-stat ${cls||''}"><div class="lab"><i class="ti ${icon}"></i> ${esc(label)} ${pulse}</div><div class="val">${esc(v)}${u}</div></div>`;
-}
 function fitProgBadge(p){
   if(!p||!p.kind)return '';
   const map={pr:['pr','ti-trophy','PR'],up:['up','ti-trending-up','Mehr'],same:['same','ti-equal','Gehalten'],down:['down','ti-trending-down','Weniger']};
   const m=map[p.kind];if(!m)return '';
   return `<span class="prog-badge ${m[0]}"><i class="ti ${m[1]}"></i> ${esc(p.label||m[2])}</span>`;
-}
-async function loadGarmin(silent){
-  const grid=document.getElementById('fitGarminGrid');const sync=document.getElementById('fitGarminSync');
-  if(!grid)return;
-  if(!silent)grid.innerHTML=fitSkeletonCards(4);
-  try{
-    const d=await fitFetch('/api/garmin/live');
-    if(d&&d.ok===false)throw new Error(d.error||'Dienst meldet einen Fehler');
-    const cards=[];
-    cards.push(fitStat('hr','ti-heartbeat','Herzfrequenz',d.heartRate,'bpm',true));
-    cards.push(fitStat('','ti-heart','Ruhepuls',d.restingHeartRate,'bpm'));
-    cards.push(fitStat('','ti-walk','Schritte',fitNum(d.steps),d.stepGoal?('/ '+fitNum(d.stepGoal)):''));
-    if(d.calories!=null)cards.push(fitStat('','ti-flame','Kalorien',fitNum(d.calories),'kcal'));
-    if(d.bodyBattery!=null)cards.push(fitStat('','ti-battery-3','Body Battery',d.bodyBattery,'%'));
-    if(d.stress!=null)cards.push(fitStat('','ti-activity','Stress',d.stress,''));
-    if(d.distanceKm!=null)cards.push(fitStat('','ti-route','Distanz',d.distanceKm,'km'));
-    grid.innerHTML=cards.join('');
-    if(sync){
-      const stale=d.ts?(Date.now()-new Date(d.ts).getTime()>10*60*1000):false;
-      sync.className='fit-sync'+(stale?' stale':'');
-      sync.innerHTML=d.ts?`<i class="ti ti-${stale?'alert-triangle':'refresh'}"></i> Aktualisiert ${esc(fitRelTime(d.ts))}${stale?' · Uhr synchronisieren':''}`:'';
-    }
-    const fsc=document.getElementById('fitSleepCard');
-    if(fsc)fsc.innerHTML=sleepCardHtml(d.sleep);
-  }catch(e){
-    grid.innerHTML='<div class="fit-err"><i class="ti ti-plug-connected-x"></i> '+esc(fitErrMsg(e))+'</div>';
-    if(sync)sync.innerHTML='';
-  }
 }
 async function loadLyfta(silent){
   const card=document.getElementById('fitLyftaCard');if(!card)return;
@@ -2585,41 +2548,20 @@ function renderFitness(){
   const body=document.getElementById('fitnessBody');if(!body)return;
   // Gewicht ist unabhängig vom Fitness-Dienst → steht immer ganz oben (eigener Container für gezieltes Neu-Rendern).
   let h='<div id="fitWeightHost">'+weightSectionHtml(todayKey,true)+'</div>';
-  h+=tpCardHtml(); // Trainingsplan steht ebenfalls vor dem Garmin/Lyfta-Block, damit er auch ohne verbundenen Dienst sichtbar ist.
+  h+=tpCardHtml(); // Trainingsplan vor dem Lyfta-Block, damit er auch ohne verbundenen Dienst sichtbar ist.
   if(!fitBase()){
-    h+=`<div class="section-h">Garmin &amp; Lyfta</div><div class="card"><div class="fit-empty"><i class="ti ti-activity-heartbeat"></i><div style="font-size:16px;font-weight:600;color:var(--text2);">Fitness-Dienst nicht verbunden</div><div class="sub">Garmin (Herzfrequenz, Schritte …) und Lyfta (letztes Workout mit Fortschritt) laufen über einen kleinen, selbst gehosteten Begleit-Dienst — so bleiben dein Garmin-Login und der Lyfta-Schlüssel von dieser Seite getrennt. Trage seine Adresse in den Einstellungen ein.</div><button class="mb primary" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:auto;padding:12px 20px;margin-top:4px;" onclick="switchView('settings')"><i class="ti ti-settings"></i> Zu den Einstellungen</button></div></div>`;
+    h+=`<div class="section-h">Lyfta</div><div class="card"><div class="fit-empty"><i class="ti ti-barbell"></i><div style="font-size:16px;font-weight:600;color:var(--text2);">Fitness-Dienst nicht verbunden</div><div class="sub">Lyfta (letztes Workout mit Fortschritt) läuft über einen kleinen, selbst gehosteten Begleit-Dienst — so bleibt dein Lyfta-Schlüssel von dieser Seite getrennt. Trage seine Adresse in den Einstellungen ein.</div><button class="mb primary" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:auto;padding:12px 20px;margin-top:4px;" onclick="switchView('settings')"><i class="ti ti-settings"></i> Zu den Einstellungen</button></div></div>`;
     body.innerHTML=h;
     return;
   }
-  h+='<div class="section-h">Garmin · Live</div>'
-    +'<div class="card"><div class="fit-grid" id="fitGarminGrid"></div><div class="fit-sync" id="fitGarminSync"></div></div>'
-    +'<div class="section-h">Schlaf · Letzte Nacht</div>'
-    +'<div class="card" id="fitSleepCard"></div>'
-    +'<div class="section-h">Lyfta · Letztes Workout</div>'
+  h+='<div class="section-h">Lyfta · Letztes Workout</div>'
     +'<div class="card" id="fitLyftaCard"></div>';
   body.innerHTML=h;
-  loadGarmin(false);loadLyfta(false);
+  loadLyfta(false);
 }
-function refreshFitness(){haptic('light');loadGarmin(false);loadLyfta(false);}
-// Nur die Gewicht-Karte im Fitness-Tab neu zeichnen (ohne Garmin/Lyfta neu zu laden).
+function refreshFitness(){haptic('light');loadLyfta(false);}
+// Nur die Gewicht-Karte im Fitness-Tab neu zeichnen (ohne Lyfta neu zu laden).
 function renderFitnessWeight(){const host=document.getElementById('fitWeightHost');if(host)host.innerHTML=weightSectionHtml(todayKey,true);}
-
-// ===== Schlaf (Fitness-Tab + Übersicht) =====
-function fitSleepDur(min){min=Math.round(Number(min)||0);const h=Math.floor(min/60),m=min%60;return h+' h'+(m?' '+String(m).padStart(2,'0'):'');}
-function sleepStagesBar(s){
-  const parts=[['deep','Tief','#3b5bdb'],['light','Leicht','#74c0fc'],['rem','REM','#9775fa'],['awake','Wach','#adb5bd']];
-  const used=parts.filter(([k])=>Number(s[k])>0);
-  const tot=used.reduce((a,p)=>a+Number(s[p[0]]),0);
-  if(!tot)return '';
-  const seg=used.map(([k,lab,c])=>`<span style="width:${(Number(s[k])/tot*100).toFixed(1)}%;background:${c}" title="${lab}: ${fitSleepDur(s[k])}"></span>`).join('');
-  const leg=used.map(([k,lab,c])=>`<span class="sleg"><i class="sdot" style="background:${c}"></i>${lab} ${fitSleepDur(s[k])}</span>`).join('');
-  return `<div class="sleep-bar">${seg}</div><div class="sleep-leg">${leg}</div>`;
-}
-function sleepCardHtml(s){
-  if(!s||s.durationMin==null)return '<div class="fit-empty" style="padding:16px;"><i class="ti ti-zzz"></i><div style="font-size:14px;color:var(--text2);margin-top:4px;">Keine Schlafdaten für letzte Nacht</div></div>';
-  const score=s.score!=null?`<div class="sleep-score"><span class="sv">${esc(String(s.score))}</span><span class="sl">Score</span></div>`:'';
-  return `<div class="sleep-head"><div class="sleep-dur"><i class="ti ti-moon-stars"></i> ${fitSleepDur(s.durationMin)}</div>${score}</div>${sleepStagesBar(s)}`;
-}
 
 // ===== Übersicht =====
 function ovRelLabel(dk){
@@ -2878,29 +2820,12 @@ function weightSvg(series,selDk){
   return '<svg class="wchart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gewichtsverlauf">'
     +grid+(area?'<path class="wc-area" d="'+area+'"/>':'')+(pts.length>1?'<path class="wc-line" d="'+line+'"/>':'')+dots+ylab+xlab+'</svg>';
 }
-async function loadOverviewFitness(silent){
-  const grid=document.getElementById('ovFitGrid');if(!grid)return;
-  if(!silent)grid.innerHTML=fitSkeletonCards(3);
-  try{
-    const d=await fitFetch('/api/garmin/live');
-    if(d&&d.ok===false)throw new Error(d.error||'Fehler');
-    const sleep=d.sleep&&d.sleep.durationMin!=null?fitSleepDur(d.sleep.durationMin):null;
-    grid.innerHTML=[
-      fitStat('hr','ti-heartbeat','Herzfrequenz',d.heartRate,'bpm',true),
-      fitStat('','ti-walk','Schritte',fitNum(d.steps),d.stepGoal?('/ '+fitNum(d.stepGoal)):''),
-      fitStat('','ti-moon-stars','Schlaf',sleep,'')
-    ].join('');
-  }catch(e){
-    grid.innerHTML='<div class="fit-err"><i class="ti ti-plug-connected-x"></i> '+esc(fitErrMsg(e))+'</div>';
-  }
-}
-
 // ===== Einstellungen: Fitness-Dienst =====
 function renderFitnessSettings(){
   const c=document.getElementById('fitCard');if(!c)return;
   const base=fitBase(),key=fitKey();
   c.innerHTML='<div class="set-row" style="align-items:flex-start;flex-direction:column;gap:12px;">'
-    +'<div class="set-label">Begleit-Dienst<br><span class="set-sub">Eine kleine, von dir gehostete Brücke holt deine Garmin- &amp; Lyfta-Daten. Garmin-Login und Lyfta-Schlüssel liegen nur dort — nie auf dieser Seite.</span></div>'
+    +'<div class="set-label">Begleit-Dienst<br><span class="set-sub">Eine kleine, von dir gehostete Brücke holt deine Lyfta-Daten. Der Lyfta-Schlüssel liegt nur dort — nie auf dieser Seite.</span></div>'
     +'<input type="url" id="fitBaseInput" class="set-input full" placeholder="https://dein-dienst.example" value="'+esc(base)+'" autocomplete="off" inputmode="url">'
     +'<div style="display:flex;gap:8px;width:100%;flex-wrap:wrap;"><input type="password" id="fitKeyInput" class="set-input" placeholder="Zugriffsschlüssel (optional)" value="'+esc(key)+'" autocomplete="off" style="flex:1;min-width:180px;"><button class="mb primary" onclick="saveFitnessSettings()"><i class="ti ti-check"></i> Speichern</button></div>'
     +(base?'<button class="mb danger" onclick="clearFitnessSettings()">Verbindung entfernen</button>':'')
@@ -2920,9 +2845,8 @@ function clearFitnessSettings(){
   haptic('light');renderFitnessSettings();
 }
 
-// Live-Aktualisierung der Garmin-Werte, solange der Fitness-Tab sichtbar ist
-setInterval(()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness')loadGarmin(true);},30000);
-document.addEventListener('visibilitychange',()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness'){loadGarmin(true);loadLyfta(true);}});
+// Lyfta beim Zurückkehren auf den sichtbaren Fitness-Tab aktualisieren
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!fitBase())return;if(currentView==='fitness')loadLyfta(true);});
 </script>
 </body>
 </html>
