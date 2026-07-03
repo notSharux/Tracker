@@ -94,6 +94,14 @@
   :root[data-accent="graphite"]{--blue:#16181d;--accent-grad:#16181d;--accent-soft:rgba(22,24,29,0.07);--accent-ring:rgba(22,24,29,0.18);--on-accent:#ffffff;}
   :root[data-accent="graphite"][data-theme="dark"]{--blue:#edeef0;--accent-grad:#edeef0;--accent-soft:rgba(237,238,240,0.12);--accent-ring:rgba(237,238,240,0.22);--on-accent:#0c0d10;}
 
+  /* ===== Wetter-Hintergrund: NUR die Schriftfarbe frei auf dem Himmel liegender Beschriftungen folgt live der Szene =====
+     data-wxink ("dark"|"light") setzt applyWeatherBg bei jedem Wetter-Update. Ohne aktiven Wetter-Hintergrund fehlt
+     das Attribut → alles exakt wie gehabt. Bewusst NUR color-Regeln — keine Flächen, Linien, Controls, kein Theme-Bezug. */
+  :root[data-wxink="dark"]{--wx-ink:#2c3350;--wx-ink-strong:#101425;}
+  :root[data-wxink="light"]{--wx-ink:#d6dbe8;--wx-ink-strong:#f4f6fc;}
+  [data-wxink] .toolbar-title,[data-wxink] .today-date,[data-wxink] .ov-clock,[data-wxink] .ov-ring-cap,[data-wxink] .progress-num,[data-wxink] .section-h,[data-wxink] .ov-ring-pct span{color:var(--wx-ink);}
+  [data-wxink] .today-h1,[data-wxink] .progress-pct,[data-wxink] .ov-ring-pct,[data-wxink] .ov-ring-cap strong,[data-wxink] .progress-num strong{color:var(--wx-ink-strong);}
+
   .accent-picker{display:flex;gap:10px;align-items:center;}
   .accent-dot{width:26px;height:26px;border-radius:50%;border:none;background:var(--sw,#888);cursor:pointer;padding:0;transition:transform .15s var(--ease-out);}
   .accent-dot:hover{transform:scale(1.12);}
@@ -959,6 +967,10 @@
   .ov-now:hover{background:var(--fill-strong);}
   .ov-now.is-today{background:var(--accent-soft);border-color:transparent;color:var(--blue);}
   .ov-daygoals{display:flex;flex-direction:column;}
+  /* Tageszeit-Unterüberschriften in der Übersicht (Generell/Morgen/Nachmittag/Abend) */
+  .ov-cat-h{font-size:10.5px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin:14px 2px 4px;}
+  .ov-cat-h::after{content:'';flex:1;height:1px;background:var(--separator);}
+  .ov-cat-h:first-child{margin-top:2px;}
   .ov-events{display:flex;flex-direction:column;}
   .ov-event{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--separator);}
   .ov-event:last-child{border-bottom:none;}
@@ -3056,6 +3068,16 @@ function ovProgress(dk){
   if(dk===todayKey){const t=goals.filter(g=>isAbst(g)||isScheduledToday(g));return {done:t.filter(g=>isDoneToday(g)).length,total:t.length};}
   const h=history[dk]||{};const l=goals.filter(g=>!isAbst(g)&&isScheduledOn(g,dk));return {done:l.filter(g=>h[g.id]).length,total:l.length};
 }
+// Ziel-Liste nach Tageszeit gruppiert (Generell/Morgen/Nachmittag/Abend) — wie im Ziele-Tab
+function ovCatList(list,row){
+  let s='';
+  CATS.forEach(cat=>{
+    const cg=list.filter(g=>(g.cat||'general')===cat.key);
+    if(!cg.length)return;
+    s+=`<div class="ov-cat-h">${esc(cat.label)}</div><div class="ov-daygoals">${cg.map(row).join('')}</div>`;
+  });
+  return s;
+}
 function renderOverview(){
   const body=document.getElementById('overviewBody');if(!body)return;
   const dk=ovDate,isToday=dk===todayKey;
@@ -3096,9 +3118,7 @@ function renderOverview(){
     if(!sched.length){h+='<div class="day-empty">Keine Ziele für heute geplant.</div>';}
     else if(!open.length){h+=`<div class="ov-alldone"><i class="ti ti-circle-check-filled"></i><div>Alles erledigt für heute</div><div class="sub">${done.length} ${done.length===1?'Ziel':'Ziele'} abgehakt</div></div>`;}
     else{
-      h+=`<div class="ov-daygoals">`;
-      open.forEach(g=>{h+=`<div class="day-goal" onclick="toggleOvGoal('${g.id}')"><div class="day-goal-box"><i class="ti ti-check"></i></div><div class="day-goal-name">${esc(g.name)}</div></div>`;});
-      h+=`</div>`;
+      h+=ovCatList(open,g=>`<div class="day-goal" onclick="toggleOvGoal('${g.id}')"><div class="day-goal-box"><i class="ti ti-check"></i></div><div class="day-goal-name">${esc(g.name)}</div></div>`);
     }
     // Erledigte heute dezent & eingeklappt — damit ein versehentlich abgehaktes Ziel nicht in der Sackgasse landet
     if(done.length){
@@ -3111,10 +3131,10 @@ function renderOverview(){
     const hist=history[dk]||{};
     const list=goals.filter(g=>!isAbst(g)&&isScheduledOn(g,dk));
     const future=_atNoon(dk)>_atNoon(todayKey);
-    h+=`<div class="section-h">${future?'Vortragen':'Nachtragen'}</div><div class="card"><div class="ov-daygoals">`;
-    if(!list.length)h+='<div class="day-empty">Keine Ziele für diesen Tag geplant.</div>';
-    else list.forEach(g=>{h+=`<div class="day-goal${hist[g.id]?' on':''}" onclick="toggleOvGoal('${g.id}')"><div class="day-goal-box"><i class="ti ti-check"></i></div><div class="day-goal-name">${esc(g.name)}</div></div>`;});
-    h+='</div></div>';
+    h+=`<div class="section-h">${future?'Vortragen':'Nachtragen'}</div><div class="card">`;
+    if(!list.length)h+='<div class="ov-daygoals"><div class="day-empty">Keine Ziele für diesen Tag geplant.</div></div>';
+    else h+=ovCatList(list,g=>`<div class="day-goal${hist[g.id]?' on':''}" onclick="toggleOvGoal('${g.id}')"><div class="day-goal-box"><i class="ti ti-check"></i></div><div class="day-goal-name">${esc(g.name)}</div></div>`);
+    h+='</div>';
   }
   h+=`</div><div class="ov-side"><div class="section-h">Generelle Ziele</div><div class="card">`;
   if(!generalGoals.length){
@@ -3390,7 +3410,7 @@ async function wxFetch(loc){
 async function loadWeather(force){
   if(!wx.loc)return;
   if(wx.loading)return;
-  if(!force&&wx.data&&Date.now()-wx.ts<600000){if(currentView==='weather')renderWeather();renderWeatherOverview();applyWeatherBg();return;}
+  if(!force&&wx.data&&Date.now()-wx.ts<55000){if(currentView==='weather')renderWeather();renderWeatherOverview();applyWeatherBg();return;}
   wx.loading=true;wx.error=null;
   if(currentView==='weather')renderWeather();
   try{wx.data=await wxFetch(wx.loc);wx.ts=Date.now();}catch(e){wx.error=e;}
@@ -3599,15 +3619,47 @@ function wxScene(){
   try{const d=wx.data.daily;if(d&&d.sunrise&&d.sunset){sunrise=new Date(d.sunrise[0]).getTime();sunset=new Date(d.sunset[0]).getTime();if(!(sunrise>0)||!(sunset>0)){sunrise=null;sunset=null;}}}catch(e){}
   return {kind,day,wind:Math.max(wind,gust*0.6),sunrise,sunset};
 }
+// ── Schriftfarbe frei liegender Beschriftungen an den ECHTEN Himmel koppeln ──
+// Misst die tatsächlich gerenderte Helligkeit des Wetter-Canvas im oberen Bereich (dort liegen
+// Datum/Uhrzeit/Überschriften), rechnet den Schleier (.wxbg-veil) ein und setzt data-wxink="dark"|"light".
+// Wird nur für color-Regeln genutzt — Theme, Flächen, Linien bleiben unberührt.
+let _wxInkPrev=null,_wxInkT=null;
+function wxInkUpdate(){
+  if(!document.body.classList.contains('wxbg-on'))return;
+  const cv=document.querySelector('#wxBg .wxbg-canvas');let lum=0,n=0;
+  try{
+    if(cv&&cv.width>0&&cv.height>0){
+      const ctx=cv.getContext('2d');
+      const lin=c=>{c/=255;return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
+      for(let y=0;y<4;y++)for(let x=0;x<6;x++){
+        const p=ctx.getImageData(Math.floor(cv.width*(x+0.5)/6),Math.floor(cv.height*0.55*(y+0.5)/4),1,1).data;
+        if(p[3]<200)continue; // noch nicht gemalt → Pixel nicht werten
+        lum+=0.2126*lin(p[0])+0.7152*lin(p[1])+0.0722*lin(p[2]);n++;
+      }
+    }
+  }catch(e){n=0;}
+  if(n<12){document.documentElement.removeAttribute('data-wxink');_wxInkPrev=null;return;} // keine verlässliche Messung (Canvas aus/leer) → nichts anfassen
+  lum/=n;
+  // Schleier über dem Canvas: hellt im hellen Theme auf, dunkelt sonst ab — Teil des sichtbaren Hintergrunds
+  lum=document.documentElement.getAttribute('data-theme')==='light'?lum*0.65+0.305:lum*0.72+0.002;
+  wxInkUpdate._lum=lum;
+  const th=_wxInkPrev==='dark'?0.21:0.27; // Wahrnehmungs-Crossover ~0.21 + Hysterese — kein Flackern in der Dämmerung
+  const ink=lum>th?'dark':'light';
+  _wxInkPrev=ink;
+  document.documentElement.setAttribute('data-wxink',ink);
+}
 function applyWeatherBg(){
   const sc=load('gt_wx_bg',false)?wxScene():null;
   if(sc){
     document.documentElement.setAttribute('data-wxscene',sc.kind+'-'+(sc.day?'day':'night'));
     document.body.classList.add('wxbg-on');
     wxAnim.set(sc);
+    clearTimeout(_wxInkT);_wxInkT=setTimeout(wxInkUpdate,700); // kurz warten, bis der Himmel gemalt ist; das Minuten-Update misst danach ohnehin neu
   }else{
     document.body.classList.remove('wxbg-on');
     document.documentElement.removeAttribute('data-wxscene');
+    document.documentElement.removeAttribute('data-wxink');
+    _wxInkPrev=null;
     wxAnim.stop();
   }
 }
@@ -4013,7 +4065,7 @@ const wxAnim=(function(){
   };
 })();
 window.addEventListener('resize',()=>wxAnim.resize());
-document.addEventListener('visibilitychange',()=>{if(document.hidden)wxAnim.pause();else wxAnim.refresh();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){wxAnim.pause();}else{wxAnim.refresh();if(wx.loc)loadWeather();}}); // beim Zurückkehren sofort frisches Wetter (Intervall steht im Hintergrund still)
 
 /* ── Init der Zusatz-Funktionen ── */
 applyAnim(load('gt_anim',100));
@@ -4021,7 +4073,7 @@ applyAnimBg(load('gt_anim_bg',load('gt_anim',100)));
 syncDesignToggles();
 applyWeatherBg();
 setInterval(updateOvClock,1000);                                              // Live-Uhr (Sekundentakt)
-setInterval(()=>{if(!document.hidden&&wx.loc)loadWeather(true);},600000);     // Wetter alle 10 Min
+setInterval(()=>{if(!document.hidden&&wx.loc)loadWeather(true);},60000);      // Wetter jede Minute frisch
 setInterval(()=>{if(!document.hidden&&fitBase())loadLyfta(true);},3600000);   // Lyfta jede Stunde
 </script>
 </body>
