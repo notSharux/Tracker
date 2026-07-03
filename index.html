@@ -327,6 +327,39 @@
 
   /* ===== Bars ===== */
   .bar-list{display:flex;flex-direction:column;gap:14px;}
+  /* Zeilen sind klickbar → Ziel-Detail-Statistik */
+  .bar-row.bar-click{cursor:pointer;border-radius:10px;margin:-4px -6px;padding:4px 6px;transition:background .15s var(--ease-out);}
+  .bar-row.bar-click:hover{background:var(--fill-hover);}
+  /* ===== Ziel-Detail-Statistik (Modal) ===== */
+  .gs-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .gs-num{background:var(--fill3);border:0.5px solid var(--separator);border-radius:12px;padding:10px 12px;min-width:0;}
+  .gs-num .l{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .gs-num .v{font-family:var(--font-num);font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em;}
+  .gs-num .v small{font-size:12px;color:var(--text3);font-weight:600;margin-left:2px;}
+  .gs-cap{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;}
+  .gs-weeks{display:flex;align-items:stretch;gap:8px;height:120px;}
+  .gs-wk{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;}
+  .gs-wk-bar{width:100%;max-width:34px;flex:1;border-radius:8px;background:var(--track);position:relative;overflow:hidden;}
+  .gs-wk-fill{position:absolute;left:0;right:0;bottom:0;border-radius:inherit;}
+  .gs-wk-l{font-size:9.5px;color:var(--text3);font-weight:600;white-space:nowrap;}
+  .gs-wk-p{font-size:10.5px;font-family:var(--font-num);color:var(--text2);font-weight:700;}
+  .gs-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:330px;}
+  .gs-cell{aspect-ratio:1;border-radius:6px;background:var(--track);}
+  .gs-cell.on{background:var(--green);}
+  .gs-cell.miss{background:color-mix(in srgb,var(--red) 45%,var(--track));}
+  .gs-cell.off{opacity:.25;}
+  .gs-cell.fut{background:transparent;border:1px dashed var(--separator-opaque);}
+  .gs-legend{display:flex;gap:14px;margin-top:9px;font-size:11px;color:var(--text3);flex-wrap:wrap;}
+  .gs-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .gs-dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+  /* ===== Finanzen ===== */
+  .fin-delta.up{color:var(--green);}
+  .fin-delta.down{color:var(--red);}
+  .fin-list{display:flex;flex-direction:column;margin-top:6px;}
+  .fin-item{display:flex;align-items:center;gap:12px;padding:8px 2px;border-bottom:1px solid var(--separator);}
+  .fin-item:last-child{border-bottom:none;}
+  .fin-d{font-size:13px;color:var(--text2);width:84px;flex-shrink:0;}
+  .fin-v{font-family:var(--font-num);font-size:14px;font-weight:600;color:var(--text);flex:1;}
   .bar-row{display:flex;align-items:center;gap:14px;animation:barIn .5s var(--ease-out) backwards;}
   @keyframes barIn{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:translateX(0);}}
   .bar-label{font-size:14px;font-weight:500;color:var(--text);width:160px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em;}
@@ -1552,6 +1585,8 @@
           </div>
         </div>
 
+        <div class="view" id="view-finance"><div id="financeBody"></div></div>
+
         <div class="view" id="view-settings">
           <div class="section-h">Darstellung</div>
           <div class="set-card">
@@ -1695,6 +1730,14 @@
   </div>
 </div>
 
+<div class="overlay hidden" id="goalStatOverlay" onclick="if(event.target===this)closeGoalStat()">
+  <div class="modal" style="max-width:540px;">
+    <div class="modal-h" id="gsTitle">Ziel</div>
+    <div id="gsBody" style="position:relative;z-index:1;"></div>
+    <div class="modal-foot"><button class="mb primary" onclick="closeGoalStat()">Schließen</button></div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="unsavedOverlay" onclick="if(event.target===this)unsavedCancel()">
   <div class="modal" style="max-width:380px;">
     <div class="modal-h">Ungespeicherte Änderungen</div>
@@ -1733,7 +1776,7 @@
 <script>
 function ymd(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function load(k,fb){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb;}catch{return fb;}}
-const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
+const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
 let syncToken=localStorage.getItem('gt_sync_token')||'';
 let syncGistId=localStorage.getItem('gt_sync_gist')||'';
 let syncStatus=syncToken?'idle':'off';
@@ -1744,7 +1787,7 @@ function ssave(k,v){
 }
 
 // ===== Cloud-Sync (privater GitHub-Gist) =====
-function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
+function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_fin:finData,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
 function mergeHistory(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{out[d]=(a[d]&&b[d])?(bN?{...a[d],...b[d]}:{...b[d],...a[d]}):(a[d]||b[d]);});return out;}
 function mergeWeights(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{const av=a?a[d]:undefined,bv=b?b[d]:undefined;out[d]=(av!=null&&bv!=null)?(bN?bv:av):(av!=null?av:bv);});return out;}
 // Tagesnotizen wie Gewicht feldweise zusammenführen: pro Tag gewinnt bei Konflikt der neuere Stand.
@@ -1763,12 +1806,13 @@ async function ensureGist(){
   else{const ts=new Date().toISOString();const c=await ghFetch('POST','/gists',{description:'goal-tracker-data (Tracker Sync) — nicht löschen',public:false,files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:localData()})}}});syncGistId=c.id;localStorage.setItem('gt_data_ts',ts);}
   localStorage.setItem('gt_sync_gist',syncGistId);
 }
-function applyRemote(rData,rTs,mergedHist,mergedW,mergedN){
+function applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedF){
   const set=(k,v)=>{if(v!==undefined)localStorage.setItem(k,JSON.stringify(v));};
   set('gt_goals3',rData.gt_goals3);set('gt_start3',rData.gt_start3);
   localStorage.setItem('gt_history3',JSON.stringify(mergedHist));
   set('gt_events3',rData.gt_events3);set('gt_notes3',rData.gt_notes3);
   localStorage.setItem('gt_weight',JSON.stringify(mergedW||rData.gt_weight||{}));
+  localStorage.setItem('gt_fin',JSON.stringify(mergedF||rData.gt_fin||{}));
   set('gt_general',rData.gt_general);
   localStorage.setItem('gt_daynotes',JSON.stringify(mergedN||rData.gt_daynotes||{}));
   set('gt_taborder',rData.gt_taborder);
@@ -1798,21 +1842,24 @@ async function doPull(){
     if(rReset&&rReset>lReset){
       // Ein Reset, den dieses Gerät noch nicht kennt → leeren Remote-Stand 1:1 übernehmen (KEINE mergeHistory-Vereinigung, sonst kämen alte Tage zurück)
       localStorage.setItem('gt_reset_at',rReset);
-      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{},rData.gt_daynotes||{});return;
+      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{},rData.gt_daynotes||{},rData.gt_fin||{});return;
     }
     const lTs=localStorage.getItem('gt_data_ts')||'';
     const mergedHist=mergeHistory(history||{},rData.gt_history3||{},lTs,rTs);
     const mergedW=mergeWeights(weights||{},rData.gt_weight||{},lTs,rTs);
     const mergedN=mergeDayNotes(dayNotes||{},rData.gt_daynotes||{},lTs,rTs);
-    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW,mergedN);return;}
+    const mergedF=mergeWeights(finData||{},rData.gt_fin||{},lTs,rTs); // gleiche Datum→Zahl-Merge-Logik wie Gewicht
+    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedF);return;}
     const histChanged=JSON.stringify(mergedHist)!==JSON.stringify(history||{});
     const wChanged=JSON.stringify(mergedW)!==JSON.stringify(weights||{});
     const nChanged=JSON.stringify(mergedN)!==JSON.stringify(dayNotes||{});
+    const fChanged=JSON.stringify(mergedF)!==JSON.stringify(finData||{});
     if(histChanged){history=mergedHist;ssave('gt_history3',history);}
     if(wChanged){weights=mergedW;ssave('gt_weight',weights);}
     if(nChanged){dayNotes=mergedN;ssave('gt_daynotes',dayNotes);}
+    if(fChanged){finData=mergedF;ssave('gt_fin',finData);if(currentView==='finance')renderFinance();}
     if(histChanged||wChanged||nChanged){renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
-    if(lTs>rTs||histChanged||wChanged||nChanged){await doPush();}else{setSyncStatus('ok');}
+    if(lTs>rTs||histChanged||wChanged||nChanged||fChanged){await doPush();}else{setSyncStatus('ok');}
   }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
 }
 function pushSoon(){if(!syncToken||!_syncReady)return;_pendingPush=true;clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>doPush(),1500);}
@@ -1903,6 +1950,8 @@ let startDate=load('gt_start3',ymd(new Date()));
 let history=load('gt_history3',{});
 let events=load('gt_events3',[]);
 let weights=load('gt_weight',{});   // tägliches Morgengewicht: { 'YYYY-MM-DD': kg }
+let finData=load('gt_fin',{});      // Vermögens-Wochenstand (sonntags): { 'YYYY-MM-DD': Euro }
+let finRange=0,finEdit=false;       // Chart-Zeitraum (0=alle) · Eingabe trotz erledigtem Wochenstand offen
 let generalGoals=load('gt_general',[]); // reine Anzeige-Liste (Leitsätze), KEINE Tracking-Funktion: [{id,text}]
 let dayNotes=load('gt_daynotes',{});    // Anmerkung/Begründung pro Tag: { 'YYYY-MM-DD': 'Text' }
 let tabOrder=load('gt_taborder',['overview','goals','calendar','fitness','notes','stats']); // anpassbare Tab-Reihenfolge (Einstellungen bleibt fix am Ende)
@@ -1963,6 +2012,7 @@ const TAB_DEFS={
   fitness:{label:'Fitness',icon:'ti-activity-heartbeat'},
   weather:{label:'Wetter',icon:'ti-cloud'},
   notes:{label:'Notizen',icon:'ti-notes'},
+  finance:{label:'Finanzen',icon:'ti-chart-line'},
   stats:{label:'Statistik',icon:'ti-chart-bar'},
 };
 const TAB_KEYS=Object.keys(TAB_DEFS);
@@ -2007,7 +2057,7 @@ function doSwitchView(v){
   document.querySelectorAll('.nav-item,.tab,.settings-gear').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const titles={overview:'Übersicht',goals:'Ziele',calendar:'Kalender',fitness:'Fitness',weather:'Wetter',notes:'Notizen',stats:'Statistik',settings:'Einstellungen'};
+  const titles={overview:'Übersicht',goals:'Ziele',calendar:'Kalender',fitness:'Fitness',weather:'Wetter',notes:'Notizen',finance:'Finanzen',stats:'Statistik',settings:'Einstellungen'};
   document.getElementById('tbTitle').textContent=titles[v];
   if(v==='settings')initSettingsDraft();
   renderToolbar();
@@ -2016,6 +2066,7 @@ function doSwitchView(v){
   if(v==='settings'){renderTabsEditor();renderGoalsEditor();renderGeneralEditor();renderSyncUI();renderFitnessSettings();syncDesignToggles();}
   if(v==='notes')renderNotes();
   if(v==='fitness')renderFitness();
+  if(v==='finance')renderFinance();
   if(v==='weather')renderWeather();
   if(v==='overview')renderOverview();
   if(v==='goals'){renderGoals();renderStats();}
@@ -2291,10 +2342,108 @@ function renderBars(){
     const row=document.createElement('div');row.className='bar-row';
     row.style.animationDelay=(i*0.04)+'s';
     row.innerHTML=`<div class="bar-label">${g.name}${tag}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col};color:${col}"></div></div><div class="bar-pct">${pct}%</div>`;
+    row.classList.add('bar-click');row.title='Antippen für Details';
+    row.addEventListener('click',()=>openGoalStat(g.id));
     bl.appendChild(row);
   });
   if(goals.some(isAbst)){const n=document.createElement('div');n.style.cssText='font-size:12px;color:var(--text3);margin-top:14px;letter-spacing:-.01em;';n.innerHTML='<i class="ti ti-info-circle"></i> Abstinenz-Ziele erscheinen als Zähler unter „Ziele“, nicht hier.';bl.appendChild(n);}
 }
+
+// ===== Ziel-Detail-Statistik: Klick auf eine Zeile in „Erfolgsquote pro Ziel" =====
+function gsRateColor(p){return p>=80?'var(--green)':p>=50?'var(--orange)':'var(--red)';}
+// Quote wie in renderBars gerechnet (gleiche Zahlen wie in der Liste): Basis sind Tage mit History-Einträgen
+function gsQuote(g,rangeDays){
+  const allDays=Object.keys(history).sort();
+  let days=allDays;
+  if(rangeDays){const c=new Date();c.setDate(c.getDate()-rangeDays);const cs=ymd(c);days=allDays.filter(d=>d>=cs);}
+  if(!days.length)return null;
+  const freq=goalFreq(g),wd=goalDays(g);
+  const done=days.filter(d=>history[d]&&history[d][g.id]).length;
+  const expected=wd?days.filter(d=>isScheduledOn(g,d)).length:(freq<7?days.length*freq/7:days.length);
+  return expected?Math.min(100,Math.round(done/expected*100)):null;
+}
+// Beste Serie über die gesamte History (heute zählt mit, bricht aber nichts ab, solange es offen ist)
+function gsBestStreak(g){
+  const ks=Object.keys(history).sort();if(!ks.length)return 0;
+  let best=0,run=0;const d=_atNoon(ks[0]);const end=_atNoon(todayKey);
+  while(d<=end){const k=ymd(d);
+    if(isScheduledOn(g,k)){
+      if(history[k]&&history[k][g.id]){run++;if(run>best)best=run;}
+      else if(k<todayKey)run=0;
+    }
+    d.setDate(d.getDate()+1);
+  }
+  return best;
+}
+// Wochenstatistik (Mo–So): erledigt vs. erwartet — erwartet wie renderBars (anteilig bei x×/Woche)
+function gsWeekStat(g,ws){
+  const freq=goalFreq(g),wd=goalDays(g);
+  let done=0,past=0,sched=0;
+  for(let i=0;i<7;i++){
+    const d=new Date(ws);d.setDate(d.getDate()+i);const k=ymd(d);
+    if(k>todayKey)break;
+    past++;
+    const s=wd?isScheduledOn(g,k):true;
+    if(s){sched++;if(history[k]&&history[k][g.id])done++;}
+  }
+  const exp=wd?sched:(freq<7?Math.max(1,Math.round(past*freq/7)):past);
+  return {done,exp:exp||0,past};
+}
+function openGoalStat(id){
+  const g=goals.find(x=>x.id===id);if(!g||isAbst(g))return;
+  haptic('light');
+  const freq=goalFreq(g),wd=goalDays(g);
+  const tag=wd?dayAbbr(wd):(freq<7?freq+'×/Woche':'Täglich');
+  const q28=gsQuote(g,28),qAll=gsQuote(g,0);
+  // — Kennzahlen: bei Wochen-Zielen ist eine Tages-Serie irreführend → stattdessen „diese Woche x/f" —
+  let nums;
+  if(freq<7&&!wd){
+    const wc=weekChecks(g.id,todayKey);
+    nums=[['Quote · 28 T',q28==null?'—':q28+'<small>%</small>'],
+          ['Diese Woche',wc+'<small>/'+freq+'</small>'],
+          ['Quote · gesamt',qAll==null?'—':qAll+'<small>%</small>']];
+  }else{
+    const cur=calcStreak(g)+((history[todayKey]||{})[g.id]?1:0);
+    nums=[['Quote · 28 T',q28==null?'—':q28+'<small>%</small>'],
+          ['Aktuelle Serie',cur+'<small>'+(cur===1?'Tag':'Tage')+'</small>'],
+          ['Rekord-Serie',gsBestStreak(g)+'<small>Tage</small>']];
+  }
+  let html='<div class="gs-nums">'+nums.map(n=>'<div class="gs-num"><div class="l">'+n[0]+'</div><div class="v">'+n[1]+'</div></div>').join('')+'</div>';
+  // — 8-Wochen-Balken —
+  const wsNow=_atNoon(weekStartKey(todayKey));
+  let wk='';
+  for(let w=7;w>=0;w--){
+    const ws=new Date(wsNow);ws.setDate(ws.getDate()-w*7);
+    const st=gsWeekStat(g,ws);
+    const pct=st.exp?Math.min(100,Math.round(st.done/st.exp*100)):0;
+    const lab=ws.getDate()+'.'+(ws.getMonth()+1)+'.';
+    wk+='<div class="gs-wk"><div class="gs-wk-p">'+pct+'</div><div class="gs-wk-bar"><div class="gs-wk-fill" style="height:'+Math.max(4,pct)+'%;background:'+gsRateColor(pct)+'"></div></div><div class="gs-wk-l">'+lab+'</div></div>';
+  }
+  html+='<div class="gs-cap">Wochen-Quote in % · letzte 8 Wochen (ab Mo)</div><div class="gs-weeks">'+wk+'</div>';
+  // — 28-Tage-Raster (Mo–So, endet mit der aktuellen Woche) —
+  let grid='';
+  const g0=new Date(wsNow);g0.setDate(g0.getDate()-21);
+  for(let i=0;i<28;i++){
+    const d=new Date(g0);d.setDate(d.getDate()+i);const k=ymd(d);
+    let cls;
+    if(k>todayKey)cls='fut';
+    else if(wd&&!isScheduledOn(g,k))cls='off';
+    else if(history[k]&&history[k][g.id])cls='on';
+    else if(k===todayKey||freq<7)cls='';        // heute offen bzw. Wochen-Ziel: leerer Tag ist kein Verpasst
+    else cls='miss';
+    grid+='<div class="gs-cell '+cls+'" title="'+k+'"></div>';
+  }
+  html+='<div class="gs-cap">Letzte 28 Tage</div><div class="gs-grid">'+grid+'</div>'
+    +'<div class="gs-legend">'
+    +'<span><span class="gs-dot" style="background:var(--green)"></span>erledigt</span>'
+    +(freq<7&&!wd?'':'<span><span class="gs-dot" style="background:color-mix(in srgb,var(--red) 45%,var(--track))"></span>verpasst</span>')
+    +(wd?'<span><span class="gs-dot" style="background:var(--track);opacity:.4"></span>nicht geplant</span>':'')
+    +'</div>';
+  document.getElementById('gsTitle').innerHTML='<i class="ti ti-chart-dots-2" style="color:var(--blue)"></i> '+esc(g.name)+' <span style="font-size:12px;color:var(--text3);font-weight:600;">· '+esc(tag)+'</span>';
+  document.getElementById('gsBody').innerHTML=html;
+  document.getElementById('goalStatOverlay').classList.remove('hidden');
+}
+function closeGoalStat(){document.getElementById('goalStatOverlay').classList.add('hidden');}
 
 function getMonday(d){const x=new Date(d);x.setHours(0,0,0,0);const day=x.getDay();const diff=x.getDate()-(day===0?6:day-1);x.setDate(diff);return x;}
 function getWeekDates(){const m=getMonday(calCursor);return Array.from({length:7},(_,i)=>{const d=new Date(m);d.setDate(d.getDate()+i);return d;});}
@@ -2825,6 +2974,7 @@ async function wipeSyncedGist(keepCalendar,keepGoals){
   const cleared={gt_goals3:Array.isArray(keepGoals)?keepGoals:[],gt_start3:ymd(new Date()),gt_history3:{},
     gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
     gt_weight:keepCalendar?weights:{},
+    gt_fin:keepCalendar?finData:{},
     gt_general:keepCalendar?generalGoals:[],gt_daynotes:{},
     gt_taborder:tabOrder,
     gt_theme:themePref,gt_accent:accentPref};
@@ -2855,15 +3005,15 @@ async function resetAllData(){
   if(!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.'))return;
   if(!confirm('Bist du dir sicher? Wirklich alles?'))return;
   settingsDirty=false;
-  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_general','gt_daynotes'].forEach(k=>localStorage.removeItem(k));
+  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_general','gt_daynotes'].forEach(k=>localStorage.removeItem(k));
   try{await wipeSyncedGist(false);}catch(e){}
   location.reload();
 }
 
 // ===== Backup (Export / Import) =====
-const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
+const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
 function exportData(){
-  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
+  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_fin:finData,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
   const payload={app:'goal-tracker',version:1,exportedAt:new Date().toISOString(),data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -3108,6 +3258,11 @@ function renderOverview(){
     +`<div class="ov-hero-r">${ring}<div class="ov-ring-cap"><strong>${p.done}</strong> von ${p.total} erledigt</div></div></div>`;
   // ── Zwei-Spalten: links offene/nachzutragende Ziele, rechts generelle Ziele ──
   h+=`<div class="section-h">Wetter</div><div id="ovWeatherHost"></div>`;
+  // Finanz-Wochenstand: ab Sonntag fällig, Karte bleibt bis zum Eintrag (verschwindet danach von selbst)
+  if(isToday&&finDue()){
+    h+=`<div class="section-h">Finanzen</div><div class="card">`+finEntryHtml(true)
+      +`<div style="font-size:11.5px;color:var(--text3);margin-top:8px;">Wöchentlicher Vermögens-Check · <a onclick="switchView('finance')" style="color:var(--blue);cursor:pointer;font-weight:600;">zum Finanzen-Tab</a></div></div>`;
+  }
   h+=`<div class="ov-cols"><div class="ov-main">`;
   if(isToday){
     const td=history[todayKey]||{};
@@ -3225,6 +3380,139 @@ function saveWeight(dk){
 }
 function editWeight(dk){wEditDk=dk;renderFitnessWeight();setTimeout(()=>{const i=document.getElementById('wInput');if(i){i.focus();i.select();}},30);}
 function cancelWeightEdit(){wEditDk=null;renderFitnessWeight();}
+
+// ===== Finanzen · Vermögens-Wochenstand (jeden Sonntag ein Eintrag → Verlauf über die Zeit) =====
+function fmtEur(n,dec){const d=dec==null?0:dec;return Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function parseMoney(s){
+  if(s==null)return null;
+  let t=String(s).trim().replace(/[€\s]/g,'');
+  if(/,\d{1,2}$/.test(t))t=t.replace(/\./g,'').replace(',','.'); // deutsch: 12.345,67
+  else t=t.replace(/,/g,'');                                     // 12345.67 oder 12,345.67
+  const n=parseFloat(t);
+  if(!isFinite(n)||n<0||n>100000000)return null;
+  return Math.round(n*100)/100;
+}
+function finKeys(){return Object.keys(finData).filter(k=>typeof finData[k]==='number'&&isFinite(finData[k])).sort();}
+function lastFinKey(){const k=finKeys();return k.length?k[k.length-1]:null;}
+function finDueKey(){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-d.getDay());return ymd(d);} // letzter Sonntag (heute, falls Sonntag ist)
+function finDue(){const lk=lastFinKey();return !lk||lk<finDueKey();} // seit dem letzten Sonntag kein Eintrag → fällig (bleibt bis zum Eintragen)
+function finSeries(rangeDays){
+  const ks=finKeys();if(!ks.length)return [];
+  if(!rangeDays)return ks.map(k=>({dk:k,v:finData[k]}));
+  const c=new Date();c.setHours(12,0,0,0);c.setDate(c.getDate()-rangeDays);
+  const from=ymd(c);
+  return ks.filter(k=>k>=from).map(k=>({dk:k,v:finData[k]}));
+}
+function saveFin(fromOverview){
+  const inp=document.getElementById('finInput');if(!inp)return;
+  const v=parseMoney(inp.value);
+  if(v==null){inp.classList.add('w-bad');inp.focus();inp.select();return;}
+  finData[todayKey]=v;ssave('gt_fin',finData);
+  finEdit=false;haptic('medium');
+  if(fromOverview)renderOverview();else renderFinance();
+}
+function editFin(){finEdit=true;renderFinance();setTimeout(()=>{const i=document.getElementById('finInput');if(i){i.focus();i.select();}},30);}
+function cancelFinEdit(){finEdit=false;renderFinance();}
+function removeFin(dk){
+  if(!confirm('Eintrag vom '+shortDate(dk)+' ('+fmtEur(finData[dk])+' €) löschen?'))return;
+  delete finData[dk];ssave('gt_fin',finData);haptic('light');renderFinance();
+}
+function setFinRange(r,btn){
+  finRange=r;haptic('light');
+  if(btn){btn.parentElement.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  const w=document.getElementById('finChartWrap');if(w)w.innerHTML=finChartHtml();
+}
+// Eingabezeile — nutzt die Gewichts-Optik (w-ask/w-input); compact=true steht in der Übersichts-Karte
+function finEntryHtml(compact){
+  const lk=lastFinKey();
+  const ph=lk?fmtEur(finData[lk]):'25.000';
+  const hint=lk?' <span class="w-hint">· zuletzt '+fmtEur(finData[lk])+' € ('+esc(shortDate(lk))+')</span>':'';
+  const q=compact?'Sonntag — wie steht dein Vermögen?':'Aktuellen Gesamtstand eintragen (Depot + Cash)';
+  return '<div class="w-ask"><div class="w-ask-q">'+q+hint+'</div>'
+    +'<div class="w-input-row">'
+    +'<div class="w-field"><input id="finInput" class="w-input" type="text" inputmode="decimal" autocomplete="off" placeholder="'+ph+'" onkeydown="if(event.key===\'Enter\')saveFin('+(compact?'true':'false')+')" oninput="this.classList.remove(\'w-bad\')"><span class="w-unit">€</span></div>'
+    +'<button class="mb primary w-save" onclick="saveFin('+(compact?'true':'false')+')"><i class="ti ti-check"></i> Speichern</button>'
+    +((!compact&&finEdit&&!finDue())?'<button class="mb w-cancel" onclick="cancelFinEdit()">Abbrechen</button>':'')
+    +'</div></div>';
+}
+function finChartHtml(){
+  const series=finSeries(finRange);
+  if(!series.length)return '<div class="w-empty"><i class="ti ti-chart-line"></i><span>Noch keine Einträge — trag oben deinen ersten Wochenstand ein.</span></div>';
+  const first=series[0].v,last=series[series.length-1].v;
+  const d=last-first,pct=first?d/first*100:0;
+  const rl=finRange===0?'gesamt':finRange===365?'1 J':'3 M';
+  const sign=d>0?'+':d<0?'−':'±';
+  const stats='<div class="w-stats">'
+    +'<div class="w-stat"><span class="wl">Aktuell</span><span class="wv">'+fmtEur(last)+'<small>€</small></span></div>'
+    +'<div class="w-stat"><span class="wl">Δ '+rl+'</span><span class="wv">'+sign+fmtEur(Math.abs(d))+'<small>€</small></span></div>'
+    +'<div class="w-stat"><span class="wl">Δ '+rl+' %</span><span class="wv">'+sign+fmtEur(Math.abs(pct),1)+'<small>%</small></span></div>'
+    +'</div>';
+  return finSvg(series)+stats;
+}
+function fmtEurAxis(v){return Math.abs(v)>=1000?fmtEur(v/1000,Math.abs(v)>=10000?0:1)+'k':fmtEur(v);}
+function finSvg(series){ // wie weightSvg, nur €-Achse — bewusst eigene Kopie, damit das Gewichts-Chart unangetastet bleibt
+  const W=640,H=200,padL=46,padR=14,padT=14,padB=24;
+  const iw=W-padL-padR,ih=H-padT-padB;
+  const t0=_atNoon(series[0].dk).getTime(),t1=_atNoon(series[series.length-1].dk).getTime();
+  const span=Math.max(1,t1-t0),single=series.length===1;
+  const vals=series.map(p=>p.v),dmin=Math.min(...vals),dmax=Math.max(...vals);
+  let lo=dmin,hi=dmax;if(lo===hi){lo-=Math.max(1,lo*0.02);hi+=Math.max(1,hi*0.02);}
+  const padv=(hi-lo)*0.18;lo-=padv;hi+=padv;
+  const X=p=>single?padL+iw/2:padL+(_atNoon(p.dk).getTime()-t0)/span*iw;
+  const Y=v=>padT+(1-(v-lo)/(hi-lo))*ih;
+  const baseY=(padT+ih).toFixed(1);
+  let grid='',ylab='';
+  niceTicks(dmin,dmax,4).filter(t=>t>=lo&&t<=hi).forEach(t=>{const yy=Y(t).toFixed(1);
+    grid+='<line class="wc-grid" x1="'+padL+'" y1="'+yy+'" x2="'+(W-padR)+'" y2="'+yy+'"/>';
+    ylab+='<text class="wc-axis wc-yl" x="'+(padL-7)+'" y="'+yy+'">'+fmtEurAxis(t)+'</text>';
+  });
+  const pts=series.map(p=>[X(p),Y(p.v)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=pts.length>1?(line+' L '+pts[pts.length-1][0].toFixed(1)+' '+baseY+' L '+pts[0][0].toFixed(1)+' '+baseY+' Z'):'';
+  let dots='';
+  pts.forEach((p,i)=>{const isLast=i===pts.length-1;
+    dots+='<circle class="'+(isLast?'wc-dot-last':'wc-dot')+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isLast?3.4:2.1)+'"/>';
+  });
+  const xlab='<text class="wc-axis" x="'+padL+'" y="'+(H-7)+'" text-anchor="start">'+esc(shortDate(series[0].dk))+'</text>'
+    +(single?'':'<text class="wc-axis" x="'+(W-padR)+'" y="'+(H-7)+'" text-anchor="end">'+esc(shortDate(series[series.length-1].dk))+'</text>');
+  return '<svg class="wchart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vermögensverlauf">'
+    +grid+(area?'<path class="wc-area" d="'+area+'"/>':'')+(pts.length>1?'<path class="wc-line" d="'+line+'"/>':'')+dots+ylab+xlab+'</svg>';
+}
+function renderFinance(){
+  const body=document.getElementById('financeBody');if(!body)return;
+  const due=finDue(),lk=lastFinKey();
+  let h='<div class="section-h">Wochenstand</div><div class="card">';
+  if(due||finEdit||!lk){
+    h+=finEntryHtml(false);
+    if(due&&lk)h+='<div style="font-size:12px;color:var(--text3);margin-top:10px;"><i class="ti ti-bell"></i> Fällig seit Sonntag — einmal pro Woche reicht.</div>';
+  }else{
+    const ks=finKeys();const prev=ks.length>1?finData[ks[ks.length-2]]:null;
+    let delta='<span class="w-delta first">erster Eintrag</span>';
+    if(prev!=null){
+      const d=finData[lk]-prev,dir=d<0?'down':d>0?'up':'flat';
+      const ic=dir==='down'?'ti-trending-down':dir==='up'?'ti-trending-up':'ti-minus';
+      delta='<span class="w-delta fin-delta '+dir+'"><i class="ti '+ic+'"></i> '+(d>0?'+':d<0?'−':'')+fmtEur(Math.abs(d))+' € · '+fmtEur(Math.abs(prev?d/prev*100:0),1)+'%</span>';
+    }
+    h+='<div class="w-shown"><div class="w-shown-main"><div class="w-val">'+fmtEur(finData[lk])+'<small>€</small></div>'+delta+'</div>'
+      +'<div class="w-shown-side"><div class="w-when">'+esc(shortDate(lk))+' · erledigt</div>'
+      +'<div class="w-acts"><button class="w-act" onclick="editFin()" title="Neuen Stand eintragen" aria-label="Neuen Stand eintragen"><i class="ti ti-pencil"></i></button></div></div></div>';
+  }
+  h+='</div>';
+  h+='<div class="section-h">Verlauf</div><div class="card">'
+    +'<div class="wchart-head"><span class="wchart-cap">Vermögen über Zeit</span><div class="tb-group">'
+    +[[90,'3M'],[365,'1J'],[0,'Alle']].map(([r,l])=>'<button class="tb-btn'+(finRange===r?' active':'')+'" onclick="setFinRange('+r+',this)">'+l+'</button>').join('')
+    +'</div></div>'
+    +'<div id="finChartWrap">'+finChartHtml()+'</div>';
+  const ks2=finKeys().slice(-10).reverse();
+  if(ks2.length){
+    h+='<details class="ov-done" style="margin-top:14px;"><summary><i class="ti ti-chevron-right chev"></i> Einträge verwalten ('+finKeys().length+')</summary><div class="fin-list">';
+    ks2.forEach(k=>{h+='<div class="fin-item"><span class="fin-d">'+esc(shortDate(k))+'</span><span class="fin-v">'+fmtEur(finData[k])+' €</span><button class="w-act" onclick="removeFin(\''+k+'\')" title="Löschen" aria-label="Löschen"><i class="ti ti-trash"></i></button></div>';});
+    h+='</div></details>';
+  }
+  h+='</div>';
+  h+='<div style="font-size:12px;color:var(--text3);letter-spacing:-.01em;margin-top:4px;"><i class="ti ti-lock"></i> Bleibt in deinem Tracker (lokal + dein privater Sync-Gist) — keine Bank-Anbindung, keine Drittanbieter.</div>';
+  body.innerHTML=h;
+}
 function removeWeight(dk){
   if(weights[dk]==null)return;
   if(!confirm('Gewicht für diesen Tag entfernen?'))return;
