@@ -1612,8 +1612,34 @@
               <label class="set-switch"><input type="checkbox" id="appleToggle" onchange="toggleAppleDesign(this.checked)"><span class="set-switch-track"></span><span class="set-switch-thumb"></span></label>
             </div>
             <div class="set-row">
-              <div class="set-label">Dynamischer Wetterhintergrund<div class="set-sub">Hintergrund der App passt sich Wetter &amp; Tageszeit des gewählten Orts an (Wetter-Tab).</div></div>
+              <div class="set-label">Dynamischer Wetterhintergrund<div class="set-sub">Animierter Himmel als App-Hintergrund — live nach Wetter &amp; Tageszeit oder als feste Szene (siehe „Szene").</div></div>
               <label class="set-switch"><input type="checkbox" id="wxBgToggle" onchange="toggleWxBg(this.checked)"><span class="set-switch-track"></span><span class="set-switch-thumb"></span></label>
+            </div>
+            <div class="set-row">
+              <div class="set-label">Szene<div class="set-sub">„Live" folgt dem echten Wetter des gewählten Orts (Wetter-Tab nötig). Feste Szenen laufen immer — auch ohne eingerichtetes Wetter.</div></div>
+              <select class="cat-sel" id="wxModeSel" aria-label="Hintergrund-Szene" onchange="setWxMode(this.value)">
+                <option value="live">Live — echtes Wetter</option>
+                <optgroup label="Nacht">
+                  <option value="clear-night">Klare Nacht</option>
+                  <option value="partly-night">Nacht · teils bewölkt</option>
+                  <option value="cloudy-night">Nacht · bewölkt</option>
+                  <option value="rain-night">Nacht · Regen</option>
+                  <option value="storm-night">Nacht · Gewitter</option>
+                  <option value="snow-night">Nacht · Schneefall</option>
+                  <option value="fog-night">Nacht · Nebel</option>
+                  <option value="wind-night">Nacht · windig</option>
+                </optgroup>
+                <optgroup label="Tag">
+                  <option value="clear-day">Sonnig</option>
+                  <option value="partly-day">Tag · teils bewölkt</option>
+                  <option value="cloudy-day">Tag · bewölkt</option>
+                  <option value="rain-day">Tag · Regen</option>
+                  <option value="storm-day">Tag · Gewitter</option>
+                  <option value="snow-day">Tag · Schneefall</option>
+                  <option value="fog-day">Tag · Nebel</option>
+                  <option value="wind-day">Tag · windig</option>
+                </optgroup>
+              </select>
             </div>
             <div class="set-row">
               <div class="set-label">UI-Animationen<div class="set-sub">Übergänge der Oberfläche (Tabs, Karten, Fortschrittsring) — 0 % = aus.</div></div>
@@ -3956,8 +3982,23 @@ function wxInkUpdate(){
   _wxInkPrev=ink;
   document.documentElement.setAttribute('data-wxink',ink);
 }
+// Hintergrund-Szene (Einstellungen → „Szene"): 'live' = wxScene() aus echten Wetterdaten,
+// sonst 'kind-day|night' als feste Szene. Ohne Sonnenzeiten (sunrise/sunset null) erzwingt
+// solar() im Canvas stabilen Mittag bzw. tiefe Nacht — feste Szenen driften nicht mit der
+// Uhrzeit und funktionieren auch OHNE eingerichtetes Wetter.
+function wxFixedScene(key){
+  const m=/^(clear|partly|cloudy|rain|snow|storm|fog|wind)-(day|night)$/.exec(key||'');
+  if(!m)return null;
+  return {kind:m[1],day:m[2]==='day',wind:m[1]==='wind'?48:(m[1]==='storm'?26:8),sunrise:null,sunset:null};
+}
+function setWxMode(v){
+  ssave('gt_wx_mode',v);
+  if(v==='live'&&wx.loc&&!wx.data)loadWeather(); // Live braucht Wetterdaten → ggf. nachladen
+  applyWeatherBg();haptic('light');
+}
 function applyWeatherBg(){
-  const sc=load('gt_wx_bg',false)?wxScene():null;
+  const mode=load('gt_wx_mode','live');
+  const sc=load('gt_wx_bg',false)?(mode==='live'?wxScene():(wxFixedScene(mode)||wxScene())):null;
   if(sc){
     document.documentElement.setAttribute('data-wxscene',sc.kind+'-'+(sc.day?'day':'night'));
     document.body.classList.add('wxbg-on');
@@ -3966,14 +4007,13 @@ function applyWeatherBg(){
   }else{
     document.body.classList.remove('wxbg-on');
     document.documentElement.removeAttribute('data-wxscene');
-    document.documentElement.removeAttribute('data-wxink');
-    _wxInkPrev=null;
     wxAnim.stop();
+    document.documentElement.removeAttribute('data-wxink');_wxInkPrev=null;
   }
 }
 function toggleWxBg(on){
   ssave('gt_wx_bg',!!on);
-  if(on&&wx.loc&&!wx.data)loadWeather();  // beim Einschalten ggf. Wetter nachladen
+  if(on&&load('gt_wx_mode','live')==='live'&&wx.loc&&!wx.data)loadWeather();  // beim Einschalten ggf. Wetter nachladen (nur Live-Modus)
   applyWeatherBg();haptic('light');
 }
 
@@ -4011,6 +4051,7 @@ function setAnimBg(v){
 function syncDesignToggles(){
   const a=document.getElementById('appleToggle');if(a)a.checked=!!load('gt_apple',false);
   const w=document.getElementById('wxBgToggle');if(w)w.checked=!!load('gt_wx_bg',false);
+  const ms=document.getElementById('wxModeSel');if(ms)ms.value=load('gt_wx_mode','live');
   const av=load('gt_anim',100);
   const s=document.getElementById('animSlider');if(s)s.value=av;
   const lv=document.getElementById('animVal');if(lv)lv.textContent=av+'%';
@@ -4372,6 +4413,7 @@ const wxAnim=(function(){
     _settle(secs){if(!scene)return;if(!ctx&&!setup())return;const n=Math.round((secs||2.5)/0.05);for(let i=0;i<n;i++)tick(0.05);} // synchron einschwingen (Screenshots)
   };
 })();
+
 window.addEventListener('resize',()=>wxAnim.resize());
 document.addEventListener('visibilitychange',()=>{if(document.hidden){wxAnim.pause();}else{wxAnim.refresh();if(wx.loc)loadWeather();}}); // beim Zurückkehren sofort frisches Wetter (Intervall steht im Hintergrund still)
 
