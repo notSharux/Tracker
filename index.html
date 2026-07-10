@@ -963,6 +963,46 @@
   .w-stat .wv{font-family:var(--font-num);font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.02em;}
   .w-stat .wv small{font-size:11px;color:var(--text3);font-weight:500;margin-left:2px;}
 
+  /* ── Koffein-Tracker (Übersicht) ── */
+  .caff-drinks{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
+  .caff-drink{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:11px 13px;border:1px solid var(--separator);border-radius:14px;background:var(--surface-glass);cursor:pointer;text-align:left;transition:transform .12s,border-color .12s,background .12s;}
+  .caff-drink:hover{border-color:var(--dc);background:color-mix(in srgb,var(--dc) 8%,transparent);}
+  .caff-drink:active{transform:scale(.97);}
+  .caff-drink .caff-dname{font-size:14px;font-weight:650;color:var(--text);letter-spacing:-.01em;}
+  .caff-drink .caff-dmg{font-size:11px;color:var(--text3);font-weight:500;font-family:var(--font-num);}
+  .caff-dot{width:10px;height:10px;border-radius:50%;background:var(--dc,#888);display:inline-block;flex:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--dc,#888) 22%,transparent);}
+  .caff-drink .caff-dot{margin-bottom:5px;}
+  .caff-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--separator);border-radius:14px;overflow:hidden;margin-top:14px;background:var(--surface-glass);}
+  .caff-stat{display:flex;flex-direction:column;gap:5px;padding:11px 13px;border-right:1px solid var(--separator);}
+  .caff-stat:last-child{border-right:none;}
+  .caff-stat .cl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+  .caff-stat .cv{font-family:var(--font-num);font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.02em;}
+  .caff-stat .cv small{font-size:11px;color:var(--text3);font-weight:500;margin-left:2px;}
+  .caff-chart{margin-top:14px;}
+  .caff-area{fill:var(--accent-soft);stroke:none;}
+  .caff-line{fill:none;stroke:var(--blue);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+  .caff-pt{stroke:var(--surface-glass);stroke-width:1.4;}
+  .caff-ref{stroke:var(--amber,#bb8523);stroke-width:1;stroke-dasharray:4 4;opacity:.7;vector-effect:non-scaling-stroke;}
+  .caff-ref-l{fill:var(--text3);font-family:var(--font-num);font-size:11px;font-weight:600;}
+  .caff-bed{stroke:var(--text2);stroke-width:1.2;stroke-dasharray:2 3;opacity:.6;vector-effect:non-scaling-stroke;}
+  .caff-bed-dot{fill:var(--text);stroke:var(--surface-glass);stroke-width:1.4;}
+  .caff-bed-l{fill:var(--text2);font-family:var(--font-num);font-size:11.5px;font-weight:650;}
+  .caff-now{stroke:var(--blue);stroke-width:1.4;opacity:.55;vector-effect:non-scaling-stroke;}
+  .caff-empty{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;color:var(--text3);font-size:13px;padding:24px 16px;line-height:1.4;}
+  .caff-empty i{font-size:28px;opacity:.5;}
+  .caff-warn,.caff-ok{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:550;margin-top:13px;padding:9px 12px;border-radius:11px;line-height:1.35;}
+  .caff-warn{color:var(--amber,#bb8523);background:color-mix(in srgb,var(--amber,#bb8523) 12%,transparent);}
+  .caff-ok{color:var(--text2);background:var(--surface-glass);}
+  .caff-warn i,.caff-ok i{flex:none;}
+  .caff-log{margin-top:12px;display:flex;flex-direction:column;gap:2px;}
+  .caff-le{display:flex;align-items:center;gap:9px;padding:7px 2px;border-top:1px solid var(--separator);}
+  .caff-le:first-child{border-top:none;}
+  .caff-le-t{width:82px;flex:none;background:transparent;border:1px solid var(--separator);border-radius:8px;padding:3px 6px;color:var(--text2);font-family:var(--font-num);font-size:12px;}
+  .caff-le-n{flex:1;font-size:13.5px;font-weight:550;color:var(--text);}
+  .caff-le-mg{font-family:var(--font-num);font-size:12px;color:var(--text3);font-weight:600;}
+  .caff-le-x{flex:none;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:transparent;border:none;color:var(--text3);cursor:pointer;}
+  .caff-le-x:hover{background:color-mix(in srgb,var(--red,#d33) 14%,transparent);color:var(--red,#d33);}
+
   @media(min-width:761px){
     .tabbar{display:none!important;}
   }
@@ -1666,6 +1706,10 @@
               <div class="set-label">Startdatum</div>
               <input type="date" class="set-input" id="startDateInput" onchange="setStartDate(this.value)">
             </div>
+            <div class="set-row">
+              <div class="set-label">Schlafenszeit<div class="set-sub">Zielpunkt der Koffein-Abbaukurve auf der Übersicht.</div></div>
+              <input type="time" class="set-input" id="bedtimeInput" value="19:30" onchange="setBedtime(this.value)">
+            </div>
           </div>
 
           <div class="section-h">Ziele verwalten</div>
@@ -1802,7 +1846,7 @@
 <script>
 function ymd(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function load(k,fb){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb;}catch{return fb;}}
-const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
+const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
 let syncToken=localStorage.getItem('gt_sync_token')||'';
 let syncGistId=localStorage.getItem('gt_sync_gist')||'';
 let syncStatus=syncToken?'idle':'off';
@@ -1813,11 +1857,13 @@ function ssave(k,v){
 }
 
 // ===== Cloud-Sync (privater GitHub-Gist) =====
-function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_fin:finData,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
+function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_fin:finData,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
 function mergeHistory(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{out[d]=(a[d]&&b[d])?(bN?{...a[d],...b[d]}:{...b[d],...a[d]}):(a[d]||b[d]);});return out;}
 function mergeWeights(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{const av=a?a[d]:undefined,bv=b?b[d]:undefined;out[d]=(av!=null&&bv!=null)?(bN?bv:av):(av!=null?av:bv);});return out;}
 // Tagesnotizen wie Gewicht feldweise zusammenführen: pro Tag gewinnt bei Konflikt der neuere Stand.
 function mergeDayNotes(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{const av=a?a[d]:undefined,bv=b?b[d]:undefined;out[d]=(av!=null&&bv!=null)?(bN?bv:av):(av!=null?av:bv);});return out;}
+// Koffein-Log pro Tag: Vereinigung der Einträge über ihre id (jeder Trink-Eintrag hat eine eindeutige id).
+function mergeCaffeine(a,b){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);days.forEach(d=>{const seen={},arr=[];[...(a&&a[d]||[]),...(b&&b[d]||[])].forEach(e=>{if(e&&e.id&&!seen[e.id]){seen[e.id]=1;arr.push(e);}});arr.sort((x,y)=>(x.t||'').localeCompare(y.t||''));if(arr.length)out[d]=arr;});return out;}
 async function ghFetch(method,path,body,keepalive){
   const r=await fetch('https://api.github.com'+path,{method,keepalive:!!keepalive,headers:{'Authorization':'Bearer '+syncToken,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
   if(r.status===401||r.status===403)throw new Error('auth');
@@ -1832,13 +1878,15 @@ async function ensureGist(){
   else{const ts=new Date().toISOString();const c=await ghFetch('POST','/gists',{description:'goal-tracker-data (Tracker Sync) — nicht löschen',public:false,files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:localData()})}}});syncGistId=c.id;localStorage.setItem('gt_data_ts',ts);}
   localStorage.setItem('gt_sync_gist',syncGistId);
 }
-function applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedF){
+function applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedF,mergedC){
   const set=(k,v)=>{if(v!==undefined)localStorage.setItem(k,JSON.stringify(v));};
   set('gt_goals3',rData.gt_goals3);set('gt_start3',rData.gt_start3);
   localStorage.setItem('gt_history3',JSON.stringify(mergedHist));
   set('gt_events3',rData.gt_events3);set('gt_notes3',rData.gt_notes3);
   localStorage.setItem('gt_weight',JSON.stringify(mergedW||rData.gt_weight||{}));
   localStorage.setItem('gt_fin',JSON.stringify(mergedF||rData.gt_fin||{}));
+  localStorage.setItem('gt_caffeine',JSON.stringify(mergedC||rData.gt_caffeine||{}));
+  set('gt_bedtime',rData.gt_bedtime);
   set('gt_general',rData.gt_general);
   localStorage.setItem('gt_daynotes',JSON.stringify(mergedN||rData.gt_daynotes||{}));
   set('gt_taborder',rData.gt_taborder);
@@ -1868,24 +1916,27 @@ async function doPull(){
     if(rReset&&rReset>lReset){
       // Ein Reset, den dieses Gerät noch nicht kennt → leeren Remote-Stand 1:1 übernehmen (KEINE mergeHistory-Vereinigung, sonst kämen alte Tage zurück)
       localStorage.setItem('gt_reset_at',rReset);
-      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{},rData.gt_daynotes||{},rData.gt_fin||{});return;
+      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{},rData.gt_daynotes||{},rData.gt_fin||{},rData.gt_caffeine||{});return;
     }
     const lTs=localStorage.getItem('gt_data_ts')||'';
     const mergedHist=mergeHistory(history||{},rData.gt_history3||{},lTs,rTs);
     const mergedW=mergeWeights(weights||{},rData.gt_weight||{},lTs,rTs);
     const mergedN=mergeDayNotes(dayNotes||{},rData.gt_daynotes||{},lTs,rTs);
     const mergedF=mergeWeights(finData||{},rData.gt_fin||{},lTs,rTs); // gleiche Datum→Zahl-Merge-Logik wie Gewicht
-    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedF);return;}
+    const mergedC=mergeCaffeine(caffeine||{},rData.gt_caffeine||{});   // Koffein-Einträge über id vereinigen
+    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedF,mergedC);return;}
     const histChanged=JSON.stringify(mergedHist)!==JSON.stringify(history||{});
     const wChanged=JSON.stringify(mergedW)!==JSON.stringify(weights||{});
     const nChanged=JSON.stringify(mergedN)!==JSON.stringify(dayNotes||{});
     const fChanged=JSON.stringify(mergedF)!==JSON.stringify(finData||{});
+    const cChanged=JSON.stringify(mergedC)!==JSON.stringify(caffeine||{});
     if(histChanged){history=mergedHist;ssave('gt_history3',history);}
     if(wChanged){weights=mergedW;ssave('gt_weight',weights);}
     if(nChanged){dayNotes=mergedN;ssave('gt_daynotes',dayNotes);}
     if(fChanged){finData=mergedF;ssave('gt_fin',finData);if(currentView==='finance')renderFinance();}
-    if(histChanged||wChanged||nChanged){renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
-    if(lTs>rTs||histChanged||wChanged||nChanged||fChanged){await doPush();}else{setSyncStatus('ok');}
+    if(cChanged){caffeine=mergedC;ssave('gt_caffeine',caffeine);}
+    if(histChanged||wChanged||nChanged||cChanged){renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
+    if(lTs>rTs||histChanged||wChanged||nChanged||fChanged||cChanged){await doPush();}else{setSyncStatus('ok');}
   }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
 }
 function pushSoon(){if(!syncToken||!_syncReady)return;_pendingPush=true;clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>doPush(),1500);}
@@ -1978,6 +2029,16 @@ let events=load('gt_events3',[]);
 let weights=load('gt_weight',{});   // tägliches Morgengewicht: { 'YYYY-MM-DD': kg }
 let finData=load('gt_fin',{});      // Depot-Wochenstand (Wochenend-Check Fr–So): { 'YYYY-MM-DD': Euro }
 let finRange=0,finEdit=false;       // Chart-Zeitraum (0=alle) · Eingabe trotz erledigtem Wochenstand offen
+let caffeine=load('gt_caffeine',{});// Koffein-Log pro Tag: { 'YYYY-MM-DD': [ {id, t:'HH:MM', drink:'monster', mg:160} ] }
+let bedtime=load('gt_bedtime','19:30'); // Schlafenszeit (Einstellungen) — Zielpunkt der Koffein-Abbaukurve
+const CAFF_HL=5;                 // Koffein-Halbwertszeit in Stunden (Standardannahme)
+const CAFF_SLEEP_LIMIT=50;       // Richtwert: unter ~50 mg zur Schlafenszeit stört Schlaf kaum
+const CAFF_DRINKS=[              // mg = typischer Koffeingehalt der üblichen Dosengröße
+  {id:'monster', name:'Monster Energy', vol:'500 ml', mg:160, color:'#84c517'},
+  {id:'redbull', name:'Red Bull',       vol:'250 ml', mg:80,  color:'#d33a45'},
+  {id:'cola',    name:'Coca-Cola',      vol:'330 ml', mg:32,  color:'#9b1c14'},
+  {id:'pepsi',   name:'Pepsi',          vol:'330 ml', mg:38,  color:'#2f5fd0'}
+];
 let generalGoals=load('gt_general',[]); // reine Anzeige-Liste (Leitsätze), KEINE Tracking-Funktion: [{id,text}]
 let dayNotes=load('gt_daynotes',{});    // Anmerkung/Begründung pro Tag: { 'YYYY-MM-DD': 'Text' }
 let tabOrder=load('gt_taborder',['overview','goals','calendar','fitness','notes','stats']); // anpassbare Tab-Reihenfolge (Einstellungen bleibt fix am Ende)
@@ -2846,6 +2907,7 @@ function unsavedDiscard(){settingsDirty=false;closeUnsavedModal();const v=pendin
 function unsavedCancel(){pendingView=null;closeUnsavedModal();}
 
 function setStartDate(v){if(v){draftStartDate=v;markDirty();}}
+function setBedtime(v){if(!hm2min(v))return;bedtime=v;ssave('gt_bedtime',bedtime);haptic('light');if(currentView==='overview')renderOverview();}
 function renderGoalsEditor(){
   const wrap=document.getElementById('goalsEditor');wrap.innerHTML='';
   draftGoals.forEach((g,i)=>{
@@ -3001,6 +3063,7 @@ async function wipeSyncedGist(keepCalendar,keepGoals){
     gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
     gt_weight:keepCalendar?weights:{},
     gt_fin:keepCalendar?finData:{},
+    gt_caffeine:keepCalendar?caffeine:{},gt_bedtime:bedtime,
     gt_general:keepCalendar?generalGoals:[],gt_daynotes:{},
     gt_taborder:tabOrder,
     gt_theme:themePref,gt_accent:accentPref};
@@ -3031,15 +3094,15 @@ async function resetAllData(){
   if(!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.'))return;
   if(!confirm('Bist du dir sicher? Wirklich alles?'))return;
   settingsDirty=false;
-  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_general','gt_daynotes'].forEach(k=>localStorage.removeItem(k));
+  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_caffeine','gt_general','gt_daynotes'].forEach(k=>localStorage.removeItem(k));
   try{await wipeSyncedGist(false);}catch(e){}
   location.reload();
 }
 
 // ===== Backup (Export / Import) =====
-const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
+const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
 function exportData(){
-  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_fin:finData,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
+  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_fin:finData,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
   const payload={app:'goal-tracker',version:1,exportedAt:new Date().toISOString(),data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -3254,6 +3317,128 @@ function ovCatList(list,row){
   });
   return s;
 }
+/* ════════════════════════════════════════════════════════════════════
+   Koffein-Tracker (Übersicht): Getränk antippen → Eintrag mit Uhrzeit;
+   Kurve zeigt den geschätzten Koffeinspiegel und wie er bis zur
+   Schlafenszeit abfällt. Pharmakokinetik: exponentieller Abbau,
+   Halbwertszeit ~5 h (Standardannahme, individuell verschieden).
+   ════════════════════════════════════════════════════════════════════ */
+function caffDrink(id){return CAFF_DRINKS.find(d=>d.id===id)||{name:id,mg:0,color:'#888'};}
+function hm2min(s){const m=/^(\d{1,2}):(\d{2})$/.exec(s||'');return m?(+m[1])*60+(+m[2]):null;}
+function min2hm(m){m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+// Koffeinspiegel (mg) zum Minutenzeitpunkt t: Summe aller vorherigen Einträge, exponentiell abgebaut.
+function caffLevelAt(evs,t){let s=0;evs.forEach(e=>{if(e.min<=t)s+=e.mg*Math.pow(0.5,((t-e.min)/60)/CAFF_HL);});return s;}
+function caffEvents(dk){return (caffeine[dk]||[]).map(e=>({...e,min:hm2min(e.t)})).filter(e=>e.min!=null).sort((a,b)=>a.min-b.min);}
+function addCaffeine(drink){
+  const d=caffDrink(drink);const dk=ovDate;
+  const now=new Date();
+  const t=(ovDate===todayKey)?min2hm(now.getHours()*60+now.getMinutes()):'12:00'; // anderer Tag: neutraler Mittags-Zeitpunkt
+  if(!caffeine[dk])caffeine[dk]=[];
+  caffeine[dk].push({id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,drink,mg:d.mg});
+  caffeine[dk].sort((a,b)=>(a.t||'').localeCompare(b.t||''));
+  ssave('gt_caffeine',caffeine);haptic('light');renderOverview();
+}
+function delCaffeine(dk,id){
+  if(!caffeine[dk])return;
+  caffeine[dk]=caffeine[dk].filter(e=>e.id!==id);
+  if(!caffeine[dk].length)delete caffeine[dk];
+  ssave('gt_caffeine',caffeine);haptic('light');renderOverview();
+}
+function editCaffTime(dk,id,val){
+  const arr=caffeine[dk];if(!arr)return;const e=arr.find(x=>x.id===id);if(!e||!hm2min(val))return;
+  e.t=val;arr.sort((a,b)=>(a.t||'').localeCompare(b.t||''));
+  ssave('gt_caffeine',caffeine);renderOverview();
+}
+function caffeineSectionHtml(dk){
+  const isToday=dk===todayKey;
+  const evs=caffEvents(dk);
+  const now=new Date();const nowMin=now.getHours()*60+now.getMinutes();
+  let bedMin=hm2min(bedtime);if(bedMin==null)bedMin=19*60+30;
+  const effBed=bedMin<720?bedMin+1440:bedMin; // Schlafenszeit vor Mittag = nach Mitternacht → auf Folgetag legen
+  const total=evs.reduce((a,e)=>a+e.mg,0);
+  const nowLvl=isToday?caffLevelAt(evs,nowMin):null;
+  const bedLvl=caffLevelAt(evs,effBed);
+  // Getränk-Auswahl
+  let btns=`<div class="caff-drinks">`;
+  CAFF_DRINKS.forEach(d=>{btns+=`<button class="caff-drink" style="--dc:${d.color}" onclick="addCaffeine('${d.id}')"><span class="caff-dot"></span><span class="caff-dname">${esc(d.name)}</span><span class="caff-dmg">${d.mg} mg · ${esc(d.vol)}</span></button>`;});
+  btns+=`</div>`;
+  // Statistik-Kacheln
+  const stat=(l,v,u)=>`<div class="caff-stat"><span class="cl">${l}</span><span class="cv">${v}<small>${u}</small></span></div>`;
+  let stats=`<div class="caff-stats">`;
+  if(isToday)stats+=stat('Jetzt',Math.round(nowLvl),'mg');
+  stats+=stat('Zu Bett ('+min2hm(bedMin)+')',Math.round(bedLvl),'mg');
+  stats+=stat('Gesamt heute',total,'mg')+`</div>`;
+  let chart;
+  if(!evs.length){
+    chart=`<div class="caff-empty"><i class="ti ti-cup"></i><span>Noch kein Getränk erfasst${isToday?' — tippe oben auf ein Getränk.':'.'}</span></div>`;
+  }else{
+    chart=caffeineSvg(evs,isToday,nowMin,bedMin,effBed);
+  }
+  // Einträge-Liste
+  let list='';
+  if(evs.length){
+    list=`<div class="caff-log">`;
+    evs.forEach(e=>{const d=caffDrink(e.drink);
+      list+=`<div class="caff-le"><span class="caff-dot" style="--dc:${d.color}"></span>`
+        +`<input class="caff-le-t" type="time" value="${esc(e.t)}" onchange="editCaffTime('${dk}','${e.id}',this.value)" aria-label="Uhrzeit">`
+        +`<span class="caff-le-n">${esc(d.name)}</span><span class="caff-le-mg">${e.mg} mg</span>`
+        +`<button class="caff-le-x" onclick="delCaffeine('${dk}','${e.id}')" aria-label="Löschen"><i class="ti ti-x"></i></button></div>`;});
+    list+=`</div>`;
+  }
+  const bedNote=bedLvl>=CAFF_SLEEP_LIMIT
+    ?`<div class="caff-warn"><i class="ti ti-alert-triangle"></i> ~${Math.round(bedLvl)} mg zur Schlafenszeit — über dem Richtwert von ${CAFF_SLEEP_LIMIT} mg, kann den Schlaf stören.</div>`
+    :(evs.length?`<div class="caff-ok"><i class="ti ti-check"></i> ~${Math.round(bedLvl)} mg zur Schlafenszeit — unter dem Richtwert, guter Schlaf wahrscheinlich.</div>`:'');
+  return `<div class="section-h">Koffein</div><div class="card caff-card">${btns}${stats}${chart}${bedNote}${list}</div>`;
+}
+function caffeineSvg(evs,isToday,nowMin,bedMin,effBed){
+  const W=640,H=210,padL=40,padR=14,padT=14,padB=26;
+  const iw=W-padL-padR,ih=H-padT-padB;
+  const firstMin=evs[0].min,lastMin=evs[evs.length-1].min;
+  let xStart=Math.max(0,Math.min(firstMin-30,isToday?nowMin:firstMin));
+  let xEnd=Math.max(effBed,lastMin+30,isToday?nowMin+15:0);
+  if(xEnd<=xStart)xEnd=xStart+120;
+  const span=xEnd-xStart;
+  // Kurve abtasten
+  const step=Math.max(2,Math.round(span/160));
+  const pts=[];let ymax=CAFF_SLEEP_LIMIT;
+  for(let t=xStart;t<=xEnd;t+=step){const v=caffLevelAt(evs,t);if(v>ymax)ymax=v;pts.push([t,v]);}
+  const lastEnd=pts.length?pts[pts.length-1][0]:xEnd;if(lastEnd<xEnd){const v=caffLevelAt(evs,xEnd);if(v>ymax)ymax=v;pts.push([xEnd,v]);}
+  ymax*=1.15;if(ymax<20)ymax=20;
+  const X=t=>padL+(t-xStart)/span*iw;
+  const Y=v=>padT+(1-v/ymax)*ih;
+  const baseY=(padT+ih).toFixed(1);
+  // Y-Gitter
+  let grid='',ylab='';
+  niceTicks(0,ymax/1.15,4).filter(t=>t>=0&&t<=ymax).forEach(t=>{const yy=Y(t).toFixed(1);
+    grid+=`<line class="wc-grid" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/>`;
+    ylab+=`<text class="wc-axis wc-yl" x="${padL-7}" y="${yy}">${Math.round(t)}</text>`;});
+  // Schlaf-Richtwert-Linie
+  let ref='';
+  if(CAFF_SLEEP_LIMIT<=ymax){const ry=Y(CAFF_SLEEP_LIMIT).toFixed(1);
+    ref=`<line class="caff-ref" x1="${padL}" y1="${ry}" x2="${W-padR}" y2="${ry}"/>`
+      +`<text class="caff-ref-l" x="${W-padR}" y="${(+ry-4).toFixed(1)}" text-anchor="end">Schlaf-Richtwert ${CAFF_SLEEP_LIMIT} mg</text>`;}
+  // Fläche + Linie
+  const line=pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ');
+  const area=line+' L '+X(pts[pts.length-1][0]).toFixed(1)+' '+baseY+' L '+X(pts[0][0]).toFixed(1)+' '+baseY+' Z';
+  // Bettzeit-Marker
+  let bed='';
+  if(effBed>=xStart&&effBed<=xEnd){const bx=X(effBed).toFixed(1),bl=caffLevelAt(evs,effBed);
+    bed=`<line class="caff-bed" x1="${bx}" y1="${padT}" x2="${bx}" y2="${baseY}"/>`
+      +`<circle class="caff-bed-dot" cx="${bx}" cy="${Y(bl).toFixed(1)}" r="3.2"/>`
+      +`<text class="caff-bed-l" x="${bx}" y="${padT+9}" text-anchor="${effBed>xStart+span*0.75?'end':'middle'}">Bett ${esc(min2hm(bedMin))} · ${Math.round(bl)} mg</text>`;}
+  // Jetzt-Marker (nur heute)
+  let nowm='';
+  if(isToday&&nowMin>=xStart&&nowMin<=xEnd){const nx=X(nowMin).toFixed(1);
+    nowm=`<line class="caff-now" x1="${nx}" y1="${padT}" x2="${nx}" y2="${baseY}"/>`;}
+  // Trink-Punkte
+  let dots='';
+  evs.forEach(e=>{const d=caffDrink(e.drink);dots+=`<circle class="caff-pt" cx="${X(e.min).toFixed(1)}" cy="${Y(caffLevelAt(evs,e.min)).toFixed(1)}" r="3" style="fill:${d.color}"/>`;});
+  // X-Beschriftung
+  const xlab=`<text class="wc-axis" x="${padL}" y="${H-8}" text-anchor="start">${esc(min2hm(xStart))}</text>`
+    +`<text class="wc-axis" x="${W-padR}" y="${H-8}" text-anchor="end">${esc(min2hm(xEnd))}</text>`;
+  return `<svg class="wchart caff-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Koffeinverlauf">`
+    +grid+ref+`<path class="caff-area" d="${area}"/><path class="caff-line" d="${line}"/>`+bed+nowm+dots+ylab+xlab+`</svg>`;
+}
 function renderOverview(){
   const body=document.getElementById('overviewBody');if(!body)return;
   const dk=ovDate,isToday=dk===todayKey;
@@ -3284,6 +3469,8 @@ function renderOverview(){
     +`<div class="ov-hero-r">${ring}<div class="ov-ring-cap"><strong>${p.done}</strong> von ${p.total} erledigt</div></div></div>`;
   // ── Zwei-Spalten: links offene/nachzutragende Ziele, rechts generelle Ziele ──
   h+=`<div class="section-h">Wetter</div><div id="ovWeatherHost"></div>`;
+  // Koffein-Tracker: Getränke erfassen + Abbaukurve bis zur Schlafenszeit
+  h+=caffeineSectionHtml(dk);
   // Finanz-Wochenstand: ab Sonntag fällig, Karte bleibt bis zum Eintrag (verschwindet danach von selbst)
   if(isToday&&finReminderNow()){
     h+=`<div class="section-h">Finanzen</div><div class="card">`+finEntryHtml(true)
@@ -4052,6 +4239,7 @@ function syncDesignToggles(){
   const a=document.getElementById('appleToggle');if(a)a.checked=!!load('gt_apple',false);
   const w=document.getElementById('wxBgToggle');if(w)w.checked=!!load('gt_wx_bg',false);
   const ms=document.getElementById('wxModeSel');if(ms)ms.value=load('gt_wx_mode','live');
+  const bt=document.getElementById('bedtimeInput');if(bt)bt.value=bedtime;
   const av=load('gt_anim',100);
   const s=document.getElementById('animSlider');if(s)s.value=av;
   const lv=document.getElementById('animVal');if(lv)lv.textContent=av+'%';
