@@ -352,14 +352,6 @@
   .gs-legend{display:flex;gap:14px;margin-top:9px;font-size:11px;color:var(--text3);flex-wrap:wrap;}
   .gs-legend span{display:inline-flex;align-items:center;gap:5px;}
   .gs-dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
-  /* ===== Finanzen ===== */
-  .fin-delta.up{color:var(--green);}
-  .fin-delta.down{color:var(--red);}
-  .fin-list{display:flex;flex-direction:column;margin-top:6px;}
-  .fin-item{display:flex;align-items:center;gap:12px;padding:8px 2px;border-bottom:1px solid var(--separator);}
-  .fin-item:last-child{border-bottom:none;}
-  .fin-d{font-size:13px;color:var(--text2);width:84px;flex-shrink:0;}
-  .fin-v{font-family:var(--font-num);font-size:14px;font-weight:600;color:var(--text);flex:1;}
   .bar-row{display:flex;align-items:center;gap:14px;animation:barIn .5s var(--ease-out) backwards;}
   @keyframes barIn{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:translateX(0);}}
   .bar-label{font-size:14px;font-weight:500;color:var(--text);width:160px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em;}
@@ -909,6 +901,53 @@
   .tp-ico.run{background:color-mix(in srgb,var(--teal) 14%,transparent);}
   .tp-ico.push{background:color-mix(in srgb,var(--orange) 14%,transparent);}
   .tp-ico.pull{background:color-mix(in srgb,var(--blue) 14%,transparent);}
+  /* Übrige Trainingsarten (frei wählbar in den Einstellungen) */
+  .tp-ico.legs,.tp-day.legs .tp-day-ico{color:var(--purple,#8b5cf6);}
+  .tp-ico.upper,.tp-day.upper .tp-day-ico{color:var(--orange);}
+  .tp-ico.full,.tp-day.full .tp-day-ico{color:var(--green,#10b981);}
+  .tp-ico.cardio,.tp-day.cardio .tp-day-ico{color:var(--red);}
+  .tp-ico.rest,.tp-day.rest .tp-day-ico{color:var(--text3);}
+  .tp-ico.legs{background:color-mix(in srgb,var(--purple,#8b5cf6) 14%,transparent);}
+  .tp-ico.upper{background:color-mix(in srgb,var(--orange) 14%,transparent);}
+  .tp-ico.full{background:color-mix(in srgb,var(--green,#10b981) 14%,transparent);}
+  .tp-ico.cardio{background:color-mix(in srgb,var(--red) 14%,transparent);}
+  .tp-ico.rest{background:var(--fill3);}
+  /* Plan-Umschalter oben in der Trainingsplan-Karte */
+  .tp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .tp-pick{
+    flex:1 1 160px;min-width:0;background:var(--fill3);color:var(--text);
+    border:0.5px solid var(--separator-opaque);border-radius:11px;height:38px;padding:0 12px;
+    font-size:14px;font-weight:600;letter-spacing:-.01em;outline:none;cursor:pointer;
+  }
+  .tp-pick:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--accent-ring);}
+  .tp-pick-name{flex:1;font-size:15px;font-weight:600;color:var(--text);letter-spacing:-.01em;}
+  .tp-edit{
+    display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 13px;flex-shrink:0;
+    background:var(--fill3);color:var(--text2);border:0.5px solid var(--separator-opaque);
+    border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s var(--ease-out);
+  }
+  .tp-edit:hover{color:var(--text);background:var(--fill-hover);}
+
+  /* ===== Einstellungen: Trainingsplan-Editor ===== */
+  .tpe-plan{
+    border:0.5px solid var(--separator-opaque);border-radius:14px;
+    padding:14px;margin:10px 0;display:flex;flex-direction:column;gap:10px;background:var(--fill3);
+  }
+  .tpe-plan.active{border-color:color-mix(in srgb,var(--blue) 45%,transparent);background:var(--accent-soft);}
+  .tpe-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .tpe-name{flex:1 1 160px;min-width:0;}
+  .tpe-badge{
+    display:inline-flex;align-items:center;gap:5px;flex-shrink:0;padding:6px 11px;border-radius:9px;
+    background:color-mix(in srgb,var(--blue) 16%,transparent);color:var(--blue);
+    font-size:12px;font-weight:700;letter-spacing:-.01em;
+  }
+  .tpe-row{padding:2px 0;}
+  .tpe-week{border-top:0.5px solid var(--separator);padding-top:10px;}
+  .tpe-week-h{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:8px;}
+  .tpe-days{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:7px;}
+  .tpe-day{display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .tpe-dow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);}
+  .tpe-sel{width:100%;min-width:0;height:36px;font-size:13px;}
 
   /* ===== Gewicht (Übersicht) ===== */
   .w-ask{padding:2px 0 2px;}
@@ -1625,8 +1664,6 @@
           </div>
         </div>
 
-        <div class="view" id="view-finance"><div id="financeBody"></div></div>
-
         <div class="view" id="view-settings">
           <div class="section-h">Darstellung</div>
           <div class="set-card">
@@ -1717,6 +1754,9 @@
 
           <div class="section-h">Generelle Ziele</div>
           <div class="set-card" id="generalEditor"></div>
+
+          <div class="section-h">Trainingspläne</div>
+          <div class="set-card" id="plansEditor"></div>
 
           <div class="section-h">Cloud-Sync</div>
           <div class="set-card" id="syncCard"></div>
@@ -1846,7 +1886,7 @@
 <script>
 function ymd(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function load(k,fb){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb;}catch{return fb;}}
-const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
+const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_tplans','gt_tplan','gt_taborder','gt_theme','gt_accent'];
 let syncToken=localStorage.getItem('gt_sync_token')||'';
 let syncGistId=localStorage.getItem('gt_sync_gist')||'';
 let syncStatus=syncToken?'idle':'off';
@@ -1857,7 +1897,7 @@ function ssave(k,v){
 }
 
 // ===== Cloud-Sync (privater GitHub-Gist) =====
-function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_fin:finData,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
+function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_tplans:tPlans,gt_tplan:tPlanId,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
 function mergeHistory(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{out[d]=(a[d]&&b[d])?(bN?{...a[d],...b[d]}:{...b[d],...a[d]}):(a[d]||b[d]);});return out;}
 function mergeWeights(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{const av=a?a[d]:undefined,bv=b?b[d]:undefined;out[d]=(av!=null&&bv!=null)?(bN?bv:av):(av!=null?av:bv);});return out;}
 // Tagesnotizen wie Gewicht feldweise zusammenführen: pro Tag gewinnt bei Konflikt der neuere Stand.
@@ -1878,16 +1918,16 @@ async function ensureGist(){
   else{const ts=new Date().toISOString();const c=await ghFetch('POST','/gists',{description:'goal-tracker-data (Tracker Sync) — nicht löschen',public:false,files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,data:localData()})}}});syncGistId=c.id;localStorage.setItem('gt_data_ts',ts);}
   localStorage.setItem('gt_sync_gist',syncGistId);
 }
-function applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedF,mergedC){
+function applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedC){
   const set=(k,v)=>{if(v!==undefined)localStorage.setItem(k,JSON.stringify(v));};
   set('gt_goals3',rData.gt_goals3);set('gt_start3',rData.gt_start3);
   localStorage.setItem('gt_history3',JSON.stringify(mergedHist));
   set('gt_events3',rData.gt_events3);set('gt_notes3',rData.gt_notes3);
   localStorage.setItem('gt_weight',JSON.stringify(mergedW||rData.gt_weight||{}));
-  localStorage.setItem('gt_fin',JSON.stringify(mergedF||rData.gt_fin||{}));
   localStorage.setItem('gt_caffeine',JSON.stringify(mergedC||rData.gt_caffeine||{}));
   set('gt_bedtime',rData.gt_bedtime);
   set('gt_general',rData.gt_general);
+  set('gt_tplans',rData.gt_tplans);set('gt_tplan',rData.gt_tplan);
   localStorage.setItem('gt_daynotes',JSON.stringify(mergedN||rData.gt_daynotes||{}));
   set('gt_taborder',rData.gt_taborder);
   set('gt_theme',rData.gt_theme);set('gt_accent',rData.gt_accent);
@@ -1916,27 +1956,24 @@ async function doPull(){
     if(rReset&&rReset>lReset){
       // Ein Reset, den dieses Gerät noch nicht kennt → leeren Remote-Stand 1:1 übernehmen (KEINE mergeHistory-Vereinigung, sonst kämen alte Tage zurück)
       localStorage.setItem('gt_reset_at',rReset);
-      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{},rData.gt_daynotes||{},rData.gt_fin||{},rData.gt_caffeine||{});return;
+      applyRemote(rData,rTs||rReset,rData.gt_history3||{},rData.gt_weight||{},rData.gt_daynotes||{},rData.gt_caffeine||{});return;
     }
     const lTs=localStorage.getItem('gt_data_ts')||'';
     const mergedHist=mergeHistory(history||{},rData.gt_history3||{},lTs,rTs);
     const mergedW=mergeWeights(weights||{},rData.gt_weight||{},lTs,rTs);
     const mergedN=mergeDayNotes(dayNotes||{},rData.gt_daynotes||{},lTs,rTs);
-    const mergedF=mergeWeights(finData||{},rData.gt_fin||{},lTs,rTs); // gleiche Datum→Zahl-Merge-Logik wie Gewicht
     const mergedC=mergeCaffeine(caffeine||{},rData.gt_caffeine||{});   // Koffein-Einträge über id vereinigen
-    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedF,mergedC);return;}
+    if(rTs>lTs){applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedC);return;}
     const histChanged=JSON.stringify(mergedHist)!==JSON.stringify(history||{});
     const wChanged=JSON.stringify(mergedW)!==JSON.stringify(weights||{});
     const nChanged=JSON.stringify(mergedN)!==JSON.stringify(dayNotes||{});
-    const fChanged=JSON.stringify(mergedF)!==JSON.stringify(finData||{});
     const cChanged=JSON.stringify(mergedC)!==JSON.stringify(caffeine||{});
     if(histChanged){history=mergedHist;ssave('gt_history3',history);}
     if(wChanged){weights=mergedW;ssave('gt_weight',weights);}
     if(nChanged){dayNotes=mergedN;ssave('gt_daynotes',dayNotes);}
-    if(fChanged){finData=mergedF;ssave('gt_fin',finData);if(currentView==='finance')renderFinance();}
     if(cChanged){caffeine=mergedC;ssave('gt_caffeine',caffeine);}
     if(histChanged||wChanged||nChanged||cChanged){renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
-    if(lTs>rTs||histChanged||wChanged||nChanged||fChanged||cChanged){await doPush();}else{setSyncStatus('ok');}
+    if(lTs>rTs||histChanged||wChanged||nChanged||cChanged){await doPush();}else{setSyncStatus('ok');}
   }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
 }
 function pushSoon(){if(!syncToken||!_syncReady)return;_pendingPush=true;clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>doPush(),1500);}
@@ -2027,8 +2064,6 @@ let startDate=load('gt_start3',ymd(new Date()));
 let history=load('gt_history3',{});
 let events=load('gt_events3',[]);
 let weights=load('gt_weight',{});   // tägliches Morgengewicht: { 'YYYY-MM-DD': kg }
-let finData=load('gt_fin',{});      // Depot-Wochenstand (Wochenend-Check Fr–So): { 'YYYY-MM-DD': Euro }
-let finRange=0,finEdit=false;       // Chart-Zeitraum (0=alle) · Eingabe trotz erledigtem Wochenstand offen
 let caffeine=load('gt_caffeine',{});// Koffein-Log pro Tag: { 'YYYY-MM-DD': [ {id, t:'HH:MM', drink:'monster', mg:160} ] }
 let bedtime=load('gt_bedtime','19:30'); // Schlafenszeit (Einstellungen) — Zielpunkt der Koffein-Abbaukurve
 const CAFF_HL=5;                 // Koffein-Halbwertszeit in Stunden (Standardannahme)
@@ -2099,7 +2134,6 @@ const TAB_DEFS={
   fitness:{label:'Fitness',icon:'ti-activity-heartbeat'},
   weather:{label:'Wetter',icon:'ti-cloud'},
   notes:{label:'Notizen',icon:'ti-notes'},
-  finance:{label:'Finanzen',icon:'ti-chart-line'},
   stats:{label:'Statistik',icon:'ti-chart-bar'},
 };
 const TAB_KEYS=Object.keys(TAB_DEFS);
@@ -2144,16 +2178,15 @@ function doSwitchView(v){
   document.querySelectorAll('.nav-item,.tab,.settings-gear').forEach(n=>n.classList.toggle('active',n.dataset.view===v));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const titles={overview:'Übersicht',goals:'Ziele',calendar:'Kalender',fitness:'Fitness',weather:'Wetter',notes:'Notizen',finance:'Finanzen',stats:'Statistik',settings:'Einstellungen'};
+  const titles={overview:'Übersicht',goals:'Ziele',calendar:'Kalender',fitness:'Fitness',weather:'Wetter',notes:'Notizen',stats:'Statistik',settings:'Einstellungen'};
   document.getElementById('tbTitle').textContent=titles[v];
   if(v==='settings')initSettingsDraft();
   renderToolbar();
   if(v==='calendar')renderCalendar();
   if(v==='stats'){renderHeatmap();renderBars();}
-  if(v==='settings'){renderTabsEditor();renderGoalsEditor();renderGeneralEditor();renderSyncUI();renderFitnessSettings();syncDesignToggles();}
+  if(v==='settings'){renderTabsEditor();renderGoalsEditor();renderGeneralEditor();renderPlansEditor();renderSyncUI();renderFitnessSettings();syncDesignToggles();}
   if(v==='notes')renderNotes();
   if(v==='fitness')renderFitness();
-  if(v==='finance')renderFinance();
   if(v==='weather')renderWeather();
   if(v==='overview')renderOverview();
   if(v==='goals'){renderGoals();renderStats();}
@@ -3062,9 +3095,9 @@ async function wipeSyncedGist(keepCalendar,keepGoals){
   const cleared={gt_goals3:Array.isArray(keepGoals)?keepGoals:[],gt_start3:ymd(new Date()),gt_history3:{},
     gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
     gt_weight:keepCalendar?weights:{},
-    gt_fin:keepCalendar?finData:{},
     gt_caffeine:keepCalendar?caffeine:{},gt_bedtime:bedtime,
     gt_general:keepCalendar?generalGoals:[],gt_daynotes:{},
+    gt_tplans:tPlans,gt_tplan:tPlanId,
     gt_taborder:tabOrder,
     gt_theme:themePref,gt_accent:accentPref};
   localStorage.setItem('gt_reset_at',ts);   // Reset-Marker: ältere Geräte übernehmen dadurch beim nächsten Pull den leeren Stand
@@ -3094,15 +3127,15 @@ async function resetAllData(){
   if(!confirm('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.'))return;
   if(!confirm('Bist du dir sicher? Wirklich alles?'))return;
   settingsDirty=false;
-  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_caffeine','gt_general','gt_daynotes'].forEach(k=>localStorage.removeItem(k));
+  ['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_caffeine','gt_general','gt_daynotes'].forEach(k=>localStorage.removeItem(k));
   try{await wipeSyncedGist(false);}catch(e){}
   location.reload();
 }
 
 // ===== Backup (Export / Import) =====
-const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_fin','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_taborder','gt_theme','gt_accent'];
+const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_tplans','gt_tplan','gt_taborder','gt_theme','gt_accent'];
 function exportData(){
-  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_fin:finData,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
+  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_tplans:tPlans,gt_tplan:tPlanId,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
   const payload={app:'goal-tracker',version:1,exportedAt:new Date().toISOString(),data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -3133,16 +3166,45 @@ function importData(input){
 // ===== Trainingsplan-Konstanten (früh, vor dem Init — Übersicht nutzt sie beim ersten Render) =====
 // Wochen wechseln Mo–So zwischen A und B. Anker: Mo 22.06.2026 = Woche B
 // (vom Nutzer bestätigt: Sa 27.06.2026 = Woche B). Reine Kalender-Logik, nichts zu speichern.
-const TP_ANCHOR=new Date(2026,5,22); // Montag einer B-Woche (Monat 0-indexiert: 5 = Juni)
-const TP_PLAN={                      // Index 0..6 = Montag..Sonntag
+const TP_ANCHOR_DEFAULT='2026-06-22'; // Montag einer B-Woche (vom Nutzer bestätigt: Sa 27.06.2026 = B)
+const TP_TYPES={
+  run  :{name:'Laufen',     short:'Lauf',  icon:'ti-run'},
+  push :{name:'Push',       short:'Push',  icon:'ti-arrow-big-up-lines'},
+  pull :{name:'Pull',       short:'Pull',  icon:'ti-arrow-big-down-lines'},
+  legs :{name:'Beine',      short:'Beine', icon:'ti-stairs-up'},
+  upper:{name:'Oberkörper', short:'Ober',  icon:'ti-barbell'},
+  full :{name:'Ganzkörper', short:'Ganz',  icon:'ti-body-scan'},
+  cardio:{name:'Cardio',    short:'Cardio',icon:'ti-heartbeat'},
+  rest :{name:'Ruhetag',    short:'Frei',  icon:'ti-zzz'}
+};
+const TP_TYPE_KEYS=Object.keys(TP_TYPES);
+// Mehrere Trainingspläne: jeder Plan hat 7 Tage (Mo–So). Mit ab:true wechseln sich zwei
+// Wochen A/B ab — der Anker-Montag ist dann eine B-Woche. Ohne ab gilt jede Woche die A-Reihe.
+function tpNewId(){return 'tp'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function tpDefaultPlans(){return [{
+  id:'ppl',name:'Push / Pull / Laufen',ab:true,anchor:TP_ANCHOR_DEFAULT,
   A:['run','push','pull','run','pull','push','pull'],
   B:['run','pull','push','run','push','pull','push']
-};
-const TP_TYPES={
-  run :{name:'Laufen',short:'Lauf',icon:'ti-run'},
-  push:{name:'Push',  short:'Push',icon:'ti-arrow-big-up-lines'},
-  pull:{name:'Pull',  short:'Pull',icon:'ti-arrow-big-down-lines'}
-};
+}];}
+function tpFixDays(arr){
+  const out=[];for(let i=0;i<7;i++){const k=Array.isArray(arr)?arr[i]:null;out.push(TP_TYPES[k]?k:'rest');}
+  return out;
+}
+function tpSanitizePlans(list){
+  const out=[];
+  (Array.isArray(list)?list:[]).forEach(p=>{
+    if(!p||typeof p!=='object')return;
+    out.push({id:String(p.id||tpNewId()),name:String(p.name||'Plan').slice(0,40),ab:!!p.ab,
+      anchor:/^\d{4}-\d{2}-\d{2}$/.test(p.anchor||'')?p.anchor:TP_ANCHOR_DEFAULT,
+      A:tpFixDays(p.A),B:tpFixDays(p.B)});
+  });
+  return out.length?out:tpDefaultPlans();
+}
+let tPlans=tpSanitizePlans(load('gt_tplans',null));
+let tPlanId=load('gt_tplan','');
+if(!tPlans.some(p=>p.id===tPlanId))tPlanId=tPlans[0].id;
+function tpActive(){return tPlans.find(p=>p.id===tPlanId)||tPlans[0];}
+function tpSavePlans(){ssave('gt_tplans',tPlans);ssave('gt_tplan',tPlanId);}
 const TP_DOW=['Mo','Di','Mi','Do','Fr','Sa','So'];
 const TP_DOW_LONG=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
 
@@ -3249,30 +3311,143 @@ async function loadLyfta(silent){
     card.innerHTML='<div class="fit-err"><i class="ti ti-plug-connected-x"></i> '+esc(fitErrMsg(e))+'</div>';
   }
 }
-// ===== Trainingsplan (A/B-Wochen) =====
-// TP_ANCHOR/TP_PLAN/TP_TYPES/TP_DOW/TP_DOW_LONG sind weiter oben (vor dem Init) definiert,
+// ===== Trainingsplan (mehrere Pläne, optional A/B-Wochen) =====
+// tPlans/tPlanId/TP_TYPES/TP_DOW/TP_DOW_LONG sind weiter oben (vor dem Init) definiert,
 // damit die Übersicht den heutigen Trainingstag schon beim ersten Render anzeigen kann.
 function tpMonday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;} // Montag der Woche von d (lokal)
-function tpWeekOf(d){const diff=Math.round((tpMonday(d)-tpMonday(TP_ANCHOR))/604800000);return ((diff%2)+2)%2===0?'B':'A';} // Anker = B
+function tpWeekOf(d,plan){ // 'B' = Anker-Woche; ohne A/B-Wechsel gilt immer die A-Reihe
+  const p=plan||tpActive();
+  if(!p.ab)return 'A';
+  const a=_atNoon(p.anchor||TP_ANCHOR_DEFAULT);
+  const diff=Math.round((tpMonday(d)-tpMonday(a))/604800000);
+  return ((diff%2)+2)%2===0?'B':'A';
+}
 function tpDowIndex(d){return (d.getDay()+6)%7;} // Mo=0 … So=6
-function tpForDate(d){const week=tpWeekOf(d),di=tpDowIndex(d),k=TP_PLAN[week][di];return {week,di,cls:k,type:TP_TYPES[k]};} // Trainingseinheit für ein beliebiges Datum
+function tpForDate(d,plan){ // Trainingseinheit für ein beliebiges Datum
+  const p=plan||tpActive(),week=tpWeekOf(d,p),di=tpDowIndex(d),k=p[week][di];
+  return {week,di,cls:k,type:TP_TYPES[k],plan:p};
+}
+function tpSetActive(id){
+  if(!tPlans.some(p=>p.id===id))return;
+  tPlanId=id;tpSavePlans();haptic('light');
+  renderFitness();if(currentView==='overview')renderOverview();
+}
 function tpCardHtml(){
-  const now=new Date(),week=tpWeekOf(now),di=tpDowIndex(now),plan=TP_PLAN[week],today=TP_TYPES[plan[di]],todayCls=plan[di];
+  const p=tpActive(),now=new Date(),week=tpWeekOf(now,p),di=tpDowIndex(now),days=p[week];
+  const today=TP_TYPES[days[di]],todayCls=days[di];
   let strip='';
-  for(let i=0;i<7;i++){const k=plan[i],t=TP_TYPES[k];
+  for(let i=0;i<7;i++){const k=days[i],t=TP_TYPES[k];
     strip+=`<div class="tp-day ${k}${i===di?' today':''}"><span class="tp-day-dow">${TP_DOW[i]}</span><span class="tp-day-ico"><i class="ti ${t.icon}"></i></span><span class="tp-day-name">${t.short}</span></div>`;}
+  // Plan-Umschalter: Auswahl nur wenn es mehr als einen Plan gibt, sonst nur der Name.
+  const picker=tPlans.length>1
+    ? `<select class="tp-pick" onchange="tpSetActive(this.value)" aria-label="Trainingsplan wählen">`
+      +tPlans.map(pl=>`<option value="${esc(pl.id)}"${pl.id===p.id?' selected':''}>${esc(pl.name)}</option>`).join('')
+      +'</select>'
+    : `<span class="tp-pick-name">${esc(p.name)}</span>`;
   return '<div class="section-h">Trainingsplan</div>'
     +'<div class="card tp-card">'
+    +`<div class="tp-bar">${picker}<button class="tp-edit" onclick="switchView('settings')" title="Pläne bearbeiten"><i class="ti ti-adjustments"></i> Pläne</button></div>`
     +'<div class="tp-head">'
       +'<div class="tp-today">'
         +`<div class="tp-today-lab">Heute · ${TP_DOW_LONG[di]}</div>`
         +`<div class="tp-today-main"><span class="tp-ico ${todayCls}"><i class="ti ${today.icon}"></i></span><span class="tp-today-name">${today.name}</span></div>`
       +'</div>'
-      +`<div class="tp-week-badge ${week==='B'?'b':'a'}"><span class="tp-week-lab">Woche</span><span class="tp-week-letter">${week}</span></div>`
+      +(p.ab?`<div class="tp-week-badge ${week==='B'?'b':'a'}"><span class="tp-week-lab">Woche</span><span class="tp-week-letter">${week}</span></div>`:'')
     +'</div>'
     +`<div class="tp-week">${strip}</div>`
     +'</div>';
 }
+
+// ===== Einstellungen: Trainingspläne verwalten (sofort gespeichert, wie Tab-Reihenfolge) =====
+// Nach jeder Änderung neu zeichnen: Fitness-Karte + Übersicht zeigen den aktiven Plan an.
+function tpAfterChange(rerenderEditor){
+  tpSavePlans();
+  if(rerenderEditor)renderPlansEditor();
+  renderFitness();
+  if(currentView==='overview')renderOverview();
+}
+function tpAddPlan(){
+  const inp=document.getElementById('newPlanName');const n=(inp?inp.value:'').trim();if(!n)return;
+  const p={id:tpNewId(),name:n.slice(0,40),ab:false,anchor:TP_ANCHOR_DEFAULT,
+           A:tpFixDays(null),B:tpFixDays(null)}; // neuer Plan startet als 7× Ruhetag
+  tPlans.push(p);tPlanId=p.id;                   // neu angelegter Plan wird direkt aktiv
+  inp.value='';haptic('medium');tpAfterChange(true);
+  const ni=document.getElementById('newPlanName');if(ni)ni.focus();
+}
+function tpDeletePlan(id){
+  if(tPlans.length<=1){alert('Es muss mindestens ein Trainingsplan bleiben.');return;}
+  const p=tPlans.find(x=>x.id===id);if(!p)return;
+  if(!confirm(`Plan „${p.name}" wirklich löschen?`))return;
+  tPlans=tPlans.filter(x=>x.id!==id);
+  if(tPlanId===id)tPlanId=tPlans[0].id;          // aktiven Plan nie verwaist lassen
+  haptic('medium');tpAfterChange(true);
+}
+function tpRenamePlan(id,name){
+  const p=tPlans.find(x=>x.id===id);if(!p)return;
+  p.name=String(name||'Plan').slice(0,40);
+  tpAfterChange(false);                          // kein Neu-Zeichnen: sonst verliert das Eingabefeld den Fokus
+}
+function tpToggleAb(id,on){
+  const p=tPlans.find(x=>x.id===id);if(!p)return;
+  p.ab=!!on;haptic('light');tpAfterChange(true);
+}
+function tpSetAnchor(id,val){
+  const p=tPlans.find(x=>x.id===id);if(!p)return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(val))return;
+  // Auf den Montag der gewählten Woche normieren — die A/B-Rechnung geht von einem Montag aus.
+  const d=_atNoon(val),mo=tpMonday(d);
+  p.anchor=`${mo.getFullYear()}-${String(mo.getMonth()+1).padStart(2,'0')}-${String(mo.getDate()).padStart(2,'0')}`;
+  tpAfterChange(true);
+}
+function tpSetDay(id,week,di,type){
+  const p=tPlans.find(x=>x.id===id);if(!p||!TP_TYPES[type])return;
+  p[week][di]=type;haptic('light');tpAfterChange(true);
+}
+function tpDaySelect(p,week,i){
+  const opts=TP_TYPE_KEYS.map(k=>`<option value="${k}"${p[week][i]===k?' selected':''}>${TP_TYPES[k].name}</option>`).join('');
+  return `<label class="tpe-day"><span class="tpe-dow">${TP_DOW[i]}</span>`
+    +`<select class="cat-sel tpe-sel" aria-label="${TP_DOW_LONG[i]}" onchange="tpSetDay('${p.id}','${week}',${i},this.value)">${opts}</select></label>`;
+}
+function tpWeekBlock(p,week){
+  const lab=p.ab?`Woche ${week}`:'Wochenplan';
+  let h=`<div class="tpe-week"><div class="tpe-week-h">${lab}</div><div class="tpe-days">`;
+  for(let i=0;i<7;i++)h+=tpDaySelect(p,week,i);
+  return h+'</div></div>';
+}
+function renderPlansEditor(){
+  const wrap=document.getElementById('plansEditor');if(!wrap)return;
+  let h='<div class="set-row"><div class="set-label" style="font-weight:400;"><span class="set-sub">'
+    +'Lege mehrere Splits an und wechsle im Fitness-Tab zwischen ihnen. Mit A/B-Wochen wechseln sich zwei Wochenpläne ab.'
+    +'</span></div></div>';
+  tPlans.forEach(p=>{
+    const active=p.id===tPlanId;
+    h+=`<div class="tpe-plan${active?' active':''}">`
+      +'<div class="tpe-top">'
+        +`<input type="text" class="set-input tpe-name" value="${esc(p.name)}" maxlength="40" placeholder="Plan-Name" oninput="tpRenamePlan('${p.id}',this.value)">`
+        +(active
+            ? '<span class="tpe-badge"><i class="ti ti-check"></i> Aktiv</span>'
+            : `<button class="mb" onclick="tpSetActive('${p.id}');renderPlansEditor();">Aktivieren</button>`)
+        +`<button class="icon-btn danger" aria-label="Plan löschen" onclick="tpDeletePlan('${p.id}')"><i class="ti ti-trash"></i></button>`
+      +'</div>'
+      +'<div class="set-row tpe-row">'
+        +'<div class="set-label">A/B-Wochen<div class="set-sub">Zwei sich abwechselnde Wochenpläne statt einem festen.</div></div>'
+        +`<label class="set-switch"><input type="checkbox" ${p.ab?'checked':''} onchange="tpToggleAb('${p.id}',this.checked)"><span class="set-switch-track"></span><span class="set-switch-thumb"></span></label>`
+      +'</div>'
+      +(p.ab?'<div class="set-row tpe-row">'
+        +'<div class="set-label">Anker-Montag (Woche B)<div class="set-sub">Woche dieses Datums ist B; danach wechselt es wöchentlich.</div></div>'
+        +`<input type="date" class="set-input" value="${esc(p.anchor)}" onchange="tpSetAnchor('${p.id}',this.value)">`
+      +'</div>':'')
+      +tpWeekBlock(p,'A')
+      +(p.ab?tpWeekBlock(p,'B'):'')
+    +'</div>';
+  });
+  h+='<div class="add-row"><input type="text" class="set-input" id="newPlanName" placeholder="Neuen Trainingsplan hinzufügen…">'
+    +'<button class="mb primary" onclick="tpAddPlan()"><i class="ti ti-plus"></i> Hinzufügen</button></div>';
+  wrap.innerHTML=h;
+  const ni=document.getElementById('newPlanName');
+  if(ni)ni.addEventListener('keydown',e=>{if(e.key==='Enter')tpAddPlan();});
+}
+
 function renderFitness(){
   const body=document.getElementById('fitnessBody');if(!body)return;
   // Gewicht ist unabhängig vom Fitness-Dienst → steht immer ganz oben (eigener Container für gezieltes Neu-Rendern).
@@ -3471,11 +3646,6 @@ function renderOverview(){
   h+=`<div class="section-h">Wetter</div><div id="ovWeatherHost"></div>`;
   // Koffein-Tracker: Getränke erfassen + Abbaukurve bis zur Schlafenszeit
   h+=caffeineSectionHtml(dk);
-  // Finanz-Wochenstand: ab Sonntag fällig, Karte bleibt bis zum Eintrag (verschwindet danach von selbst)
-  if(isToday&&finReminderNow()){
-    h+=`<div class="section-h">Finanzen</div><div class="card">`+finEntryHtml(true)
-      +`<div style="font-size:11.5px;color:var(--text3);margin-top:8px;">Wöchentlicher Vermögens-Check · <a onclick="switchView('finance')" style="color:var(--blue);cursor:pointer;font-weight:600;">zum Finanzen-Tab</a></div></div>`;
-  }
   h+=`<div class="ov-cols"><div class="ov-main">`;
   if(isToday){
     const td=history[todayKey]||{};
@@ -3594,158 +3764,6 @@ function saveWeight(dk){
 function editWeight(dk){wEditDk=dk;renderFitnessWeight();setTimeout(()=>{const i=document.getElementById('wInput');if(i){i.focus();i.select();}},30);}
 function cancelWeightEdit(){wEditDk=null;renderFitnessWeight();}
 
-// ===== Finanzen · Vermögens-Wochenstand (jeden Sonntag ein Eintrag → Verlauf über die Zeit) =====
-function fmtEur(n,dec){const d=dec==null?0:dec;return Number(n).toLocaleString('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d});}
-function parseMoney(s){
-  if(s==null)return null;
-  let t=String(s).trim().replace(/[€\s]/g,'');
-  if(!t)return null;
-  if(/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(t))t=t.replace(/\./g,'').replace(',','.');  // deutsch gruppiert: 26.800 / 1.234.567,89
-  else if(/^\d{1,3}(,\d{3})+(\.\d{1,2})?$/.test(t))t=t.replace(/,/g,'');               // englisch gruppiert: 26,800 / 1,234,567.89
-  else if(/,\d{1,2}$/.test(t))t=t.replace(/\./g,'').replace(',','.');                  // deutsch: 26800,50
-  else t=t.replace(/,/g,'');                                                           // 26800.50 oder 26800
-  const n=parseFloat(t);
-  if(!isFinite(n)||n<0||n>100000000)return null;
-  return Math.round(n*100)/100;
-}
-function finKeys(){return Object.keys(finData).filter(k=>typeof finData[k]==='number'&&isFinite(finData[k])).sort();}
-function lastFinKey(){const k=finKeys();return k.length?k[k.length-1]:null;}
-// Wochen-Anker: Freitag 17:30 (europäischer Börsenschluss) des zuletzt begonnenen Wochenend-Fensters.
-// Ein Eintrag ab diesem Freitag zählt als „diese Woche erledigt" — egal ob Fr-Abend, Sa oder So eingetragen.
-function finAnchorFriday(){
-  const now=new Date(),dow=now.getDay(),mins=now.getHours()*60+now.getMinutes();
-  let back;
-  if(dow===5)back=mins>=1050?0:7;                                 // Freitag: ab 17:30 beginnt das neue Fenster, davor gilt das der Vorwoche
-  else if(dow===6)back=1;else if(dow===0)back=2;else back=dow+2;  // Sa/So bzw. Mo–Do → zurück zum letzten Freitag
-  const d=new Date(now);d.setHours(12,0,0,0);d.setDate(d.getDate()-back);
-  return ymd(d);
-}
-function finDue(){const lk=lastFinKey();return !lk||lk<finAnchorFriday();} // kein Eintrag seit dem letzten Freitag-Marktschluss → fällig (Finanzen-Tab zeigt das Formular, bis eingetragen)
-// Übersichts-Erinnerung NUR im Wochenend-Fenster: Fr ab 17:30 bis So 24:00 — und nur solange nicht eingetragen
-function finReminderNow(){
-  const now=new Date(),dow=now.getDay(),mins=now.getHours()*60+now.getMinutes();
-  const inWin=(dow===5&&mins>=1050)||dow===6||dow===0;
-  return inWin&&finDue();
-}
-function finSeries(rangeDays){
-  const ks=finKeys();if(!ks.length)return [];
-  if(!rangeDays)return ks.map(k=>({dk:k,v:finData[k]}));
-  const c=new Date();c.setHours(12,0,0,0);c.setDate(c.getDate()-rangeDays);
-  const from=ymd(c);
-  return ks.filter(k=>k>=from).map(k=>({dk:k,v:finData[k]}));
-}
-function saveFin(fromOverview){
-  // Übersicht und Finanzen-Tab haben je ein eigenes Eingabefeld — getrennte IDs,
-  // sonst greift getElementById ins unsichtbare Feld der jeweils anderen View (Speichern tat dann nichts).
-  const inp=document.getElementById(fromOverview?'finInputOv':'finInput');if(!inp)return;
-  const v=parseMoney(inp.value);
-  if(v==null){inp.classList.add('w-bad');inp.focus();inp.select();return;}
-  finData[todayKey]=v;ssave('gt_fin',finData);
-  finEdit=false;haptic('medium');
-  if(fromOverview)renderOverview();else renderFinance();
-}
-function editFin(){finEdit=true;renderFinance();setTimeout(()=>{const i=document.getElementById('finInput');if(i){i.focus();i.select();}},30);}
-function cancelFinEdit(){finEdit=false;renderFinance();}
-function removeFin(dk){
-  if(!confirm('Eintrag vom '+shortDate(dk)+' ('+fmtEur(finData[dk])+' €) löschen?'))return;
-  delete finData[dk];ssave('gt_fin',finData);haptic('light');renderFinance();
-}
-function setFinRange(r,btn){
-  finRange=r;haptic('light');
-  if(btn){btn.parentElement.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-  const w=document.getElementById('finChartWrap');if(w)w.innerHTML=finChartHtml();
-}
-// Eingabezeile — nutzt die Gewichts-Optik (w-ask/w-input); compact=true steht in der Übersichts-Karte
-function finEntryHtml(compact){
-  const lk=lastFinKey();
-  const ph=lk?fmtEur(finData[lk]):'25.000';
-  const hint=lk?' <span class="w-hint">· zuletzt '+fmtEur(finData[lk])+' € ('+esc(shortDate(lk))+')</span>':'';
-  const q=compact?'Wochenend-Check — wie steht dein Aktiendepot?':'Aktuellen Gesamtstand eintragen — Aktiendepot';
-  return '<div class="w-ask"><div class="w-ask-q">'+q+hint+'</div>'
-    +'<div class="w-input-row">'
-    +'<div class="w-field"><input id="'+(compact?'finInputOv':'finInput')+'" class="w-input" type="text" inputmode="decimal" autocomplete="off" placeholder="'+ph+'" onkeydown="if(event.key===\'Enter\')saveFin('+(compact?'true':'false')+')" oninput="this.classList.remove(\'w-bad\')"><span class="w-unit">€</span></div>'
-    +'<button class="mb primary w-save" onclick="saveFin('+(compact?'true':'false')+')"><i class="ti ti-check"></i> Speichern</button>'
-    +((!compact&&finEdit&&!finDue())?'<button class="mb w-cancel" onclick="cancelFinEdit()">Abbrechen</button>':'')
-    +'</div></div>';
-}
-function finChartHtml(){
-  const series=finSeries(finRange);
-  if(!series.length)return '<div class="w-empty"><i class="ti ti-chart-line"></i><span>Noch keine Einträge — trag oben deinen ersten Wochenstand ein.</span></div>';
-  const first=series[0].v,last=series[series.length-1].v;
-  const d=last-first,pct=first?d/first*100:0;
-  const rl=finRange===0?'gesamt':finRange===365?'1 J':'3 M';
-  const sign=d>0?'+':d<0?'−':'±';
-  const stats='<div class="w-stats">'
-    +'<div class="w-stat"><span class="wl">Aktuell</span><span class="wv">'+fmtEur(last)+'<small>€</small></span></div>'
-    +'<div class="w-stat"><span class="wl">Δ '+rl+'</span><span class="wv">'+sign+fmtEur(Math.abs(d))+'<small>€</small></span></div>'
-    +'<div class="w-stat"><span class="wl">Δ '+rl+' %</span><span class="wv">'+sign+fmtEur(Math.abs(pct),1)+'<small>%</small></span></div>'
-    +'</div>';
-  return finSvg(series)+stats;
-}
-function fmtEurAxis(v){return Math.abs(v)>=1000?fmtEur(v/1000,Math.abs(v)>=10000?0:1)+'k':fmtEur(v);}
-function finSvg(series){ // wie weightSvg, nur €-Achse — bewusst eigene Kopie, damit das Gewichts-Chart unangetastet bleibt
-  const W=640,H=200,padL=46,padR=14,padT=14,padB=24;
-  const iw=W-padL-padR,ih=H-padT-padB;
-  const t0=_atNoon(series[0].dk).getTime(),t1=_atNoon(series[series.length-1].dk).getTime();
-  const span=Math.max(1,t1-t0),single=series.length===1;
-  const vals=series.map(p=>p.v),dmin=Math.min(...vals),dmax=Math.max(...vals);
-  let lo=dmin,hi=dmax;if(lo===hi){lo-=Math.max(1,lo*0.02);hi+=Math.max(1,hi*0.02);}
-  const padv=(hi-lo)*0.18;lo-=padv;hi+=padv;
-  const X=p=>single?padL+iw/2:padL+(_atNoon(p.dk).getTime()-t0)/span*iw;
-  const Y=v=>padT+(1-(v-lo)/(hi-lo))*ih;
-  const baseY=(padT+ih).toFixed(1);
-  let grid='',ylab='';
-  niceTicks(dmin,dmax,4).filter(t=>t>=lo&&t<=hi).forEach(t=>{const yy=Y(t).toFixed(1);
-    grid+='<line class="wc-grid" x1="'+padL+'" y1="'+yy+'" x2="'+(W-padR)+'" y2="'+yy+'"/>';
-    ylab+='<text class="wc-axis wc-yl" x="'+(padL-7)+'" y="'+yy+'">'+fmtEurAxis(t)+'</text>';
-  });
-  const pts=series.map(p=>[X(p),Y(p.v)]);
-  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
-  const area=pts.length>1?(line+' L '+pts[pts.length-1][0].toFixed(1)+' '+baseY+' L '+pts[0][0].toFixed(1)+' '+baseY+' Z'):'';
-  let dots='';
-  pts.forEach((p,i)=>{const isLast=i===pts.length-1;
-    dots+='<circle class="'+(isLast?'wc-dot-last':'wc-dot')+'" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(isLast?3.4:2.1)+'"/>';
-  });
-  const xlab='<text class="wc-axis" x="'+padL+'" y="'+(H-7)+'" text-anchor="start">'+esc(shortDate(series[0].dk))+'</text>'
-    +(single?'':'<text class="wc-axis" x="'+(W-padR)+'" y="'+(H-7)+'" text-anchor="end">'+esc(shortDate(series[series.length-1].dk))+'</text>');
-  return '<svg class="wchart" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Vermögensverlauf">'
-    +grid+(area?'<path class="wc-area" d="'+area+'"/>':'')+(pts.length>1?'<path class="wc-line" d="'+line+'"/>':'')+dots+ylab+xlab+'</svg>';
-}
-function renderFinance(){
-  const body=document.getElementById('financeBody');if(!body)return;
-  const due=finDue(),lk=lastFinKey();
-  let h='<div class="section-h">Wochenstand</div><div class="card">';
-  if(due||finEdit||!lk){
-    h+=finEntryHtml(false);
-    if(due&&lk)h+='<div style="font-size:12px;color:var(--text3);margin-top:10px;"><i class="ti ti-bell"></i> Wochenend-Check offen — einmal pro Woche reicht.</div>';
-  }else{
-    const ks=finKeys();const prev=ks.length>1?finData[ks[ks.length-2]]:null;
-    let delta='<span class="w-delta first">erster Eintrag</span>';
-    if(prev!=null){
-      const d=finData[lk]-prev,dir=d<0?'down':d>0?'up':'flat';
-      const ic=dir==='down'?'ti-trending-down':dir==='up'?'ti-trending-up':'ti-minus';
-      delta='<span class="w-delta fin-delta '+dir+'"><i class="ti '+ic+'"></i> '+(d>0?'+':d<0?'−':'')+fmtEur(Math.abs(d))+' € · '+fmtEur(Math.abs(prev?d/prev*100:0),1)+'%</span>';
-    }
-    h+='<div class="w-shown"><div class="w-shown-main"><div class="w-val">'+fmtEur(finData[lk])+'<small>€</small></div>'+delta+'</div>'
-      +'<div class="w-shown-side"><div class="w-when">'+esc(shortDate(lk))+' · erledigt</div>'
-      +'<div class="w-acts"><button class="w-act" onclick="editFin()" title="Neuen Stand eintragen" aria-label="Neuen Stand eintragen"><i class="ti ti-pencil"></i></button></div></div></div>';
-  }
-  h+='</div>';
-  h+='<div class="section-h">Verlauf</div><div class="card">'
-    +'<div class="wchart-head"><span class="wchart-cap">Vermögen über Zeit</span><div class="tb-group">'
-    +[[90,'3M'],[365,'1J'],[0,'Alle']].map(([r,l])=>'<button class="tb-btn'+(finRange===r?' active':'')+'" onclick="setFinRange('+r+',this)">'+l+'</button>').join('')
-    +'</div></div>'
-    +'<div id="finChartWrap">'+finChartHtml()+'</div>';
-  const ks2=finKeys().slice(-10).reverse();
-  if(ks2.length){
-    h+='<details class="ov-done" style="margin-top:14px;"><summary><i class="ti ti-chevron-right chev"></i> Einträge verwalten ('+finKeys().length+')</summary><div class="fin-list">';
-    ks2.forEach(k=>{h+='<div class="fin-item"><span class="fin-d">'+esc(shortDate(k))+'</span><span class="fin-v">'+fmtEur(finData[k])+' €</span><button class="w-act" onclick="removeFin(\''+k+'\')" title="Löschen" aria-label="Löschen"><i class="ti ti-trash"></i></button></div>';});
-    h+='</div></details>';
-  }
-  h+='</div>';
-  h+='<div style="font-size:12px;color:var(--text3);letter-spacing:-.01em;margin-top:4px;"><i class="ti ti-lock"></i> Bleibt in deinem Tracker (lokal + dein privater Sync-Gist) — keine Bank-Anbindung, keine Drittanbieter.</div>';
-  body.innerHTML=h;
-}
 function removeWeight(dk){
   if(weights[dk]==null)return;
   if(!confirm('Gewicht für diesen Tag entfernen?'))return;
