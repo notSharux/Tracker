@@ -3634,7 +3634,7 @@ function renderOverview(){
     +`<div class="ov-ring-c"><div class="ov-ring-pct">${pct}<span>%</span></div></div>`
   +`</div>`;
   const tps=tpForDate(dt); // heutige (bzw. gewählte) Trainingseinheit aus dem A/B-Plan
-  const tpName=tps.cls==='run'?tps.type.name:tps.type.name+' '+tps.week; // Laufen ohne A/B; Push/Pull mit Wochen-Buchstabe
+  const tpName=(tps.cls==='run'||!tps.plan.ab)?tps.type.name:tps.type.name+' '+tps.week; // Wochen-Buchstabe nur bei aktiven A/B-Wochen (und nie bei Laufen)
   let h=`<div class="today-hero ov-hero">`
     +`<div class="ov-hero-l"><div class="hero-head"><div class="today-date">${esc(dateStr)} <span class="ov-clock" id="ovClock" aria-label="Uhrzeit">··:··:··</span></div><div class="today-h1">${esc(heading)}</div></div>`
     +`<div class="ov-nav"><button class="ov-arrow" onclick="ovStep(-1)" aria-label="Vorheriger Tag"><i class="ti ti-chevron-left"></i></button>`
