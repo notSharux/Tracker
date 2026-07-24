@@ -1848,6 +1848,20 @@
   </div>
 </div>
 
+<div class="overlay hidden" id="relapseOverlay" onclick="if(event.target===this)closeRelapse()">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-h">Rückfall eintragen</div>
+    <div style="font-size:15px;color:var(--text2);line-height:1.5;margin-bottom:14px;position:relative;z-index:1;letter-spacing:-.01em;">
+      Wann war der Rückfall bei <b id="relapseGoalName"></b>? Der Rekord bleibt gespeichert.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;position:relative;z-index:1;">
+      <button class="mb danger" onclick="confirmRelapse(0)"><i class="ti ti-rotate-2"></i> Heute · Zähler startet bei 0</button>
+      <button class="mb danger" onclick="confirmRelapse(1)"><i class="ti ti-calendar-minus"></i> Gestern · Zähler startet bei 1</button>
+      <button class="mb" onclick="closeRelapse()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="unsavedOverlay" onclick="if(event.target===this)unsavedCancel()">
   <div class="modal" style="max-width:380px;">
     <div class="modal-h">Ungespeicherte Änderungen</div>
@@ -2316,12 +2330,23 @@ function applyMode(g,val){
   else if(val==='days'){g.type='daily';g.freq=7;if(!goalDays(g))g.days=[0,1,2,3,4,5,6];}
   else{g.type='daily';g.freq=parseInt(val.slice(1),10)||7;delete g.days;}
 }
+let relapseGoalId=null;
 function relapse(goalId){
   const g=goals.find(x=>x.id===goalId);if(!g)return;
-  if(!confirm('Rückfall bei „'+g.name+'" eintragen?\n\nDer Zähler startet wieder bei 0 — dein Rekord ('+abstRecord(g)+' Tage) bleibt gespeichert.'))return;
+  relapseGoalId=goalId;
+  document.getElementById('relapseGoalName').textContent=g.name;
+  document.getElementById('relapseOverlay').classList.remove('hidden');
+}
+function closeRelapse(){document.getElementById('relapseOverlay').classList.add('hidden');relapseGoalId=null;}
+// daysAgo=0 → Rückfall heute (Zähler startet bei 0); daysAgo=1 → Rückfall gestern (Zähler startet bei 1).
+function confirmRelapse(daysAgo){
+  const g=goals.find(x=>x.id===relapseGoalId);if(!g){closeRelapse();return;}
+  const d=_atNoon(todayKey);d.setDate(d.getDate()-daysAgo);
+  const relapseKey=ymd(d);
   g.record=Math.max(g.record||0,cleanDays(g));
-  g.cleanSince=todayKey;g.lastRelapse=todayKey;g.relapses=(g.relapses||0)+1;
+  g.cleanSince=relapseKey;g.lastRelapse=relapseKey;g.relapses=(g.relapses||0)+1;
   ssave('gt_goals3',goals);haptic('heavy');
+  closeRelapse();
   renderGoals();renderStats();
 }
 
