@@ -1083,6 +1083,21 @@
   .ov-cat-h{font-size:10.5px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin:14px 2px 4px;}
   .ov-cat-h::after{content:'';flex:1;height:1px;background:var(--separator);}
   .ov-cat-h:first-child{margin-top:2px;}
+  /* Kategorien nebeneinander statt untereinander — 2 Spalten, sobald der Platz reicht */
+  .ov-catgrid{display:grid;grid-template-columns:1fr;gap:0 22px;align-items:start;}
+  .ov-catgrid>.ov-catgroup>.ov-cat-h{margin-top:14px;}
+  .ov-catgrid>.ov-catgroup:first-child>.ov-cat-h{margin-top:2px;}
+  /* Ab ~360px zwei Kategorien pro Reihe (auch am Handy) — dann hat auch die zweite oben keinen Abstand */
+  @media(min-width:360px){
+    .ov-catgrid{grid-template-columns:1fr 1fr;gap:0 14px;}
+    .ov-catgrid>.ov-catgroup:nth-child(2)>.ov-cat-h{margin-top:2px;}
+  }
+  @media(min-width:761px){.ov-catgrid{gap:0 22px;}}
+  /* Schmale Handys: Zeilen kompakter, damit zwei Spalten nicht gequetscht wirken */
+  @media(max-width:520px){
+    .ov-catgrid .day-goal{gap:10px;padding:10px 6px;}
+    .ov-catgrid .day-goal-name{font-size:14px;line-height:1.3;}
+  }
   .ov-events{display:flex;flex-direction:column;}
   .ov-event{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--separator);}
   .ov-event:last-child{border-bottom:none;}
@@ -1749,6 +1764,9 @@
             </div>
           </div>
 
+          <div class="section-h">Kategorien</div>
+          <div class="set-card" id="catsEditor"></div>
+
           <div class="section-h">Ziele verwalten</div>
           <div class="set-card" id="goalsEditor"></div>
 
@@ -1900,18 +1918,21 @@
 <script>
 function ymd(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function load(k,fb){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb;}catch{return fb;}}
-const SYNC_DATA_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_tplans','gt_tplan','gt_taborder','gt_theme','gt_accent'];
+const SYNC_DATA_KEYS=['gt_goals3','gt_cats','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_tplans','gt_tplan','gt_taborder','gt_theme','gt_accent'];
 let syncToken=localStorage.getItem('gt_sync_token')||'';
 let syncGistId=localStorage.getItem('gt_sync_gist')||'';
 let syncStatus=syncToken?'idle':'off';
 let _syncTimer=null,_syncReady=false,_pendingPush=false,_syncPillT=null;
+let _syncBusy=false;        // verhindert, dass sich zwei Pulls/Pushes überholen
+let _retryT=null,_retryN=0; // fehlgeschlagener Push wird mit wachsendem Abstand wiederholt
+let _lastPull=0;            // Zeitpunkt des letzten Pulls (drosselt Fokus-Trigger)
 function ssave(k,v){
   try{localStorage.setItem(k,JSON.stringify(v));}catch{}
   if(SYNC_DATA_KEYS.includes(k)){try{localStorage.setItem('gt_data_ts',new Date().toISOString());}catch{} pushSoon();}
 }
 
 // ===== Cloud-Sync (privater GitHub-Gist) =====
-function localData(){return {gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_tplans:tPlans,gt_tplan:tPlanId,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
+function localData(){return {gt_goals3:goals,gt_cats:cats,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_tplans:tPlans,gt_tplan:tPlanId,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};}
 function mergeHistory(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{out[d]=(a[d]&&b[d])?(bN?{...a[d],...b[d]}:{...b[d],...a[d]}):(a[d]||b[d]);});return out;}
 function mergeWeights(a,b,aTs,bTs){const out={},days=new Set([...Object.keys(a||{}),...Object.keys(b||{})]);const bN=(bTs||'')>(aTs||'');days.forEach(d=>{const av=a?a[d]:undefined,bv=b?b[d]:undefined;out[d]=(av!=null&&bv!=null)?(bN?bv:av):(av!=null?av:bv);});return out;}
 // Tagesnotizen wie Gewicht feldweise zusammenführen: pro Tag gewinnt bei Konflikt der neuere Stand.
@@ -1934,7 +1955,7 @@ async function ensureGist(){
 }
 function applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedC){
   const set=(k,v)=>{if(v!==undefined)localStorage.setItem(k,JSON.stringify(v));};
-  set('gt_goals3',rData.gt_goals3);set('gt_start3',rData.gt_start3);
+  set('gt_goals3',rData.gt_goals3);set('gt_cats',rData.gt_cats);set('gt_start3',rData.gt_start3);
   localStorage.setItem('gt_history3',JSON.stringify(mergedHist));
   set('gt_events3',rData.gt_events3);set('gt_notes3',rData.gt_notes3);
   localStorage.setItem('gt_weight',JSON.stringify(mergedW||rData.gt_weight||{}));
@@ -1948,22 +1969,44 @@ function applyRemote(rData,rTs,mergedHist,mergedW,mergedN,mergedC){
   localStorage.setItem('gt_data_ts',rTs);
   location.reload();
 }
+// Fehlgeschlagenen Push nicht liegen lassen: mit wachsendem Abstand erneut versuchen
+// (5s → 15s → 45s → … max 5 min). Sonst bleibt eine Änderung bis zur nächsten
+// Änderung auf dem Gerät liegen — genau der Fall „am PC war nichts synchronisiert".
+function scheduleRetry(){
+  if(!_pendingPush||!syncToken)return;
+  clearTimeout(_retryT);
+  const wait=Math.min(5000*Math.pow(3,_retryN),300000);_retryN++;
+  _retryT=setTimeout(()=>{if(_pendingPush)doPush();},wait);
+}
 async function doPush(opts){
   if(!syncToken)return;
+  const nested=_syncBusy;                                        // Push aus einem laufenden Pull heraus
+  if(nested&&!(opts&&(opts.keepalive||opts.force)))return;        // sonst: läuft schon ein Sync → der übernimmt
+  if(!nested)_syncBusy=true;
   setSyncStatus('syncing');
   try{await ensureGist();const ts=new Date().toISOString();
     const rAt=localStorage.getItem('gt_reset_at')||undefined;   // Reset-Marker mitschleppen, nie verlieren
-    await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content:JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:rAt,data:localData()})}}},opts&&opts.keepalive);
-    localStorage.setItem('gt_data_ts',ts);_pendingPush=false;setSyncStatus('ok');
-  }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
+    const content=JSON.stringify({app:'goal-tracker',version:1,updatedAt:ts,resetAt:rAt,data:localData()});
+    // keepalive-Requests dürfen im Browser max. 64 KB groß sein — größere Pakete würden
+    // beim Schließen still scheitern. Dann lieber normal senden (und notfalls neu versuchen).
+    const ka=!!(opts&&opts.keepalive)&&content.length<58000;
+    await ghFetch('PATCH','/gists/'+syncGistId,{files:{'tracker.json':{content}}},ka);
+    localStorage.setItem('gt_data_ts',ts);_pendingPush=false;_retryN=0;clearTimeout(_retryT);setSyncStatus('ok');
+  }catch(e){setSyncStatus(navigator.onLine?'error':'offline');scheduleRetry();}
+  finally{if(!nested)_syncBusy=false;}
 }
-async function doPull(){
+async function doPull(quiet){
   if(!syncToken)return;
-  setSyncStatus('syncing');
+  if(_syncBusy)return;
+  _syncBusy=true;_lastPull=Date.now();
+  try{return await _doPullInner(quiet);}finally{_syncBusy=false;}
+}
+async function _doPullInner(quiet){
+  if(!quiet)setSyncStatus('syncing');
   try{await ensureGist();
     const gist=await ghFetch('GET','/gists/'+syncGistId);
     const f=gist.files&&gist.files['tracker.json'];
-    if(!f){setSyncStatus('ok');return;}
+    if(!f){_pendingPush=true;await doPush({force:true});return;}  // Gist ohne Datei → eigenen Stand hochschieben
     const text=f.truncated?await (await fetch(f.raw_url)).text():f.content;
     const remote=JSON.parse(text),rData=remote.data||{},rTs=remote.updatedAt||'';
     const rReset=remote.resetAt||'',lReset=localStorage.getItem('gt_reset_at')||'';
@@ -1987,12 +2030,25 @@ async function doPull(){
     if(nChanged){dayNotes=mergedN;ssave('gt_daynotes',dayNotes);}
     if(cChanged){caffeine=mergedC;ssave('gt_caffeine',caffeine);}
     if(histChanged||wChanged||nChanged||cChanged){renderGoals();renderStats();if(currentView==='overview')renderOverview();if(currentView==='stats'){renderHeatmap();renderBars();}}
-    if(lTs>rTs||histChanged||wChanged||nChanged||cChanged){await doPush();}else{setSyncStatus('ok');}
-  }catch(e){setSyncStatus(navigator.onLine?'error':'offline');}
+    if(lTs>rTs||histChanged||wChanged||nChanged||cChanged){_pendingPush=true;await doPush({force:true});}else{_pendingPush=false;_retryN=0;setSyncStatus('ok');}
+  }catch(e){setSyncStatus(navigator.onLine?'error':'offline');scheduleRetry();}
 }
-function pushSoon(){if(!syncToken||!_syncReady)return;_pendingPush=true;clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>doPush(),1500);}
+// Merken immer, auch wenn der Start-Pull noch läuft — sonst geht eine Änderung
+// aus den ersten Sekunden nach dem Öffnen verloren.
+function pushSoon(){
+  if(!syncToken)return;
+  _pendingPush=true;
+  if(!_syncReady)return;                 // wird direkt nach dem Start-Pull nachgeholt
+  clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>doPush(),800);
+}
 // Ausstehenden Push sofort wegschicken (z. B. bevor das Handy die Hintergrund-Seite einfriert / die App geschlossen wird).
-function flushSync(keepalive){if(!syncToken||!_syncReady||!_pendingPush)return;clearTimeout(_syncTimer);doPush({keepalive:!!keepalive});}
+let _lastFlush=0;
+function flushSync(keepalive){
+  if(!syncToken||!_syncReady||!_pendingPush)return;
+  if(Date.now()-_lastFlush<3000)return;   // blur/pagehide/beforeunload feuern hintereinander — nur einmal senden
+  _lastFlush=Date.now();
+  clearTimeout(_syncTimer);doPush({keepalive:!!keepalive});
+}
 async function connectSync(token){
   token=(token||'').trim();if(!token){alert('Bitte Token einfügen.');return;}
   syncToken=token;localStorage.setItem('gt_sync_token',syncToken);_syncReady=true;
@@ -2092,6 +2148,41 @@ let generalGoals=load('gt_general',[]); // reine Anzeige-Liste (Leitsätze), KEI
 let dayNotes=load('gt_daynotes',{});    // Anmerkung/Begründung pro Tag: { 'YYYY-MM-DD': 'Text' }
 let tabOrder=load('gt_taborder',['overview','goals','calendar','fitness','notes','stats']); // anpassbare Tab-Reihenfolge (Einstellungen bleibt fix am Ende)
 const todayKey=ymd(new Date());
+
+// ===== Kategorien (frei anpassbar in den Einstellungen) =====
+// Jede Kategorie: {key, label}. key ist die stabile ID (steht in g.cat), label ist frei umbenennbar.
+const DEFAULT_CATS=[{key:'general',label:'Generell'},{key:'morning',label:'Morgen'},{key:'afternoon',label:'Nachmittag'},{key:'evening',label:'Abend'}];
+function sanitizeCats(v){
+  if(!Array.isArray(v))return DEFAULT_CATS.map(c=>({...c}));
+  const seen={},out=[];
+  v.forEach(c=>{
+    if(!c||typeof c!=='object')return;
+    const key=String(c.key||'').trim();if(!key||seen[key])return;
+    seen[key]=1;out.push({key,label:String(c.label||key).trim()||key});
+  });
+  return out.length?out:DEFAULT_CATS.map(c=>({...c}));
+}
+let cats=sanitizeCats(load('gt_cats',DEFAULT_CATS));
+function defCat(){return cats[0]?cats[0].key:'general';}
+function catLabel(k){const c=cats.find(c=>c.key===k);return c?c.label:'Ohne Kategorie';}
+// Optionen für die Kategorie-Dropdowns; unbekannte (z. B. gelöschte) Kategorie bleibt sichtbar statt still zu kippen.
+function catOptions(sel){
+  let h=cats.map(c=>`<option value="${esc(c.key)}"${c.key===sel?' selected':''}>${esc(c.label)}</option>`).join('');
+  if(sel&&!cats.some(c=>c.key===sel))h+=`<option value="${esc(sel)}" selected>Ohne Kategorie</option>`;
+  return h;
+}
+// Ziele nach Kategorie gruppieren; Ziele mit unbekannter Kategorie landen sichtbar in einer Restgruppe.
+function groupByCat(list){
+  const out=[],used=new Set();
+  cats.forEach(c=>{
+    const items=list.filter(g=>(g.cat||defCat())===c.key);
+    items.forEach(g=>used.add(g));
+    if(items.length)out.push({key:c.key,label:c.label,items});
+  });
+  const rest=list.filter(g=>!used.has(g));
+  if(rest.length)out.push({key:'',label:'Ohne Kategorie',items:rest});
+  return out;
+}
 
 // Migration: bestehenden Zielen ohne Kategorie automatisch eine zuweisen (nach Namen)
 function inferCat(name){
@@ -2198,7 +2289,7 @@ function doSwitchView(v){
   renderToolbar();
   if(v==='calendar')renderCalendar();
   if(v==='stats'){renderHeatmap();renderBars();}
-  if(v==='settings'){renderTabsEditor();renderGoalsEditor();renderGeneralEditor();renderPlansEditor();renderSyncUI();renderFitnessSettings();syncDesignToggles();}
+  if(v==='settings'){renderTabsEditor();renderCatsEditor();renderGoalsEditor();renderGeneralEditor();renderPlansEditor();renderSyncUI();renderFitnessSettings();syncDesignToggles();}
   if(v==='notes')renderNotes();
   if(v==='fitness')renderFitness();
   if(v==='weather')renderWeather();
@@ -2350,15 +2441,13 @@ function confirmRelapse(daysAgo){
   renderGoals();renderStats();
 }
 
-const CATS=[{key:'general',label:'Generell'},{key:'morning',label:'Morgen'},{key:'afternoon',label:'Nachmittag'},{key:'evening',label:'Abend'}];
 function renderGoals(){
   const td=history[todayKey]||{};
   const container=document.getElementById('goalsContainer');if(!container)return;
   container.innerHTML='';
   if(!goals.length){container.innerHTML='<div style="font-size:14px;color:var(--text3);padding:1rem 4px;letter-spacing:-.01em;">Noch keine Ziele · füge welche in den Einstellungen hinzu.</div>';return;}
-  CATS.forEach(cat=>{
-    const catGoals=goals.filter(g=>(g.cat||'general')===cat.key&&(isAbst(g)||isScheduledToday(g)));
-    if(!catGoals.length)return;
+  groupByCat(goals.filter(g=>isAbst(g)||isScheduledToday(g))).forEach(cat=>{
+    const catGoals=cat.items;
     const group=document.createElement('div');group.className='cat-group';
     const h=document.createElement('div');h.className='section-h';h.textContent=cat.label;
     group.appendChild(h);
@@ -2983,14 +3072,9 @@ function renderGoalsEditor(){
         <option value="w1">1×/Woche</option>
         <option value="abstinence">Abstinenz</option>
       </select>
-      <select class="cat-sel" aria-label="Kategorie">
-        <option value="general">Generell</option>
-        <option value="morning">Morgen</option>
-        <option value="afternoon">Nachmittag</option>
-        <option value="evening">Abend</option>
-      </select>
+      <select class="cat-sel" aria-label="Kategorie">${catOptions(g.cat||defCat())}</select>
       <button class="icon-btn danger" data-id="${g.id}" aria-label="Löschen"><i class="ti ti-trash"></i></button>`;
-    const sel=row.querySelector('.cat-sel:not(.mode-sel)');sel.value=g.cat||'morning';
+    const sel=row.querySelector('.cat-sel:not(.mode-sel)');
     const msel=row.querySelector('.mode-sel');msel.value=goalModeValue(g);
     row.querySelector('input').addEventListener('input',e=>{draftGoals[i].name=e.target.value;markDirty();});
     sel.addEventListener('change',e=>{draftGoals[i].cat=e.target.value;markDirty();});
@@ -3030,12 +3114,7 @@ function renderGoalsEditor(){
       <option value="w1">1×/Woche</option>
       <option value="abstinence">Abstinenz</option>
     </select>
-    <select class="cat-sel" id="newGoalCat" aria-label="Kategorie">
-      <option value="general">Generell</option>
-      <option value="morning">Morgen</option>
-      <option value="afternoon">Nachmittag</option>
-      <option value="evening">Abend</option>
-    </select>
+    <select class="cat-sel" id="newGoalCat" aria-label="Kategorie">${catOptions(defCat())}</select>
     <button class="mb primary" onclick="addNewGoal()"><i class="ti ti-plus"></i> Hinzufügen</button>`;
   wrap.appendChild(add);
   document.getElementById('newGoalName').addEventListener('keydown',e=>{if(e.key==='Enter')addNewGoal();});
@@ -3048,13 +3127,76 @@ function deleteGoal(id){
 }
 function addNewGoal(){
   const inp=document.getElementById('newGoalName');const n=inp.value.trim();if(!n)return;
-  const cat=(document.getElementById('newGoalCat')||{}).value||'general';
+  const cat=(document.getElementById('newGoalCat')||{}).value||defCat();
   const mode=(document.getElementById('newGoalMode')||{}).value||'daily';
   const g={id:gid(),name:n,cat};applyMode(g,mode);
   draftGoals.push(g);
   markDirty();haptic('medium');
   inp.value='';renderGoalsEditor();
   const ni=document.getElementById('newGoalName');if(ni)ni.focus();
+}
+// ===== Kategorien verwalten (sofort gespeichert — kein Draft) =====
+function catsChanged(){
+  ssave('gt_cats',cats);
+  renderGoals();
+  if(currentView==='overview')renderOverview();
+}
+function renderCatsEditor(){
+  const wrap=document.getElementById('catsEditor');if(!wrap)return;wrap.innerHTML='';
+  const info=document.createElement('div');info.className='set-row';
+  info.innerHTML='<div class="set-label" style="font-weight:400;"><span class="set-sub">Gruppen, nach denen Ziele im Ziele-Tab und auf der Übersicht sortiert werden — umbenennen, ziehen zum Sortieren, eigene hinzufügen.</span></div>';
+  wrap.appendChild(info);
+  cats.forEach((c,i)=>{
+    const used=goals.filter(g=>(g.cat||defCat())===c.key).length;
+    const row=document.createElement('div');row.className='goal-edit';row.draggable=true;
+    row.innerHTML=`
+      <span class="drag" title="Ziehen zum Sortieren"><i class="ti ti-grip-vertical"></i></span>
+      <input type="text" value="${(c.label||'').replace(/"/g,'&quot;')}" placeholder="Kategorie-Name">
+      <span class="set-sub" style="white-space:nowrap;">${used} ${used===1?'Ziel':'Ziele'}</span>
+      <button class="icon-btn danger" aria-label="Löschen"><i class="ti ti-trash"></i></button>`;
+    const inp=row.querySelector('input');
+    inp.addEventListener('input',e=>{cats[i].label=e.target.value;ssave('gt_cats',cats);});
+    inp.addEventListener('change',()=>{ // erst beim Verlassen des Feldes alles neu zeichnen (sonst springt der Fokus)
+      if(!cats[i].label.trim())cats[i].label=cats[i].key;
+      catsChanged();renderCatsEditor();renderGoalsEditor();
+    });
+    row.querySelector('.icon-btn').addEventListener('click',()=>deleteCat(c.key));
+    row.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i);row.style.opacity='.4';});
+    row.addEventListener('dragend',()=>row.style.opacity='1');
+    row.addEventListener('dragover',e=>e.preventDefault());
+    row.addEventListener('drop',e=>{
+      e.preventDefault();const f=parseInt(e.dataTransfer.getData('text/plain'));if(f===i)return;
+      const m=cats.splice(f,1)[0];cats.splice(i,0,m);
+      haptic('light');catsChanged();renderCatsEditor();renderGoalsEditor();
+    });
+    wrap.appendChild(row);
+  });
+  const add=document.createElement('div');add.className='add-row';
+  add.innerHTML=`<input type="text" class="set-input" id="newCatName" placeholder="Neue Kategorie hinzufügen…"><button class="mb primary" onclick="addCat()"><i class="ti ti-plus"></i> Hinzufügen</button>`;
+  wrap.appendChild(add);
+  document.getElementById('newCatName').addEventListener('keydown',e=>{if(e.key==='Enter')addCat();});
+}
+function addCat(){
+  const inp=document.getElementById('newCatName');const n=(inp.value||'').trim();if(!n)return;
+  cats.push({key:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),label:n});
+  haptic('medium');inp.value='';
+  catsChanged();renderCatsEditor();renderGoalsEditor();
+  const ni=document.getElementById('newCatName');if(ni)ni.focus();
+}
+function deleteCat(key){
+  if(cats.length<=1){alert('Mindestens eine Kategorie muss bleiben.');return;}
+  const c=cats.find(x=>x.key===key);if(!c)return;
+  const affected=goals.filter(g=>(g.cat||defCat())===key).length
+                +draftGoals.filter(g=>(g.cat||defCat())===key&&!goals.some(o=>o.id===g.id)).length;
+  const target=cats.find(x=>x.key!==key);
+  if(!confirm('Kategorie "'+c.label+'" löschen?'+(affected?'\n\n'+affected+' Ziel(e) werden nach "'+target.label+'" verschoben.':'')))return;
+  cats=cats.filter(x=>x.key!==key);
+  let moved=false;
+  goals.forEach(g=>{if((g.cat||defCat())===key||!cats.some(x=>x.key===g.cat)){g.cat=target.key;moved=true;}});
+  draftGoals.forEach(g=>{if(!cats.some(x=>x.key===g.cat))g.cat=target.key;});
+  if(moved)ssave('gt_goals3',goals);
+  haptic('medium');
+  catsChanged();renderCatsEditor();renderGoalsEditor();
 }
 // ===== Generelle Ziele (reine Anzeige-Leitsätze, sofort gespeichert — kein Draft) =====
 function renderGeneralEditor(){
@@ -3117,7 +3259,7 @@ async function wipeSyncedGist(keepCalendar,keepGoals){
   if(!syncToken)return;
   await ensureGist();
   const ts=new Date().toISOString();
-  const cleared={gt_goals3:Array.isArray(keepGoals)?keepGoals:[],gt_start3:ymd(new Date()),gt_history3:{},
+  const cleared={gt_goals3:Array.isArray(keepGoals)?keepGoals:[],gt_cats:cats,gt_start3:ymd(new Date()),gt_history3:{},
     gt_events3:keepCalendar?events:[],gt_notes3:keepCalendar?notes:[],
     gt_weight:keepCalendar?weights:{},
     gt_caffeine:keepCalendar?caffeine:{},gt_bedtime:bedtime,
@@ -3158,9 +3300,9 @@ async function resetAllData(){
 }
 
 // ===== Backup (Export / Import) =====
-const BACKUP_KEYS=['gt_goals3','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_tplans','gt_tplan','gt_taborder','gt_theme','gt_accent'];
+const BACKUP_KEYS=['gt_goals3','gt_cats','gt_start3','gt_history3','gt_events3','gt_notes3','gt_weight','gt_caffeine','gt_bedtime','gt_general','gt_daynotes','gt_tplans','gt_tplan','gt_taborder','gt_theme','gt_accent'];
 function exportData(){
-  const data={gt_goals3:goals,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_tplans:tPlans,gt_tplan:tPlanId,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
+  const data={gt_goals3:goals,gt_cats:cats,gt_start3:startDate,gt_history3:history,gt_events3:events,gt_notes3:notes,gt_weight:weights,gt_caffeine:caffeine,gt_bedtime:bedtime,gt_general:generalGoals,gt_daynotes:dayNotes,gt_tplans:tPlans,gt_tplan:tPlanId,gt_taborder:tabOrder,gt_theme:themePref,gt_accent:accentPref};
   const payload={app:'goal-tracker',version:1,exportedAt:new Date().toISOString(),data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -3247,16 +3389,43 @@ setInterval(()=>{if(currentView==='calendar'&&calMode==='week')renderCalendar();
 
 // Cloud-Sync: beim Start ziehen, danach Push erlauben; bei Rückkehr zur App erneut ziehen
 renderSyncUI();updateSyncPill();
-if(syncToken){doPull().finally(()=>{_syncReady=true;});}else{_syncReady=true;}
+if(syncToken){
+  doPull().finally(()=>{
+    _syncReady=true;
+    if(_pendingPush)doPush();            // während des Start-Pulls geänderte Daten sofort nachschieben
+  });
+}else{_syncReady=true;}
+// Pull, aber höchstens alle 8 s — mehrere Auslöser (Fokus, Sichtbarkeit, Klick) feuern oft gleichzeitig
+function pullSoon(quiet){
+  if(!syncToken||!_syncReady)return;
+  if(Date.now()-_lastPull<8000)return;
+  doPull(quiet);
+}
+// Ein übernommener Fremdstand lädt die Seite neu — nicht mitten im Tippen oder bei
+// ungespeicherten Einstellungen. Betrifft nur die automatischen Hintergrund-Pulls.
+function _busyEditing(){
+  if(settingsDirty)return true;
+  const a=document.activeElement;
+  return !!(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable));
+}
 document.addEventListener('visibilitychange',()=>{
   if(!syncToken||!_syncReady)return;
   if(document.hidden)flushSync(true);   // verlässt App/wechselt Tab → letzte Änderung sofort sichern (Timer würde sonst eingefroren)
-  else doPull();                        // zurück in der App → neuesten Stand holen
+  else {doPull();}                      // zurück in der App → neuesten Stand holen (immer, ohne Drossel)
 });
+// Fenster-Fokus: der Klassiker am PC — Tab war die ganze Zeit sichtbar, du kommst vom Handy
+// zurück an den Rechner. Dabei feuert KEIN visibilitychange, nur focus.
+window.addEventListener('focus',()=>pullSoon());
+window.addEventListener('blur',()=>{if(syncToken&&_syncReady)flushSync();});
 window.addEventListener('pagehide',()=>{if(syncToken&&_syncReady)flushSync(true);}); // App/Tab wird geschlossen → letzten Stand noch wegschicken
+window.addEventListener('beforeunload',()=>{if(syncToken&&_syncReady)flushSync(true);});
 window.addEventListener('online',()=>{if(syncToken&&_syncReady){flushSync();doPull();}}); // wieder online → Nachholen
-// Cloud-Sync: alle 60 Minuten automatisch ziehen (nur wenn App sichtbar & verbunden)
-setInterval(()=>{if(!document.hidden&&syncToken&&_syncReady)doPull();},60*60*1000);
+// Anderer Tab desselben Browsers hat Daten geändert → kurz darauf abgleichen
+window.addEventListener('storage',e=>{if(e&&e.key==='gt_data_ts'&&!_busyEditing())setTimeout(()=>pullSoon(true),1500);});
+// Cloud-Sync: alle 60 s automatisch ziehen, solange die App sichtbar ist (leise, ohne Status-Geflacker)
+setInterval(()=>{if(!document.hidden&&syncToken&&_syncReady&&!_busyEditing())doPull(true);},60*1000);
+// Sicherheitsnetz: hängt ein Push fest (Netz weg, Tab eingefroren), alle 30 s erneut versuchen
+setInterval(()=>{if(!document.hidden&&syncToken&&_syncReady&&_pendingPush&&navigator.onLine)doPush();},30*1000);
 
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
@@ -3510,12 +3679,10 @@ function ovProgress(dk){
 // Ziel-Liste nach Tageszeit gruppiert (Generell/Morgen/Nachmittag/Abend) — wie im Ziele-Tab
 function ovCatList(list,row){
   let s='';
-  CATS.forEach(cat=>{
-    const cg=list.filter(g=>(g.cat||'general')===cat.key);
-    if(!cg.length)return;
-    s+=`<div class="ov-cat-h">${esc(cat.label)}</div><div class="ov-daygoals">${cg.map(row).join('')}</div>`;
+  groupByCat(list).forEach(cat=>{
+    s+=`<div class="ov-catgroup"><div class="ov-cat-h">${esc(cat.label)}</div><div class="ov-daygoals">${cat.items.map(row).join('')}</div></div>`;
   });
-  return s;
+  return s?`<div class="ov-catgrid">${s}</div>`:'';
 }
 /* ════════════════════════════════════════════════════════════════════
    Koffein-Tracker (Übersicht): Getränk antippen → Eintrag mit Uhrzeit;
